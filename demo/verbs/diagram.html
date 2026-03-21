@@ -16,7 +16,6 @@
       rel="stylesheet"
     />
     <style>
-      /* Mais largura útil em ecrãs grandes (a .app global usa max-width: 1200px). */
       .app.app--diagram-wide {
         max-width: min(100%, 1680px);
         width: 100%;
@@ -24,7 +23,6 @@
         padding-right: clamp(1rem, 4vw, 3rem);
         box-sizing: border-box;
       }
-      /* demo.html usa .demo-main com max-width: 720px; aqui queremos largura total do contentor. */
       .app--diagram-wide .demo-main {
         max-width: none;
         width: 100%;
@@ -88,15 +86,15 @@
           </div>
         </div>
         <p class="tagline">
-          Mesmo estilo visual do app: fluxos em <strong>Mermaid</strong>, pipeline de
+          Fluxos em <strong>Mermaid</strong>, pipeline de
           <code>conjugar</code> e ligação ao bundle <code>assets/js/conjugai-core.js</code>.
         </p>
         <p class="diagram-doc__nav">
-          <a href="demo.html">Demo paradigma verbal</a>
+          <a href="../../index.html">Demo paradigma verbal</a>
           <span aria-hidden="true">·</span>
-          <a href="../../index.html">App principal</a>
+          <a href="../../index.html">Demo</a>
           <span aria-hidden="true">·</span>
-          <a href="../../diagrama.html">Diagramas da app (Mermaid)</a>
+          <a href="../../diagrama.html">Diagramas demo CAA (Mermaid)</a>
         </p>
       </header>
 
@@ -207,8 +205,7 @@ flowchart TD
             <span class="badge badge-accent">UI</span>
           </div>
           <p class="hint" style="margin-top: 0">
-            Mesmo padrão do diálogo «Como ocorre a conjugação?» na <a href="demo.html">demo</a>. Opcional:
-            infinitivo para atualizar lema e exemplo de 1.ª pessoa do presente.
+            Opcional: infinitivo para atualizar lema e exemplo de 1.ª pessoa do presente.
           </p>
           <div class="diagram-lemma-row">
             <label class="sr-only" for="diagram-lemma">Infinitivo para o exemplo</label>
@@ -286,13 +283,13 @@ flowchart TD
             <span class="badge">Mermaid</span>
           </div>
           <p class="hint" style="margin-top: 0">
-            <a href="demo.html">demo.html</a> — até 15 chamadas a <code>conjugar</code> por infinitivo (3 tempos × 5
-            pessoas).
+            <a href="../../index.html">index.html</a> (raiz) — até 15 chamadas a <code>conjugar</code> por infinitivo
+            (3 tempos × 5 pessoas).
           </p>
           <div class="diagram-mermaid">
             <div class="mermaid">
 sequenceDiagram
-  participant P as demo.html
+  participant P as index.html
   participant CC as ConjugaiCore
   loop Cada tempo
     loop pessoa 0 a 4
