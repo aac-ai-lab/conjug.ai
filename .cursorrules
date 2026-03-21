@@ -1,0 +1,29 @@
+# ConjugAI — regras do projeto
+
+## Contexto
+- Protótipo de **Tecnologia Assistiva / CAA**: corrigir verbos em texto **telegráfico** em **português do Brasil (PT-BR)**.
+- **Interface** (`index.html`, `assets/css/`, `assets/js/app.js`): só visualização e orquestração; **não** duplicar lógica linguística aqui.
+- **Motor linguístico** isolado em `vendors/conjugai-core/` (TypeScript). Tratar como biblioteca reutilizável; o bundle para o browser é gerado, não é fonte editável.
+
+## Arquitetura
+- **Fonte do núcleo:** `vendors/conjugai-core/**/*.ts` — pipeline: `tokenize` → sujeito → tempo → `extrairVerbo` / `conjugar` → `corrigir` (`analisarFrase` em `index.ts`).
+- **Bundle IIFE:** `assets/js/conjugai-core.js` — produzido por `npm run build:core` (esbuild, `globalName=ConjugaiCore`). **Não editar** o `.js` gerado à mão; alterar TS e voltar a gerar.
+- **Léxico:** `vendors/conjugai-core/data/verbos.json` importado em `verbos-data.ts` — única fonte de dados verbal para o motor.
+- **Scripts offline:** `vendors/conjugai-core/scripts/` (ex.: MorphoBr, CSV). Cache em `scripts/cache/` está no `.gitignore`.
+
+## Convenções de código
+- TypeScript **strict** (`tsconfig.json`). Preferir tipos em `types.ts` e exports explícitos em `index.ts`.
+- **Pessoa verbal:** índices `0–4` (eu, tu, ele/ela, nós, eles/vocês) — alinhar com `conjugar` e `sujeito.ts`.
+- **Tempos:** `presente` | `futuro` | `passado` (`tempo.ts`); conjugação fora do léxico: só **presente** regular por sufixo (-ar/-er/-ir) em `conjugador.ts`.
+- Alterações **mínimas e focadas**; não refatorar ficheiros não relacionados com o pedido.
+- UI em JS **vanilla** (sem framework); manter padrões existentes de `app.js` e modais/dialogs.
+
+## Testes
+- **Vitest:** `npm test` / `npm run test:watch`. Ficheiros `vendors/conjugai-core/**/*.test.ts`.
+- Ao mudar comportamento do motor, atualizar testes e o caso **`analisar-frase.regression.test.ts`** quando fizer sentido.
+
+## Documentação
+- Não criar novos `.md` por iniciativa própria; atualizar só se o pedido o exigir (ex.: README já existente).
+
+## Comunicação com o utilizador
+- Respostas em **português** (PT), salvo pedido explícito noutra língua.
