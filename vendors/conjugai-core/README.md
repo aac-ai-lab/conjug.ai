@@ -8,6 +8,10 @@ No repositório ConjugAI o código está em **`vendors/`** para deixar explícit
 
 O objetivo é **acessibilidade linguística** em contexto de Tecnologia Assistiva: o utilizador produz mensagens com estrutura reduzida; o sistema devolve uma forma mais próxima do português normativo, com explicação passo a passo (`debug`) para o pipeline visual já existente na interface.
 
+### Testes automatizados (Vitest)
+
+Na **raiz** do repositório ConjugAI: `npm install`, depois `npm test` (ou `npm run test:watch`). Os ficheiros `*.test.ts` dentro de `vendors/conjugai-core/` cobrem **testes unitários** (`tokenizer`, `sujeito`, `tempo`, `conjugador`), **integração/regressão** do pipeline `analisarFrase` (`analisar-frase.regression.test.ts`) e devem ser atualizados quando o comportamento do motor mudar de forma intencional.
+
 ## 2. Estado atual da aplicação
 
 A UI (HTML/CSS) já expõe etapas alinhadas ao fluxo interno:

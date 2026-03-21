@@ -9,5 +9,5 @@
     "noEmit": true,
     "rootDir": "."
   },
-  "include": ["vendors/conjugai-core/**/*.ts"]
+  "include": ["vendors/conjugai-core/**/*.ts", "vitest.config.ts"]
 }

@@ -29,6 +29,7 @@ Depois de editares o TypeScript, regenera o bundle:
 ```bash
 npm install   # necessário para instalar esbuild em node_modules
 npm run build:core
+npm test      # Vitest: testes unitários e de regressão do conjugai-core
 ```
 
 Sem este passo, o ficheiro em `assets/js/` pode ficar **desatualizado** em relação a `vendors/conjugai-core/`.
