@@ -716,6 +716,20 @@ button.brand-mark:focus-visible {
   text-decoration: underline;
 }
 
+/* Diagramas Mermaid — copiar código fonte (diagrama.html, demo/verbs/diagram.html) */
+.mermaid-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.btn-mermaid-copy {
+  font-size: 0.8rem;
+  padding: 0.28rem 0.65rem;
+}
+
 /* Modal: algoritmo — sujeito */
 .algo-dialog {
   width: min(92vw, 1200px, calc(100vw - 2.5rem));

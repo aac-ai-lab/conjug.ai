@@ -1,6 +1,6 @@
 # ConjugAI — diagramas da lógica e da interface
 
-Documentação em Mermaid. Pode pré-visualizar no VS Code/Cursor (extensão Mermaid) ou abrir `diagrama.html` na raiz do projeto no navegador.
+Documentação em Mermaid. Pode pré-visualizar no VS Code/Cursor (extensão Mermaid) ou abrir `diagrama.html` na raiz do projeto no navegador. Nas páginas **`diagrama.html`** e **`demo/verbs/diagram.html`**, cada diagrama tem o botão **«Copiar código Mermaid»** (código fonte para colar noutro editor).
 
 ---
 
