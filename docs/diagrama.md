@@ -40,7 +40,7 @@ flowchart TD
   V -->|não| N0["null"]
 ```
 
-Diagrama interativo e restantes fluxos do núcleo: `vendors/conjugai-core/diagram.html`.
+Diagrama interativo e restantes fluxos do núcleo: `demo/verbs/diagram.html`.
 
 ---
 

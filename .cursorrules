@@ -2,7 +2,7 @@
 
 ## Contexto
 - **Tecnologia Assistiva / CAA**: corrigir verbos em texto **telegráfico** em **português do Brasil (PT-BR)**.
-- **Interface** (`index.html`, `assets/css/`, `assets/js/app.js`): só visualização e orquestração; **não** duplicar lógica linguística aqui.
+- **Interface** — demo CAA: `demo/caa/index.html` com `assets/css/`, `assets/js/app.js` (e `conjugai-core.js`); **outra** demo na raiz: `index.html` (só paradigma verbal + `conjugai-core.js`). Só visualização e orquestração; **não** duplicar lógica linguística na UI.
 - **Motor linguístico** isolado em `vendors/conjugai-core/` (TypeScript). Tratar como biblioteca reutilizável; o bundle para o browser é gerado, não é fonte editável.
 
 ## Arquitetura

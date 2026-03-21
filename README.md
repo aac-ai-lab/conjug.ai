@@ -1,8 +1,10 @@
 # ConjugAI
 
-**Tecnologia Assistiva** focada na **conjugação verbal** em contexto de **CAA** (Comunicação Aumentativa e Alternativa), em **português do Brasil**: entradas telegráficas, **pessoa gramatical** e **tempos** (presente, futuro, passado com marcadores). A interface “análise ao vivo” serve para **visualizar e discutir** o desenho do motor com o orientador.
+**Tecnologia Assistiva** focada na **conjugação verbal** em contexto de **CAA** (Comunicação Aumentativa e Alternativa), em **português do Brasil**: entradas telegráficas, **pessoa gramatical** e **tempos** (presente, futuro, passado com marcadores).
 
-O **motor linguístico** (`conjugai-core`) vive em **`vendors/`** de propósito: é um núcleo reutilizável que **pode existir sem** esta interface web experimental; a app serve apenas de interface de visualização.
+Há **duas** páginas de demonstração na raiz do repositório: **`index.html`** — paradigma verbal (infinitivo → tabelas, estilo verbe.cc), só `conjugai-core.js`; e **`demo/caa/index.html`** — frases telegráficas com passos e `analisarFrase`, com `app.js` + `conjugai-core.js`. A interface de **análise ao vivo** (quatro passos) é esta segunda; serve para **visualizar e discutir** o desenho do motor com o orientador.
+
+O **motor linguístico** (`conjugai-core`) vive em **`vendors/`** de propósito: núcleo reutilizável que **pode existir sem** estas páginas; as demos são interfaces de visualização.
 
 ## Requisitos
 
@@ -40,16 +42,16 @@ Documentação detalhada (fonte vs bundle, fluxo): **`vendors/conjugai-core/READ
 
 | Caminho | Descrição |
 |--------|-----------|
-| `index.html` | Página principal |
-| `assets/css/styles.css` | Estilos |
-| `assets/js/app.js` | UI e chamada ao core |
+| `index.html` | Demo paradigma verbal (raiz); carrega `conjugai-core.js` |
+| `demo/caa/index.html` | Demo CAA (frase telegráfica, `analisarFrase`); carrega `app.js` + `conjugai-core.js` |
+| `assets/css/styles.css` | Estilos partilhados pelas demos |
+| `assets/js/app.js` | UI e orquestração da demo CAA (chama o core) |
 | `assets/js/conjugai-core.js` | Bundle do motor (IIFE `ConjugaiCore`) |
 | `vendors/conjugai-core/` | Código-fonte TS do motor (pacote separado da UI) |
 | `vendors/conjugai-core/data/verbos.json` | Léxico de verbos (importado em `verbos-data.ts`) |
-| `vendors/conjugai-core/demo.html` | Página simples “infinitivo → paradigma” (estilo verbe.cc) |
-| `vendors/conjugai-core/diagram.html` | Diagramas da biblioteca (`conjugar`, `analisarFrase`, `corrigir` + pipeline visual) |
-| `vendors/conjugai-core/lexico-verbos.html` | Página HTML sobre origem e atualização de `verbos.json` (MorphoBr, CSV, build) |
-| `diagrama.html` / `docs/diagrama.md` | Diagramas Mermaid (app + motor) |
+| `demo/verbs/diagram.html` | Diagramas do núcleo (`conjugar`, `analisarFrase`, `corrigir`, pipeline visual) |
+| `demo/verbs/lexico-verbos.html` | Origem e atualização de `verbos.json` (MorphoBr, CSV, build) |
+| `diagrama.html` / `docs/diagrama.md` | Diagramas Mermaid da demo CAA + fluxo do motor |
 
 ## Regras (resumo)
 

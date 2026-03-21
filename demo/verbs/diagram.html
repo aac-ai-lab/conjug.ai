@@ -303,12 +303,14 @@ sequenceDiagram
 
         <section class="panel" aria-labelledby="diagram-h-app">
           <div class="panel-head">
-            <h2 id="diagram-h-app" class="panel-title">App completa</h2>
+            <h2 id="diagram-h-app" class="panel-title">Demo CAA (<code>analisarFrase</code>)</h2>
             <span class="badge">Contexto</span>
           </div>
           <p class="hint" style="margin-top: 0">
-            O <a href="../../index.html">index.html</a> usa <code>analisarFrase</code> (passos tokenização, sujeito,
-            tempo, regra). Diagramas adicionais: <a href="../../diagrama.html">diagrama.html</a> na raiz.
+            A demo CAA (<a href="../../demo/caa/index.html"><code>demo/caa/index.html</code></a>) usa
+            <code>analisarFrase</code> (passos tokenização, sujeito, tempo, regra) via <code>app.js</code>. O
+            <a href="../../index.html"><code>index.html</code></a> na raiz é só paradigma verbal (<code>conjugar</code>).
+            Diagramas Mermaid adicionais: <a href="../../diagrama.html">diagrama.html</a> na raiz.
           </p>
           <div class="diagram-mermaid">
             <div class="mermaid">
@@ -318,7 +320,7 @@ flowchart TB
     CJ[conjugar]
     CR[corrigir]
   end
-  subgraph UI[index.html + app.js]
+  subgraph UI["demo/caa + app.js"]
     IN[Entrada telegráfica]
     ST[Passos 1 a 4]
     OUT[Saída]

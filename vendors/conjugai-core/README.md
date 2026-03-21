@@ -188,10 +188,10 @@ UI (HTML + CSS + app.js)
 2. Correr `npm install` (uma vez) e `npm run build:core` para **regenerar** `assets/js/conjugai-core.js` com esbuild.  
 3. Se não usares `npm`, tens de **atualizar manualmente** o `.js` em `assets/` para ficar alinhado ao TypeScript — caso contrário o demo e o código-fonte **divergem**.
 
-O `index.html` referencia apenas `assets/js/conjugai-core.js`; não importa os `.ts` diretamente.
+O `index.html` na **raiz** do repositório referencia apenas `assets/js/conjugai-core.js`; não importa os `.ts` diretamente. A demo CAA em `demo/caa/index.html` acrescenta `assets/js/app.js`.
 
 **Demo tipo [verbe.cc](https://verbe.cc/) (só infinitivo → paradigma):** abrir com servidor HTTP a partir da raiz do repositório, por exemplo  
-`http://localhost:8765/vendors/conjugai-core/demo.html` — usa o mesmo `ConjugaiCore.conjugar` em ciclo (presente, futuro, passado × cinco pessoas).
+`http://localhost:8765/` (ficheiro `index.html` na raiz) — usa `ConjugaiCore.conjugar` em ciclo (presente, futuro, passado × cinco pessoas).
 
 ## 10. Integração no browser (resumo)
 
