@@ -14,11 +14,32 @@ function normalize(s: string): string {
 }
 
 /**
- * *amanhã* → futuro; *ontem* → passado; caso contrário → presente.
+ * *ontem* → passado.
+ * *amanhã* → futuro, exceto quando a frase já tem perífrase **ir + infinitivo** no presente
+ * (ex.: «vou viajar amanhã»), caso em que o primeiro verbo permanece no presente.
+ * Caso contrário → presente.
  */
 export function detectarTempo(tokens: string[]): InfoTempo {
   const lower = tokens.map(normalize);
-  if (lower.includes("amanha")) {
+  const primeiro = lower[0] ?? "";
+  const amanha = lower.includes("amanha");
+  const perifrasisIrPresente =
+    amanha &&
+    (primeiro === "vou" ||
+      primeiro === "vais" ||
+      primeiro === "vai" ||
+      primeiro === "vamos" ||
+      primeiro === "vao");
+
+  if (perifrasisIrPresente) {
+    return {
+      tipo: "presente",
+      rotulo:
+        'Marcador "amanhã" com «vou/vai/… viajar» (perífrase) → presente no verbo suporte.',
+    };
+  }
+
+  if (amanha) {
     return {
       tipo: "futuro",
       rotulo: 'Marcador "amanhã" → Futuro do Presente do indicativo.',

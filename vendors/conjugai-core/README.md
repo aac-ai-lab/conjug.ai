@@ -2,7 +2,9 @@
 
 ## 1. Visão geral
 
-**conjugai-core** é uma biblioteca JavaScript/TypeScript isolada (`src/lib/conjugai-core/`) que concentra a **inteligência linguística** do projeto ConjugAI: tokenização, deteção de sujeito e tempo, conjugação verbal e montagem da frase corrigida a partir de entradas **telegráficas** (ex.: *eu comer maçã*).
+**conjugai-core** é uma biblioteca JavaScript/TypeScript isolada (`vendors/conjugai-core/`) que concentra a **inteligência linguística** do projeto ConjugAI: tokenização, deteção de sujeito e tempo, conjugação verbal e montagem da frase corrigida a partir de entradas **telegráficas** (ex.: *eu comer maçã*).
+
+No repositório ConjugAI o código está em **`vendors/`** para deixar explícito que o núcleo **não depende** da interface web experimental (protótipo de visualização em contexto **CAA**); podes tratar esta pasta como um pacote reutilizável à parte.
 
 O objetivo é **acessibilidade linguística** em contexto de Tecnologia Assistiva: o utilizador produz mensagens com estrutura reduzida; o sistema devolve uma forma mais próxima do português normativo, com explicação passo a passo (`debug`) para o pipeline visual já existente na interface.
 
@@ -29,7 +31,62 @@ A lógica que antes estava acoplada ao `app.js` ou a dependências externas foi 
 
 Em **NLP** e lexicografia, recursos como **DELAF** (e ecosistemas **Unitex**/Linguateca) oferecem **cobertura lexical** fina (lemas, flexões, classes). Integrações completas exigem pipelines e formatos específicos.
 
-No ConjugAI adotamos, por agora, um **léxico controlado** (`data/verbos.json` espelhado em `data/verbos-data.ts`) complementado por **regras de sufixação** (-AR, -ER, -IR) no **presente**, alinhado a um protótipo leve e auditável.
+No ConjugAI adotamos, por agora, um **léxico controlado** (`data/verbos.json`, importado em `data/verbos-data.ts`) complementado por **regras de sufixação** (-AR, -ER, -IR) no **presente**, alinhado a um protótipo leve e auditável.
+
+### 4.1 MorphoBr (`.dict`) → `verbos.json`
+
+O repositório **[LR-POR/MorphoBr](https://github.com/LR-POR/MorphoBr)** (Apache-2.0) publica flexões em ficheiros `verbs-*.dict` (uma letra do alfabeto por ficheiro, ex.: `verbs-c.dict` para lemas que começam por «c»).
+
+1. Descarregar os `.dict` necessários (ex.: letras que cobrem os teus lemas):
+
+   ```bash
+   cd vendors/conjugai-core/scripts
+   bash fetch_morphobr_verb_dicts.sh
+   # ou: LETRAS="a b c" bash fetch_morphobr_verb_dicts.sh
+   # (Se preferires ./fetch_… e der «Permissão negada»: chmod +x fetch_morphobr_verb_dicts.sh)
+   ```
+
+2. Gerar/atualizar `data/verbos.json` com **merge** sobre o léxico atual e **lista branca** (evita incluir dezenas de milhares de verbos no bundle):
+
+   ```bash
+   python3 morphobr_dict_to_verbos.py \
+     -i cache/verbs-c.dict -i cache/verbs-f.dict -i cache/verbs-i.dict \
+     -i cache/verbs-q.dict -i cache/verbs-v.dict \
+     -m ../data/verbos.json -o ../data/verbos.json \
+     --whitelist morphobr-whitelist.txt --prefer-morphobr
+   ```
+
+3. Na **raiz** do projeto (com dependências instaladas): `npm install` uma vez, depois `npm run build:core` (atualiza `assets/js/conjugai-core.js`). O script usa `npx esbuild` para encontrar o binário local.
+
+**Nota:** Cada lema precisa de **15** células preenchidas (3 tempos × 5 pessoas). O script omite paradigmas incompletos e regista `[omit]` em *stderr*.
+
+### 4.2 Importação CSV → `verbos.json` (recurso validado)
+
+Para **aumentar o léxico** a partir de dados **humanos** (exportação de DELAF/Unitex/Linguateca ou folha de cálculo), usa-se o script offline `scripts/csv_to_verbos.py`.
+
+**Formato do CSV** (UTF-8, primeira linha = cabeçalho):
+
+| Coluna | Valores |
+|--------|---------|
+| `lemma` | Infinitivo minúsculas (ex.: `comer`) |
+| `form` | Forma flexionada (ex.: `como`) |
+| `tense` | `presente` \| `futuro` \| `passado` (alinhado a `tempo.ts` / `conjugar`) |
+| `person` | `0`–`4` → eu, tu, ele/ela, nós, eles (igual a `conjugar` em `conjugador.ts`) |
+
+Cada lema precisa de **15 linhas** (3 tempos × 5 pessoas) para ser emitido no JSON por omissão; com `--allow-incomplete` aceitam-se buracos (preenchidos com string vazia — evitar em produção).
+
+**Exemplo:**
+
+```bash
+python3 scripts/csv_to_verbos.py -i minhas_flexoes.csv -o /tmp/verbos_novo.json
+python3 scripts/csv_to_verbos.py -i minhas_flexoes.csv -m data/verbos.json -o data/verbos.json --merge-overwrites
+```
+
+**Depois do script:** o motor lê `data/verbos.json` via `verbos-data.ts`; na raiz do repositório corre `npm run build:core` para regenerar o bundle em `assets/js/conjugai-core.js`.
+
+Recursos DELAF em formato nativo exigem um passo prévio (conversão para este CSV); documenta no trabalho o **mapeamento** das etiquetas morfológicas para `tense` + `person`.
+
+**Deteção do verbo na frase:** primeiro procura-se o lema via **índice** (formas do léxico, incluindo conjugadas, → infinitivo); se falhar, usa-se o **fallback** por regex de infinitivo (`-ar/-er/-ir/-pôr`). Pormenores e limitações: **§6** (*Detecção de verbo — evolução*).
 
 ## 5. Decisão arquitetural
 
@@ -106,34 +163,66 @@ UI (HTML + CSS + app.js)
 |----------|--------|
 | `index.ts` | `analisarFrase`, exportações públicas |
 | `tokenizer.ts` | `tokenize` |
-| `sujeito.ts` | `detectarSujeito` (incl. composto Eu + mamãe/papai → Nós) |
+| `sujeito.ts` | `detectarSujeito`, `detectarSujeitoComposto` (sujeito simples + composto) |
 | `tempo.ts` | `detectarTempo` (*amanhã*, *ontem*, default presente) |
 | `conjugador.ts` | `conjugar`, `extrairVerbo`, `detectarVerboPorDicionario`, `indiceDoVerboNaFrase`, léxico + presente regular |
 | `corretor.ts` | `corrigir` — pronome + forma verbal + complementos |
 | `types.ts` | `ResultadoAnalise` e tipos auxiliares |
 | `data/verbos.json` | Léxico (espelhado em `verbos-data.ts` para o bundler) |
+| `scripts/csv_to_verbos.py` | Gera/atualiza `verbos.json` a partir de CSV (ver §4.1) |
 
 ## 9. Fonte (TypeScript) vs bundle (`assets/js/conjugai-core.js`)
 
 | Artefacto | O quê |
 |-----------|--------|
-| **`src/lib/conjugai-core/*.ts`** | **Fonte oficial** da biblioteca — é aqui que se edita a lógica. |
+| **`vendors/conjugai-core/*.ts`** | **Fonte oficial** da biblioteca — é aqui que se edita a lógica. |
 | **`assets/js/conjugai-core.js`** | **Saída para o browser**: um único ficheiro IIFE que expõe `globalThis.ConjugaiCore` (mesma API que o TypeScript exporta em `index.ts`). Não é uma segunda biblioteca; é o **empacotamento** da conjugai-core para carregar com `<script>` sem bundler no HTML. |
 
 **Fluxo de trabalho**
 
-1. Alterar o código em `src/lib/conjugai-core/`.  
+1. Alterar o código em `vendors/conjugai-core/`.  
 2. Correr `npm install` (uma vez) e `npm run build:core` para **regenerar** `assets/js/conjugai-core.js` com esbuild.  
 3. Se não usares `npm`, tens de **atualizar manualmente** o `.js` em `assets/` para ficar alinhado ao TypeScript — caso contrário o demo e o código-fonte **divergem**.
 
 O `index.html` referencia apenas `assets/js/conjugai-core.js`; não importa os `.ts` diretamente.
 
+**Demo tipo [verbe.cc](https://verbe.cc/) (só infinitivo → paradigma):** abrir com servidor HTTP a partir da raiz do repositório, por exemplo  
+`http://localhost:8765/vendors/conjugai-core/demo.html` — usa o mesmo `ConjugaiCore.conjugar` em ciclo (presente, futuro, passado × cinco pessoas).
+
 ## 10. Integração no browser (resumo)
 
 - O bundle IIFE `assets/js/conjugai-core.js` expõe `ConjugaiCore.analisarFrase`, etc.  
-- `npm run build:core` gera esse ficheiro a partir de `src/lib/conjugai-core/index.ts`.
+- `npm run build:core` gera esse ficheiro a partir de `vendors/conjugai-core/index.ts`.
 
-## 11. Possíveis evoluções
+## 11. Sujeito composto
+
+### 11.1 Problema
+
+Frases telegráficas podem ter **vários núcleos** no sujeito (*eu e João*, *João e Maria*, *meu pai e minha mãe*). Um motor só baseado em palavras isoladas tende a ignorar a concordância plural ou a depender de regras ad hoc (ex.: só *Eu + mamãe*).
+
+### 11.2 Solução (leve, sem parser sintático completo)
+
+1. Localiza-se o **primeiro token verbal** (mesma heurística que `extrairVerbo` / léxico).
+2. O **prefixo** antes desse token é tratado como candidato a sujeito.
+3. Se o prefixo tiver **pelo menos três tokens** e contiver o conector **`e`** (token isolado), aplica-se `detectarSujeitoComposto`:
+   - existe token **eu** → pronome **Nós**, pessoa **1.ª plural** (índice 3);
+   - existe **tu** ou **você** (`voce` normalizado) → **Vocês**, pessoa **4** (em PT-BR, mesmas terminações que *eles* no sistema);
+   - caso contrário → **Eles**, pessoa **4** (ex.: *João e Maria*, *meu pai e minha mãe* — nomes próprios ou grupos nominais simples).
+4. Mantém-se a regra legada **`isCompostoEuOutra`** (*mamãe e eu*, *eu e papai* sem depender estritamente do ponto 3) em `detectarSujeitoSimples`, com `composto: true`.
+5. Na correção da frase, se `sujeito.composto`, o **prefixo inteiro** é substituído pelo pronome resolvido + verbo conjugado + restantes tokens (complementos).
+
+### 11.3 Limitações
+
+- Não há árvore sintática: ambiguidades (*X e Y* como coordenação de objetos) não são resolvidas.
+- Frases muito longas ou ordem não canónica podem falhar.
+- **Marcador temporal** *amanhã* continua a mapear para **futuro** no motor; uma frase como *João e Maria viajar amanhã* tende a **«Eles viajarão amanhã»**, não ao presente coloquial *viajam*.
+
+### 11.4 Benefícios
+
+- Melhor **concordância** em padrões frequentes em TA.
+- Aproximação a **linguagem natural** sem custo de NLP pesado.
+
+## 12. Possíveis evoluções
 
 - Análise sintática mais rica (ordem de constituintes, vários verbos).  
 - Léxico maior ou importação parcial de recursos DELAF/Unitex.  

@@ -1,0 +1,6 @@
+# Um infinitivo por linha (minúsculas). Usado com morphobr_dict_to_verbos.py --whitelist
+comer
+ir
+viajar
+querer
+fazer

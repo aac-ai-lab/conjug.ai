@@ -7,7 +7,7 @@ import { tokenize } from "./tokenizer";
 
 export type { ResultadoAnalise, TempoVerbal } from "./types";
 export { tokenize } from "./tokenizer";
-export { detectarSujeito } from "./sujeito";
+export { detectarSujeito, detectarSujeitoComposto } from "./sujeito";
 export { detectarTempo } from "./tempo";
 export {
   conjugar,
@@ -27,7 +27,7 @@ export function analisarFrase(frase: string): ResultadoAnalise {
   if (tokens.length === 0) {
     return {
       tokens: [],
-      sujeito: { texto: "Ele", pessoa: 2, rotulo: "—" },
+      sujeito: { texto: "Eu", pessoa: 0, rotulo: "—", implicito: true, composto: false },
       tempo: { tipo: "presente" },
       verbo: { infinitivo: "", conjugado: "" },
       correcao: "",
@@ -48,7 +48,13 @@ export function analisarFrase(frase: string): ResultadoAnalise {
   if (!infinitivo) {
     return {
       tokens,
-      sujeito: { texto: sujeito.texto, pessoa: sujeito.pessoa, rotulo: sujeito.rotulo },
+      sujeito: {
+        texto: sujeito.texto,
+        pessoa: sujeito.pessoa,
+        rotulo: sujeito.rotulo,
+        implicito: sujeito.implicito,
+        composto: sujeito.composto,
+      },
       tempo: { tipo: tempo.tipo },
       verbo: { infinitivo: "", conjugado: "" },
       correcao: "",
@@ -68,7 +74,13 @@ export function analisarFrase(frase: string): ResultadoAnalise {
   if (!conjugado) {
     return {
       tokens,
-      sujeito: { texto: sujeito.texto, pessoa: sujeito.pessoa, rotulo: sujeito.rotulo },
+      sujeito: {
+        texto: sujeito.texto,
+        pessoa: sujeito.pessoa,
+        rotulo: sujeito.rotulo,
+        implicito: sujeito.implicito,
+        composto: sujeito.composto,
+      },
       tempo: { tipo: tempo.tipo },
       verbo: { infinitivo, conjugado: "" },
       correcao: "",
@@ -86,7 +98,13 @@ export function analisarFrase(frase: string): ResultadoAnalise {
 
   return {
     tokens,
-    sujeito: { texto: sujeito.texto, pessoa: sujeito.pessoa, rotulo: sujeito.rotulo },
+    sujeito: {
+      texto: sujeito.texto,
+      pessoa: sujeito.pessoa,
+      rotulo: sujeito.rotulo,
+      implicito: sujeito.implicito,
+      composto: sujeito.composto,
+    },
     tempo: { tipo: tempo.tipo },
     verbo: { infinitivo, conjugado },
     correcao,

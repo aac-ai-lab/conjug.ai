@@ -9,5 +9,5 @@
     "noEmit": true,
     "rootDir": "."
   },
-  "include": ["src/lib/conjugai-core/**/*.ts"]
+  "include": ["vendors/conjugai-core/**/*.ts"]
 }

@@ -2,7 +2,7 @@
   "name": "conjugai",
   "private": true,
   "scripts": {
-    "build:core": "esbuild src/lib/conjugai-core/index.ts --bundle --format=iife --global-name=ConjugaiCore --outfile=assets/js/conjugai-core.js --platform=neutral",
+    "build:core": "npx esbuild vendors/conjugai-core/index.ts --bundle --format=iife --global-name=ConjugaiCore --outfile=assets/js/conjugai-core.js --platform=neutral",
     "build": "npm run build:core"
   },
   "devDependencies": {

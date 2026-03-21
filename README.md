@@ -1,6 +1,8 @@
 # ConjugAI
 
-Protótipo de **Tecnologia Assistiva** que transforma frases telegráficas em português do Brasil **gramaticalmente mais corretas**, com interface tipo “análise ao vivo”.
+Protótipo de **Tecnologia Assistiva** que transforma frases telegráficas em português do Brasil **gramaticalmente mais corretas**, com interface tipo “análise ao vivo”, no âmbito de **CAA** (Comunicação Aumentativa e Alternativa): serve para **visualizar e discutir** com o orientador o objetivo de corrigir verbos em texto telegráfico.
+
+O **motor linguístico** (`conjugai-core`) vive em **`vendors/`** de propósito: é um núcleo reutilizável que **pode existir sem** esta interface web experimental; a app é só o protótipo de visualização.
 
 ## Requisitos
 
@@ -18,19 +20,20 @@ Abrir: `http://localhost:8765/`
 
 ## Motor linguístico: `conjugai-core`
 
-- **Fonte:** `src/lib/conjugai-core/` (ficheiros `.ts`) — é a biblioteca propriamente dita.  
-- **No browser:** `assets/js/conjugai-core.js` — **bundle IIFE** gerado a partir dessa fonte; expõe `ConjugaiCore` (ex.: `analisarFrase`). Não é outro projeto: é a **mesma lib**, empacotada para `<script src="...">`.
+- **Fonte:** `vendors/conjugai-core/` (ficheiros `.ts`) — biblioteca isolada do resto da UI.  
+- **No browser:** `assets/js/conjugai-core.js` — **bundle IIFE** gerado a partir dessa fonte; expõe `ConjugaiCore` (ex.: `analisarFrase`). É a **mesma lib**, empacotada para `<script src="...">`.
+- **Léxico verbal** (`verbos.json`): pode ser atualizado a partir do recurso **MorphoBr** (Apache-2.0); ver a secção MorphoBr em `vendors/conjugai-core/README.md`.
 
 Depois de editares o TypeScript, regenera o bundle:
 
 ```bash
-npm install
+npm install   # necessário para instalar esbuild em node_modules
 npm run build:core
 ```
 
-Sem este passo, o ficheiro em `assets/js/` pode ficar **desatualizado** em relação ao `src/`.
+Sem este passo, o ficheiro em `assets/js/` pode ficar **desatualizado** em relação a `vendors/conjugai-core/`.
 
-Documentação detalhada (fonte vs bundle, fluxo): **`docs/conjugai-core.md`**.
+Documentação detalhada (fonte vs bundle, fluxo): **`vendors/conjugai-core/README.md`**.
 
 ## Estrutura (principal)
 
@@ -40,9 +43,9 @@ Documentação detalhada (fonte vs bundle, fluxo): **`docs/conjugai-core.md`**.
 | `assets/css/styles.css` | Estilos |
 | `assets/js/app.js` | UI e chamada ao core |
 | `assets/js/conjugai-core.js` | Bundle do motor (IIFE `ConjugaiCore`) |
-| `src/lib/conjugai-core/` | Código-fonte TS do motor |
-| `src/lib/conjugai-core/data/verbos.json` | Léxico de verbos (manter alinhado a `verbos-data.ts`) |
-| `src/lib/conjugai-core/demo.html` | Página simples “infinitivo → paradigma” (estilo verbe.cc) |
+| `vendors/conjugai-core/` | Código-fonte TS do motor (pacote separado da UI) |
+| `vendors/conjugai-core/data/verbos.json` | Léxico de verbos (importado em `verbos-data.ts`) |
+| `vendors/conjugai-core/demo.html` | Página simples “infinitivo → paradigma” (estilo verbe.cc) |
 | `diagrama.html` / `docs/diagrama.md` | Diagramas Mermaid |
 
 ## Regras (resumo)
@@ -57,7 +60,15 @@ Sujeito composto *Eu* + *mamãe*/*papai* → tratamento como **Nós** (1.ª plur
 
 ## Limpeza de versões antigas
 
-Se ainda existir uma pasta **`vendor/`** (ex.: cópia antiga do conjugador de terceiros), podes apagá-la — o motor atual é só **`conjugai-core`**.
+Se ainda existir uma pasta antiga **`vendor/`** (singular, cópia de um conjugador de terceiros), podes apagá-la. O motor atual é **`vendors/conjugai-core/`** (nome plural intencional: pacote “fornecido” / isolado da app de visualização).
+
+## Evolução
+
+Para **aumentar a cobertura de conjugação** (ir além do léxico manual `verbos.json`), o caminho alinhado com morfologia é usar **léxicos de flexão** — por exemplo no ecossistema **Unitex** (**DELAF** e recursos da **Linguateca**): lema + formas flexionadas + etiquetas, adequados a **análise morfológica** e geração de formas.
+
+**WordNet** e **VerbNet** resolvem sobretudo **relações semânticas** e classes de predicados (sentidos, papéis temáticos); são **complementares**, não substitutos de um léxico de flexão para o núcleo atual do ConjugAI.
+
+Integrar DELAF/Unitex implica tratar **formato**, **licença**, **norma** (ex. PT-BR) e **peso** em cliente móvel (subconjunto ou índice compactado). O pipeline de sujeito, tempo e reconstrução da frase mantém-se; o recurso externo **alimenta** a camada **“qual forma verbal / lema”**.
 
 ## Licença
 

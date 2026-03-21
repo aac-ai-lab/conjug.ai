@@ -9,6 +9,8 @@ export type ResultadoAnalise = {
     texto: string;
     pessoa: number;
     rotulo?: string;
+    implicito?: boolean;
+    composto?: boolean;
   };
   tempo: {
     tipo: string;
