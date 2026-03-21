@@ -4,34 +4,43 @@ Documentação em Mermaid. Pode pré-visualizar no VS Code/Cursor (extensão Mer
 
 ---
 
-## 1. Pipeline de análise (`analyze`)
+## 1. Pipeline de análise (`analisarFrase`)
 
-Fluxo principal desde o texto bruto até a frase final.
+Fluxo em `vendors/conjugai-core/index.ts`: desde o texto bruto até `correcao`. A UI chama `ConjugaiCore.analisarFrase` a partir de `assets/js/app.js` (`analyze`).
 
 ```mermaid
 flowchart TD
   A[Texto bruto] --> B[tokenize]
   B --> C{Tokens vazios?}
   C -->|sim| ERR[Erro: digite uma frase]
-  C -->|não| D[findVerbInfinitive]
-  D --> E{Infinitivo conhecido?}
-  E -->|não| ERR2[Erro: verbo não reconhecido]
-  E -->|sim| F[resolveSubject]
-  F --> G[resolveTemporal]
-  G --> H[pickForm + pronome + complementos]
-  H --> I[Frase final capitalizada]
-
-  subgraph regras_tempo["Marcador temporal"]
-    G1["amanhã → Futuro do Presente"]
-    G2["ontem → Pretérito Perfeito"]
-    G3["caso contrário → Presente"]
-  end
-
-  subgraph sujeito["Sujeito"]
-    F1["Eu + mamãe/papai → Nós"]
-    F2["Ordem: composto → nós → eles → ela → ele → eu → padrão eu"]
-  end
+  C -->|não| D[detectarSujeito]
+  D --> E[detectarTempo]
+  E --> F[extrairVerbo]
+  F --> G{Lema verbal?}
+  G -->|não| ERR2[Erro: verbo não identificado]
+  G -->|sim| H[conjugar]
+  H --> I{Forma no tempo?}
+  I -->|não| ERR3[Erro: não foi possível conjugar neste tempo]
+  I -->|sim| J[corrigir]
+  J --> K[Frase corrigida]
 ```
+
+### 1.1. `extrairVerbo` (lema verbal)
+
+Detalhe de `conjugador.ts`, invocado dentro de `analisarFrase` após sujeito e tempo.
+
+```mermaid
+flowchart TD
+  X["extrairVerbo(tokens)"] --> Y["detectarVerboPorDicionario"]
+  Y --> Z{lema?}
+  Z -->|sim| R["retorna infinitivo"]
+  Z -->|não| W["percorrer tokens em ordem"]
+  W --> V{"isVerbShape(token)?"}
+  V -->|sim| R
+  V -->|não| N0["null"]
+```
+
+Diagrama interativo e restantes fluxos do núcleo: `vendors/conjugai-core/diagram.html`.
 
 ---
 

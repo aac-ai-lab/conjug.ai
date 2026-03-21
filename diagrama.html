@@ -72,19 +72,22 @@
       </p>
 
       <section class="diagram-block">
-        <h2>1. Pipeline de análise</h2>
+        <h2>1. Pipeline <code>analisarFrase</code></h2>
         <div class="mermaid">
 flowchart TD
   A[Texto bruto] --> B[tokenize]
   B --> C{Tokens vazios?}
   C -->|sim| ERR[Erro: digite uma frase]
-  C -->|não| D[findVerbInfinitive]
-  D --> E{Infinitivo conhecido?}
-  E -->|não| ERR2[Erro: verbo não reconhecido]
-  E -->|sim| F[resolveSubject]
-  F --> G[resolveTemporal]
-  G --> H[pickForm + pronome + complementos]
-  H --> I[Frase final]
+  C -->|não| D[detectarSujeito]
+  D --> E[detectarTempo]
+  E --> F[extrairVerbo]
+  F --> G{Lema verbal?}
+  G -->|não| ERR2[Erro: verbo não identificado]
+  G -->|sim| H[conjugar]
+  H --> I{Forma no tempo?}
+  I -->|não| ERR3[Erro: não foi possível conjugar neste tempo]
+  I -->|sim| J[corrigir]
+  J --> K[Frase corrigida]
         </div>
       </section>
 

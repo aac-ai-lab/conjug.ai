@@ -124,6 +124,30 @@ flowchart LR
           </div>
         </section>
 
+        <section class="panel" aria-labelledby="diagram-h-extrair">
+          <div class="panel-head">
+            <h2 id="diagram-h-extrair" class="panel-title"><code>extrairVerbo</code> — lema</h2>
+            <span class="badge">Mermaid</span>
+          </div>
+          <p class="hint" style="margin-top: 0">
+            Implementação em <code>conjugador.ts</code>: primeiro <code>detectarVerboPorDicionario</code> (forma do
+            léxico ou infinitivo em <code>VERBOS</code>); se falhar, primeiro token com <code>isVerbShape</code>
+            (sufixo <strong>-ar / -er / -ir</strong> ou <strong>-pôr</strong>).
+          </p>
+          <div class="diagram-mermaid">
+            <div class="mermaid">
+flowchart TD
+  X["extrairVerbo(tokens)"] --> Y["detectarVerboPorDicionario"]
+  Y --> Z{lema?}
+  Z -->|sim| R["retorna infinitivo"]
+  Z -->|não| W["percorrer tokens em ordem"]
+  W --> V{"isVerbShape(token)?"}
+  V -->|sim| R
+  V -->|não| N0["null"]
+            </div>
+          </div>
+        </section>
+
         <section class="panel" aria-labelledby="diagram-h-flow">
           <div class="panel-head">
             <h2 id="diagram-h-flow" class="panel-title">Fluxo de <code>conjugar</code></h2>
