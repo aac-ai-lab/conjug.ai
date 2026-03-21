@@ -37,7 +37,7 @@
         <aside class="sidebar" aria-labelledby="examples-heading">
           <h2 id="examples-heading" class="sidebar-title">Exemplos</h2>
           <label class="sr-only" for="example-select">Selecionar frase de exemplo</label>
-          <select id="example-select" class="example-select" size="6">
+          <select id="example-select" class="example-select" size="12">
             <option value="0">Eu comer maçã</option>
             <option value="1">Mamãe e eu ir shopping amanhã</option>
             <option value="2">Ele viajar ontem</option>
@@ -90,10 +90,20 @@
             </div>
 
             <ol id="steps" class="steps hidden" hidden>
-              <li class="step" data-step="1">
+              <li class="step step--token" data-step="1">
                 <div class="step-head">
-                  <span class="step-num">1</span>
-                  <span class="step-label">Tokenização</span>
+                  <button
+                    type="button"
+                    class="step-head-trigger"
+                    id="token-step-trigger"
+                    aria-haspopup="dialog"
+                    aria-controls="dialog-token-algo"
+                  >
+                    <span class="step-num">1</span>
+                    <span class="step-label">Tokenização</span>
+                    <span class="step-help-hint" aria-hidden="true">ⓘ</span>
+                    <span class="sr-only">Abrir explicação detalhada da tokenização</span>
+                  </button>
                   <span class="step-status" aria-hidden="true"></span>
                 </div>
                 <div class="step-body">
@@ -101,10 +111,20 @@
                   <div class="token-row" id="tokens-out"></div>
                 </div>
               </li>
-              <li class="step" data-step="2">
+              <li class="step step--subject" data-step="2">
                 <div class="step-head">
-                  <span class="step-num">2</span>
-                  <span class="step-label">Sujeito e pessoa</span>
+                  <button
+                    type="button"
+                    class="step-head-trigger"
+                    id="subject-step-trigger"
+                    aria-haspopup="dialog"
+                    aria-controls="dialog-subject-algo"
+                  >
+                    <span class="step-num">2</span>
+                    <span class="step-label">Sujeito e pessoa</span>
+                    <span class="step-help-hint" aria-hidden="true">ⓘ</span>
+                    <span class="sr-only">Abrir explicação detalhada de como o algoritmo identifica o sujeito</span>
+                  </button>
                   <span class="step-status" aria-hidden="true"></span>
                 </div>
                 <div class="step-body">
@@ -112,10 +132,20 @@
                   <p class="step-highlight" id="subject-out"></p>
                 </div>
               </li>
-              <li class="step" data-step="3">
+              <li class="step step--tempo" data-step="3">
                 <div class="step-head">
-                  <span class="step-num">3</span>
-                  <span class="step-label">Marcador temporal</span>
+                  <button
+                    type="button"
+                    class="step-head-trigger"
+                    id="tempo-step-trigger"
+                    aria-haspopup="dialog"
+                    aria-controls="dialog-tempo-algo"
+                  >
+                    <span class="step-num">3</span>
+                    <span class="step-label">Marcador temporal</span>
+                    <span class="step-help-hint" aria-hidden="true">ⓘ</span>
+                    <span class="sr-only">Abrir explicação detalhada dos marcadores de tempo</span>
+                  </button>
                   <span class="step-status" aria-hidden="true"></span>
                 </div>
                 <div class="step-body">
@@ -123,10 +153,20 @@
                   <p class="step-highlight" id="time-out"></p>
                 </div>
               </li>
-              <li class="step" data-step="4">
+              <li class="step step--rule" data-step="4">
                 <div class="step-head">
-                  <span class="step-num">4</span>
-                  <span class="step-label">Regra de conjugação</span>
+                  <button
+                    type="button"
+                    class="step-head-trigger"
+                    id="rule-step-trigger"
+                    aria-haspopup="dialog"
+                    aria-controls="dialog-conj-algo"
+                  >
+                    <span class="step-num">4</span>
+                    <span class="step-label">Regra de conjugação</span>
+                    <span class="step-help-hint" aria-hidden="true">ⓘ</span>
+                    <span class="sr-only">Abrir explicação detalhada da conjugação</span>
+                  </button>
                   <span class="step-status" aria-hidden="true"></span>
                 </div>
                 <div class="step-body">
@@ -169,6 +209,139 @@
         </nav>
       </footer>
     </div>
+
+    <dialog class="algo-dialog" id="dialog-token-algo" aria-labelledby="dialog-token-title">
+      <div class="algo-dialog__inner">
+        <header class="algo-dialog__head">
+          <h2 id="dialog-token-title" class="algo-dialog__title">Como a tokenização funciona</h2>
+          <button type="button" class="algo-dialog__close" data-close-dialog aria-label="Fechar">×</button>
+        </header>
+        <div class="algo-dialog__body">
+          <p class="algo-dialog__lead">
+            A função <code>tokenize</code> prepara a frase para os passos seguintes: <strong>divide por espaços</strong>, remove segmentos vazios e <strong>limpa pontuação final</strong> em cada pedaço (vírgula, ponto, interrogação, etc. só no fim do token).
+          </p>
+          <div id="token-viz-mount" class="algo-viz-mount" aria-live="polite"></div>
+          <p class="algo-dialog__legend" aria-hidden="true">
+            <span class="algo-dialog__legend-title">Legenda:</span>
+            <span class="algo-legend"><span class="tv-chip tv-chip--idx">t0…</span> índice do token na lista</span>
+            <span class="algo-legend"><span class="sv-tag sv-tag--rest">·</span> não é «nova» palavra — só o mesmo texto repartido</span>
+          </p>
+          <h3 class="algo-dialog__h3">O que não faz (por agora)</h3>
+          <p>
+            Não há segmentação por vírgulas no meio da frase, nem tratamento de contrações tipo <em>do/da</em> como dois morfemas: cada bloco entre espaços é <strong>um</strong> token.
+          </p>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog class="algo-dialog" id="dialog-subject-algo" aria-labelledby="dialog-subject-title">
+      <div class="algo-dialog__inner">
+        <header class="algo-dialog__head">
+          <h2 id="dialog-subject-title" class="algo-dialog__title">Como o algoritmo identifica sujeito e pessoa</h2>
+          <button type="button" class="algo-dialog__close" data-close-dialog aria-label="Fechar">×</button>
+        </header>
+        <div class="algo-dialog__body">
+          <p class="algo-dialog__lead">
+            O motor (<code>conjugai-core</code>) corre <strong>depois da tokenização</strong> e <strong>antes</strong> do tempo verbal e da conjugação. A ideia é obter o <strong>pronome de referência</strong> e o índice de pessoa (0–4) usados na conjugação.
+          </p>
+
+          <div id="subject-viz-mount" class="subject-viz-mount" aria-live="polite"></div>
+          <p class="algo-dialog__legend" aria-hidden="true">
+            <span class="algo-dialog__legend-title">Legenda (estilo anotação):</span>
+            <span class="algo-legend"><span class="sv-tag sv-tag--pre">pre</span> prefixo</span>
+            <span class="algo-legend"><span class="sv-tag sv-tag--pron">pron</span> pronome</span>
+            <span class="algo-legend"><span class="sv-tag sv-tag--conj">conj</span> «e»</span>
+            <span class="algo-legend"><span class="sv-tag sv-tag--verb">V</span> verbo</span>
+            <span class="algo-legend"><span class="sv-tag sv-tag--time">t</span> tempo</span>
+            <span class="algo-legend"><span class="sv-tag sv-tag--rest">·</span> resto</span>
+          </p>
+
+          <h3 class="algo-dialog__h3">1. Onde está o verbo?</h3>
+          <p>
+            Primeiro localiza-se um <strong>infinitivo</strong> (ex.: <em>comer</em>, <em>ir</em>) ou uma forma reconhecida pelo léxico. Tudo o que fica <strong>à esquerda</strong> desse verbo é tratado como <strong>prefixo de sujeito</strong> (pode ser vazio).
+          </p>
+
+          <h3 class="algo-dialog__h3">2. Sujeito composto com «e»</h3>
+          <p>
+            Se o prefixo tiver <strong>pelo menos três tokens</strong>, contiver o conector <strong>«e»</strong> e corresponder ao padrão telegráfico <em>X e Y</em> antes do verbo, aplica-se uma de três regras:
+          </p>
+          <ul class="algo-dialog__list">
+            <li>Se aparecer <strong>«eu»</strong> → sujeito verbal <strong>Nós</strong> (1.ª plural), pessoa <strong>3</strong> no motor.</li>
+            <li>Se aparecer <strong>«tu»</strong> ou <strong>«você»</strong> → <strong>Vocês</strong> e pessoa <strong>4</strong> (forma verbal alinhada a «eles» em PT-BR).</li>
+            <li>Caso contrário (ex.: nomes próprios) → <strong>Eles</strong>, pessoa <strong>4</strong>.</li>
+          </ul>
+
+          <h3 class="algo-dialog__h3">3. Caso especial «Eu + mamãe/papai»</h3>
+          <p>
+            Combinações como <em>eu e mamãe</em> ou <em>mamãe e eu</em> (e variantes com «papai») são mapeadas para <strong>Nós</strong> (1.ª plural), por ser um sujeito composto familiar frequente em CAA.
+          </p>
+
+          <h3 class="algo-dialog__h3">4. Sujeito simples (pronome explícito)</h3>
+          <p>
+            Se nenhuma regra composta se aplicar, procuram-se, nos tokens antes do verbo, pronome(s) como <strong>nós, eles, ela, ele, eu, tu</strong> (comparação normalizada, sem acentos). O primeiro critério que coincidir define o sujeito e a pessoa.
+          </p>
+
+          <h3 class="algo-dialog__h3">5. Sujeito implícito</h3>
+          <p>
+            Se <strong>não houver</strong> pronome reconhecível, assume-se <strong>Eu</strong> (1.ª pessoa do singular) — adequado a muitas telegrafias em que o falante omite o pronome.
+          </p>
+
+          <p class="algo-dialog__note">
+            Os índices <strong>0–4</strong> correspondem a: eu, tu, ele/ela, nós, eles/vocês — o mesmo esquema usado na tabela de conjugação do protótipo.
+          </p>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog class="algo-dialog" id="dialog-tempo-algo" aria-labelledby="dialog-tempo-title">
+      <div class="algo-dialog__inner">
+        <header class="algo-dialog__head">
+          <h2 id="dialog-tempo-title" class="algo-dialog__title">Como o tempo verbal é escolhido</h2>
+          <button type="button" class="algo-dialog__close" data-close-dialog aria-label="Fechar">×</button>
+        </header>
+        <div class="algo-dialog__body">
+          <p class="algo-dialog__lead">
+            O motor olha a <strong>lista de tokens</strong> (já sem acentos na comparação) e procura marcadores <strong>«amanhã»</strong> e <strong>«ontem»</strong>. O resultado é um tempo verbal (<code>presente</code>, <code>futuro</code> ou <code>passado</code>) usado depois na conjugação.
+          </p>
+          <div id="tempo-viz-mount" class="algo-viz-mount" aria-live="polite"></div>
+          <p class="algo-dialog__legend" aria-hidden="true">
+            <span class="algo-dialog__legend-title">Legenda:</span>
+            <span class="algo-legend"><span class="sv-tag sv-tag--time">t</span> token que conta como marcador temporal</span>
+            <span class="algo-legend"><span class="tempo-badge tempo-badge--fut">futuro</span> / <span class="tempo-badge tempo-badge--past">passado</span> / <span class="tempo-badge tempo-badge--pres">presente</span> decisão do algoritmo</span>
+          </p>
+          <h3 class="algo-dialog__h3">Regras (resumo)</h3>
+          <ul class="algo-dialog__list">
+            <li><strong>«ontem»</strong> em qualquer posição → <strong>Pretérito Perfeito</strong> (<code>passado</code>).</li>
+            <li><strong>«amanhã»</strong> → por defeito <strong>Futuro do Presente</strong> (<code>futuro</code>), <em>exceto</em> se a frase começar com perífrase de <strong>ir</strong> no presente (<em>vou/vai/vamos…</em>) e ainda houver «amanhã» — aí o verbo suporte fica no <strong>presente</strong> (caso típico <em>vou viajar amanhã</em>).</li>
+            <li>Sem esses marcadores → <strong>Presente</strong> (<code>presente</code>).</li>
+          </ul>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog class="algo-dialog" id="dialog-conj-algo" aria-labelledby="dialog-conj-title">
+      <div class="algo-dialog__inner">
+        <header class="algo-dialog__head">
+          <h2 id="dialog-conj-title" class="algo-dialog__title">Como a conjugação é aplicada</h2>
+          <button type="button" class="algo-dialog__close" data-close-dialog aria-label="Fechar">×</button>
+        </header>
+        <div class="algo-dialog__body">
+          <p class="algo-dialog__lead">
+            Dados o <strong>infinitivo</strong> (ou forma reconhecida no léxico), a <strong>pessoa</strong> (0–4) e o <strong>tempo</strong>, a função <code>conjugar</code> devolve a forma flexionada. Primeiro tenta o <strong>léxico</strong> <code>verbos.json</code>; se o verbo não estiver no léxico, no <strong>presente</strong> usa-se ainda <strong>regra regular</strong> de sufixos (-ar / -er / -ir).
+          </p>
+          <div id="conj-viz-mount" class="algo-viz-mount" aria-live="polite"></div>
+          <p class="algo-dialog__legend" aria-hidden="true">
+            <span class="algo-dialog__legend-title">Legenda:</span>
+            <span class="algo-legend"><span class="conj-pipe__box conj-pipe__box--lex">léxico</span> forma vinda de <code>verbos.json</code></span>
+            <span class="algo-legend"><span class="conj-pipe__box conj-pipe__box--reg">regra</span> presente regular (-ar/-er/-ir)</span>
+          </p>
+          <h3 class="algo-dialog__h3">Limitações do protótipo</h3>
+          <p>
+            <strong>Futuro</strong> e <strong>passado</strong> de verbos <em>fora</em> do léxico não são gerados por sufixação neste núcleo — só há cobertura completa via dicionário ou, no presente, via regras regulares.
+          </p>
+        </div>
+      </div>
+    </dialog>
 
     <script src="assets/js/conjugai-core.js" defer></script>
     <script src="assets/js/app.js" defer></script>

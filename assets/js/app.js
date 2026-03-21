@@ -9,7 +9,18 @@
     "Mamãe e eu ir shopping amanhã",
     "Ele viajar ontem",
     "Nós querer brincar",
+    "Tu fazer lição",
+    "Ela fazer bolo amanhã",
+    "Vou viajar amanhã",
+    "Fazer jantar",
+    "Eu e papai comer pizza",
+    "Ana e Pedro viajar praia",
+    "Eles fazer trabalho ontem",
+    "Nós ir escola amanhã",
   ];
+
+  /** Última análise com `viz` para diagramas nos modais (passos 1–4). */
+  var lastPipeline = null;
 
   const el = {
     select: document.getElementById("example-select"),
@@ -21,11 +32,20 @@
     tokensOut: document.getElementById("tokens-out"),
     subjectDesc: document.getElementById("subject-desc"),
     subjectOut: document.getElementById("subject-out"),
+    subjectStepTrigger: document.getElementById("subject-step-trigger"),
+    dialogSubject: document.getElementById("dialog-subject-algo"),
     timeDesc: document.getElementById("time-desc"),
     timeOut: document.getElementById("time-out"),
     ruleDesc: document.getElementById("rule-desc"),
     ruleOut: document.getElementById("rule-out"),
     output: document.getElementById("output-text"),
+    subjectVizMount: document.getElementById("subject-viz-mount"),
+    tokenStepTrigger: document.getElementById("token-step-trigger"),
+    tempoStepTrigger: document.getElementById("tempo-step-trigger"),
+    ruleStepTrigger: document.getElementById("rule-step-trigger"),
+    dialogToken: document.getElementById("dialog-token-algo"),
+    dialogTempo: document.getElementById("dialog-tempo-algo"),
+    dialogConj: document.getElementById("dialog-conj-algo"),
   };
 
   function getCore() {
@@ -60,6 +80,22 @@
 
     var ruleLine = "Aplicar " + nomeTempo + " de «" + r.verbo.infinitivo + "» para " + r.sujeito.texto + ".";
 
+    var verbIndex =
+      typeof core.indiceDoVerboNaFrase === "function"
+        ? core.indiceDoVerboNaFrase(r.tokens, r.verbo.infinitivo)
+        : -1;
+
+    var lemmaViaDict =
+      typeof core.detectarVerboPorDicionario === "function"
+        ? core.detectarVerboPorDicionario(r.tokens)
+        : null;
+    var viaLexico = lemmaViaDict === r.verbo.infinitivo;
+
+    var tempoRotulo = "";
+    if (r.debug && r.debug.etapa3) {
+      tempoRotulo = r.debug.etapa3.replace(/^Tempo:\s*[^\s]+\s*[—–-]\s*/, "").trim();
+    }
+
     return {
       ok: true,
       analysis: {
@@ -76,6 +112,21 @@
         ruleLine: ruleLine,
         finalSentence: r.correcao,
         debug: r.debug,
+        viz: {
+          rawInput: String(raw).trim(),
+          tokens: r.tokens,
+          verbIndex: verbIndex,
+          infinitivo: r.verbo.infinitivo,
+          conjugado: r.verbo.conjugado,
+          sujeitoTexto: r.sujeito.texto,
+          sujeitoPessoa: r.sujeito.pessoa,
+          implicito: !!r.sujeito.implicito,
+          composto: !!r.sujeito.composto,
+          tempoTipo: r.tempo.tipo,
+          tempoRotulo: tempoRotulo,
+          nomeTempo: nomeTempo,
+          viaLexico: viaLexico,
+        },
       },
     };
   }
@@ -174,6 +225,9 @@
       el.output.textContent = result.error || "Erro.";
       return;
     }
+    if (result.analysis.viz) {
+      lastPipeline = result.analysis.viz;
+    }
     runStepAnimation(result.analysis);
   }
 
@@ -184,7 +238,396 @@
     }
   }
 
+  var DEFAULT_PIPELINE = {
+    rawInput: "Eu comer maçã",
+    tokens: ["Eu", "comer", "maçã"],
+    verbIndex: 1,
+    infinitivo: "comer",
+    conjugado: "como",
+    sujeitoTexto: "Eu",
+    sujeitoPessoa: 0,
+    implicito: false,
+    composto: false,
+    tempoTipo: "presente",
+    tempoRotulo: "Sem marcador de passado/futuro → Presente do indicativo.",
+    nomeTempo: "Presente do indicativo",
+    viaLexico: true,
+  };
+
+  function normalizeTok(s) {
+    return String(s)
+      .trim()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+  }
+
+  function tagForToken(tok, i, verbIdx) {
+    var n = normalizeTok(tok);
+    if (verbIdx >= 0) {
+      if (i < verbIdx) {
+        if (n === "e") return { short: "conj", cls: "sv-tag--conj", hint: "Conector" };
+        if (
+          n === "eu" ||
+          n === "tu" ||
+          n === "ele" ||
+          n === "ela" ||
+          n === "eles" ||
+          n === "nos" ||
+          n === "voce"
+        ) {
+          return { short: "pron", cls: "sv-tag--pron", hint: "Pronome" };
+        }
+        return { short: "pre", cls: "sv-tag--pre", hint: "Prefixo (zona sujeito)" };
+      }
+      if (i === verbIdx) return { short: "V", cls: "sv-tag--verb", hint: "Verbo (alvo da conjugação)" };
+    }
+    if (n === "amanha" || n === "ontem" || n === "hoje") {
+      return { short: "t", cls: "sv-tag--time", hint: "Marcador temporal" };
+    }
+    return { short: "·", cls: "sv-tag--rest", hint: "Resto da frase" };
+  }
+
+  function renderSubjectViz() {
+    var host = el.subjectVizMount || document.getElementById("subject-viz-mount");
+    if (!host) return;
+
+    var data = lastPipeline && lastPipeline.tokens && lastPipeline.tokens.length ? lastPipeline : DEFAULT_PIPELINE;
+    var tokens = data.tokens;
+    var verbIdx = typeof data.verbIndex === "number" ? data.verbIndex : -1;
+    var nCols = tokens.length + (verbIdx === 0 && data.implicito ? 1 : 0);
+
+    var parts = [];
+    parts.push('<div class="subject-viz" role="img" aria-label="Diagrama da frase token a token">');
+
+    parts.push('<p class="subject-viz__caption">');
+    parts.push(
+      "<strong>Resultado:</strong> sujeito verbal «" +
+        data.sujeitoTexto +
+        "» · pessoa " +
+        data.sujeitoPessoa +
+        (data.implicito ? " · <em>implícito</em>" : "") +
+        (data.composto ? " · <em>composto</em>" : "") +
+        "</p>"
+    );
+
+    parts.push('<div class="subject-viz__diagram" style="--sv-cols:' + nCols + '">');
+    parts.push('<div class="subject-viz__tags" aria-hidden="true">');
+
+    var i;
+    if (verbIdx === 0 && data.implicito) {
+      parts.push(
+        '<span class="subject-viz__cell subject-viz__cell--implicit"><span class="sv-tag sv-tag--implicit">∅</span><span class="sv-hint">implícito</span></span>'
+      );
+    }
+
+    for (i = 0; i < tokens.length; i++) {
+      var tag = tagForToken(tokens[i], i, verbIdx);
+      parts.push(
+        '<span class="subject-viz__cell"><span class="sv-tag ' +
+          tag.cls +
+          '" title="' +
+          tag.hint +
+          '">' +
+          tag.short +
+          "</span></span>"
+      );
+    }
+
+    parts.push("</div>");
+
+    parts.push('<div class="subject-viz__arc" aria-hidden="true">');
+    parts.push(
+      '<svg class="subject-viz__svg" viewBox="0 0 100 24" preserveAspectRatio="none"><path class="subject-viz__path" d="" /></svg>'
+    );
+    parts.push(
+      '<span class="subject-viz__dep-label">arco: verbo ↔ zona do sujeito (prefixo)</span>'
+    );
+    parts.push("</div>");
+
+    parts.push('<div class="subject-viz__words">');
+
+    if (verbIdx === 0 && data.implicito) {
+      parts.push(
+        '<span class="subject-viz__wcell subject-viz__wcell--implicit"><span class="sv-word">—</span></span>'
+      );
+    }
+
+    for (i = 0; i < tokens.length; i++) {
+      var isVerb = verbIdx >= 0 && i === verbIdx;
+      var wc = "subject-viz__wcell" + (isVerb ? " subject-viz__wcell--verb" : "");
+      if (verbIdx >= 0 && i < verbIdx) wc += " subject-viz__wcell--prefix";
+      parts.push(
+        '<span class="' +
+          wc +
+          '" data-viz-i="' +
+          i +
+          '"' +
+          (isVerb ? ' data-viz-role="verb"' : "") +
+          "><span class=\"sv-word\">" +
+          escapeHtml(tokens[i]) +
+          "</span></span>"
+      );
+    }
+
+    parts.push("</div>");
+    parts.push("</div>");
+
+    parts.push('<p class="subject-viz__micro">');
+    parts.push(
+      "O motor corta a frase no <strong>primeiro verbo</strong> reconhecido («" +
+        (data.infinitivo || "…") +
+        "»); à esquerda fica o <strong>prefixo</strong> onde se leem pronomes e «e»; daí a pessoa usada na conjugação."
+    );
+    parts.push("</p>");
+
+    parts.push("</div>");
+
+    host.innerHTML = parts.join("");
+
+    window.requestAnimationFrame(function () {
+      layoutSubjectVizArc(host);
+      window.requestAnimationFrame(function () {
+        layoutSubjectVizArc(host);
+      });
+    });
+  }
+
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function isPerifrasisIr(tokens) {
+    var lower = tokens.map(normalizeTok);
+    var primeiro = lower[0] || "";
+    if (lower.indexOf("amanha") < 0) return false;
+    return ["vou", "vais", "vai", "vamos", "vao"].indexOf(primeiro) >= 0;
+  }
+
+  function renderTokenViz() {
+    var host = document.getElementById("token-viz-mount");
+    if (!host) return;
+    var data = lastPipeline && lastPipeline.tokens && lastPipeline.tokens.length ? lastPipeline : DEFAULT_PIPELINE;
+    var raw = data.rawInput || (data.tokens && data.tokens.join(" "));
+    var tokens = data.tokens || [];
+    var parts = [];
+    parts.push('<div class="token-viz" role="img" aria-label="Tokenização da frase">');
+    parts.push('<div class="token-viz__row">');
+    parts.push('<span class="token-viz__label">Entrada</span>');
+    parts.push('<div class="token-viz__raw"><code>' + escapeHtml(raw) + "</code></div>");
+    parts.push("</div>");
+    parts.push('<div class="token-viz__split" aria-hidden="true">⇣</div>');
+    parts.push('<div class="token-viz__row">');
+    parts.push('<span class="token-viz__label">Tokens</span>');
+    parts.push('<div class="token-viz__chips">');
+    for (var i = 0; i < tokens.length; i++) {
+      parts.push('<span class="token-viz__chip">');
+      parts.push('<span class="tv-chip tv-chip--idx">t' + i + "</span>");
+      parts.push('<span class="token-viz__word">' + escapeHtml(tokens[i]) + "</span>");
+      parts.push("</span>");
+    }
+    parts.push("</div></div>");
+    parts.push(
+      '<p class="subject-viz__micro">Cada espaço em branco separa tokens; pontuação final (.,…,…,…) é removida de cada pedaço.</p>'
+    );
+    parts.push("</div>");
+    host.innerHTML = parts.join("");
+  }
+
+  function renderTempoViz() {
+    var host = document.getElementById("tempo-viz-mount");
+    if (!host) return;
+    var data = lastPipeline && lastPipeline.tokens && lastPipeline.tokens.length ? lastPipeline : DEFAULT_PIPELINE;
+    var tokens = data.tokens || [];
+    var tipo = data.tempoTipo || "presente";
+    var rotulo = data.tempoRotulo || "";
+    var nome = data.nomeTempo || "Presente do indicativo";
+    var badgeClass = "tempo-badge--pres";
+    if (tipo === "futuro") badgeClass = "tempo-badge--fut";
+    if (tipo === "passado") badgeClass = "tempo-badge--past";
+
+    var parts = [];
+    parts.push('<div class="tempo-viz" role="img" aria-label="Marcadores de tempo na frase">');
+    parts.push('<p class="subject-viz__caption"><strong>Decisão:</strong> ');
+    parts.push('<span class="tempo-badge ' + badgeClass + '">' + escapeHtml(nome) + "</span></p>");
+    parts.push('<div class="tempo-viz__tokens" style="--sv-cols:' + tokens.length + '">');
+    for (var i = 0; i < tokens.length; i++) {
+      var n = normalizeTok(tokens[i]);
+      var isMark = n === "amanha" || n === "ontem" || n === "hoje";
+      var cls = "tempo-viz__tok" + (isMark ? " tempo-viz__tok--mark" : "");
+      parts.push('<div class="' + cls + '">');
+      if (isMark) parts.push('<span class="sv-tag sv-tag--time">t</span>');
+      parts.push('<span class="tempo-viz__w">' + escapeHtml(tokens[i]) + "</span>");
+      parts.push("</div>");
+    }
+    parts.push("</div>");
+    parts.push('<p class="tempo-viz__rotulo">' + escapeHtml(rotulo) + "</p>");
+    if (isPerifrasisIr(tokens)) {
+      parts.push(
+        '<p class="algo-dialog__note">Perífrase «vou/vai/…» + «amanhã» detectada: o verbo suporte permanece no <strong>presente</strong> (ex.: <em>vou viajar amanhã</em>).</p>'
+      );
+    }
+    parts.push("</div>");
+    host.innerHTML = parts.join("");
+  }
+
+  function renderConjViz() {
+    var host = document.getElementById("conj-viz-mount");
+    if (!host) return;
+    var data = lastPipeline && lastPipeline.tokens && lastPipeline.tokens.length ? lastPipeline : DEFAULT_PIPELINE;
+    var inf = data.infinitivo || "…";
+    var p = typeof data.sujeitoPessoa === "number" ? data.sujeitoPessoa : 0;
+    var pessoaLabels = ["eu", "tu", "ele/ela", "nós", "eles/vocês"];
+    var tipo = data.tempoTipo || "presente";
+    var form = data.conjugado || "…";
+    var viaLexico = data.viaLexico !== false;
+    var fonteLabel = viaLexico ? "verbos.json (léxico)" : "regra regular (presente · -ar/-er/-ir)";
+    if (tipo !== "presente" && viaLexico) fonteLabel = "verbos.json (léxico)";
+    if (tipo !== "presente" && !viaLexico) fonteLabel = "verbos.json ou —";
+
+    var parts = [];
+    parts.push('<div class="conj-viz" role="img" aria-label="Pipeline de conjugação">');
+    parts.push('<div class="conj-pipe">');
+    parts.push(
+      '<div class="conj-pipe__col"><span class="conj-pipe__cap">Lema</span><span class="conj-pipe__box">' +
+        escapeHtml(inf) +
+        "</span></div>"
+    );
+    parts.push('<span class="conj-pipe__plus">+</span>');
+    parts.push(
+      '<div class="conj-pipe__col"><span class="conj-pipe__cap">Pessoa</span><span class="conj-pipe__box">' +
+        p +
+        " · " +
+        (pessoaLabels[p] || "—") +
+        "</span></div>"
+    );
+    parts.push('<span class="conj-pipe__plus">+</span>');
+    parts.push(
+      '<div class="conj-pipe__col"><span class="conj-pipe__cap">Tempo</span><span class="conj-pipe__box">' +
+        escapeHtml(tipo) +
+        "</span></div>"
+    );
+    parts.push('<span class="conj-pipe__arrow">→</span>');
+    parts.push(
+      '<div class="conj-pipe__col conj-pipe__col--out"><span class="conj-pipe__cap">Forma</span><span class="conj-pipe__box conj-pipe__box--out">«' +
+        escapeHtml(form) +
+        '»</span></div>'
+    );
+    parts.push("</div>");
+    parts.push(
+      '<p class="conj-viz__fonte">Fonte da forma: <strong class="' +
+        (viaLexico ? "conj-src--lex" : "conj-src--reg") +
+        '">' +
+        fonteLabel +
+        "</strong></p>"
+    );
+    parts.push("</div>");
+    host.innerHTML = parts.join("");
+  }
+
+  function layoutSubjectVizArc(host) {
+    var svg = host.querySelector(".subject-viz__svg");
+    var path = host.querySelector(".subject-viz__path");
+    var diagram = host.querySelector(".subject-viz__diagram");
+    if (!svg || !path || !diagram) return;
+
+    var verbEl = host.querySelector('[data-viz-role="verb"]');
+    var prefixEls = host.querySelectorAll(".subject-viz__wcell--prefix");
+    var implicitEl = host.querySelector(".subject-viz__wcell--implicit");
+
+    var arcLayer = host.querySelector(".subject-viz__arc");
+    if (!verbEl || !arcLayer) return;
+
+    var dRect = diagram.getBoundingClientRect();
+    var w = dRect.width;
+    if (w < 8) return;
+
+    svg.setAttribute("viewBox", "0 0 " + w + " 28");
+    svg.style.width = "100%";
+    svg.style.height = "28px";
+
+    var x1 = verbEl.getBoundingClientRect().left + verbEl.offsetWidth / 2 - dRect.left;
+    var x2;
+    if (implicitEl) {
+      x2 = implicitEl.getBoundingClientRect().left + implicitEl.offsetWidth / 2 - dRect.left;
+    } else if (prefixEls.length) {
+      var first = prefixEls[0];
+      var last = prefixEls[prefixEls.length - 1];
+      var cx1 = first.getBoundingClientRect().left - dRect.left;
+      var cx2 = last.getBoundingClientRect().right - dRect.left;
+      x2 = (cx1 + cx2) / 2;
+    } else {
+      x2 = x1;
+    }
+
+    var y = 24;
+    var cx = (x1 + x2) / 2;
+    var bump = Math.min(22, Math.abs(x2 - x1) * 0.35 + 8);
+    var dPath = "M " + x1 + " " + y + " Q " + cx + " " + (y - bump) + " " + x2 + " " + y;
+    path.setAttribute("d", dPath);
+    path.setAttribute("stroke-linecap", "round");
+
+    var show = prefixEls.length > 0 || implicitEl;
+    path.style.opacity = show && Math.abs(x2 - x1) > 1 ? "1" : "0.35";
+    var label = host.querySelector(".subject-viz__dep-label");
+    if (label) {
+      label.style.opacity = show ? "1" : "0.5";
+    }
+  }
+
+  function openDialogWithRender(dialog, renderFn, focusEl) {
+    if (!dialog || typeof dialog.showModal !== "function") return;
+    dialog.showModal();
+    window.requestAnimationFrame(function () {
+      renderFn();
+    });
+    dialog.addEventListener(
+      "close",
+      function () {
+        if (focusEl) focusEl.focus();
+      },
+      { once: true }
+    );
+  }
+
+  function bindOneDialog(dialog, trigger, renderFn) {
+    if (!dialog) return;
+    var closeBtn = dialog.querySelector("[data-close-dialog]");
+    if (closeBtn) {
+      closeBtn.addEventListener("click", function () {
+        dialog.close();
+      });
+    }
+    dialog.addEventListener("click", function (e) {
+      if (e.target === dialog) dialog.close();
+    });
+    if (trigger) {
+      trigger.addEventListener("click", function () {
+        openDialogWithRender(dialog, renderFn, trigger);
+      });
+    }
+  }
+
+  function bindAlgoDialogs() {
+    bindOneDialog(el.dialogToken, el.tokenStepTrigger, renderTokenViz);
+    bindOneDialog(el.dialogSubject, el.subjectStepTrigger, renderSubjectViz);
+    bindOneDialog(el.dialogTempo, el.tempoStepTrigger, renderTempoViz);
+    bindOneDialog(el.dialogConj, el.ruleStepTrigger, renderConjViz);
+
+    window.addEventListener("resize", function () {
+      if (el.dialogSubject && el.dialogSubject.open && el.subjectVizMount) {
+        layoutSubjectVizArc(el.subjectVizMount);
+      }
+    });
+  }
+
   function init() {
+    bindAlgoDialogs();
+
     el.select.innerHTML = EXAMPLES.map(function (ex, idx) {
       return '<option value="' + idx + '">' + ex + "</option>";
     }).join("");
@@ -197,6 +640,7 @@
 
     el.btnAnalyze.addEventListener("click", runAnalysis);
     el.btnReset.addEventListener("click", function () {
+      lastPipeline = null;
       el.input.value = "";
       el.output.textContent = "O resultado aparecerá aqui após a análise.";
       el.output.classList.remove("is-busy");
