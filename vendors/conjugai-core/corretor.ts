@@ -4,6 +4,7 @@ import type { TempoVerbal } from "./types";
 /**
  * Reconstrói a frase a partir dos **tokens originais**:
  * substitui só a forma verbal pelo `conjugado` e, se o sujeito for implícito, antecede o pronome.
+ * Sujeito composto (ex.: «Mamãe e eu …») mantém-se na superfície — só o verbo é flexionado.
  * Não descarta complementos.
  */
 export function corrigir(
@@ -15,12 +16,6 @@ export function corrigir(
 ): string {
   const verbLower = conjugado.charAt(0).toLowerCase() + conjugado.slice(1);
   const vi = indiceDoVerboNaFrase(tokens, infinitivo);
-
-  if (sujeito.composto && vi >= 0) {
-    const depois = tokens.slice(vi + 1);
-    const out = [sujeito.texto, verbLower, ...depois].join(" ").replace(/\s+/g, " ").trim();
-    return out.charAt(0).toUpperCase() + out.slice(1);
-  }
 
   const resultado: string[] = [];
   for (let i = 0; i < tokens.length; i++) {

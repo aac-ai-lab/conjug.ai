@@ -7,7 +7,7 @@ export type InfoSujeito = {
   rotulo: string;
   /** Sem pronome explícito na frase — usa-se 1.ª pessoa (Eu) para telegrafias. */
   implicito?: boolean;
-  /** Sujeito composto: substituir o prefixo antes do verbo pelo pronome em `texto`. */
+  /** Sujeito composto: `texto` é rótulo (ex.: Nós) para UI; a pessoa serve à conjugação. A frase corrigida mantém os tokens do sujeito. */
   composto?: boolean;
 };
 

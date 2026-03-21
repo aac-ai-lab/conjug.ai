@@ -57,7 +57,7 @@ Documentação detalhada (fonte vs bundle, fluxo): **`vendors/conjugai-core/READ
 | *ontem* | Pretérito Perfeito |
 | (outros) | Presente |
 
-Sujeito composto *Eu* + *mamãe*/*papai* → tratamento como **Nós** (1.ª plural).
+Sujeito composto (*Eu* + *mamãe*/*papai*, ou *X e Y* antes do verbo) → **pessoa** para conjugação é **1.ª plural** (rótulo interno «Nós»); na **frase corrigida** só o verbo é flexionado — os **tokens do sujeito mantêm-se** (ex.: «Mamãe e eu iremos…»).
 
 ## Limpeza de versões antigas
 

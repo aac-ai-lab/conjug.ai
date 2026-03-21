@@ -250,11 +250,6 @@ var ConjugaiCore = (() => {
   function corrigir(tokens, sujeito, infinitivo, conjugado, _tempoTipo) {
     const verbLower = conjugado.charAt(0).toLowerCase() + conjugado.slice(1);
     const vi = indiceDoVerboNaFrase(tokens, infinitivo);
-    if (sujeito.composto && vi >= 0) {
-      const depois = tokens.slice(vi + 1);
-      const out2 = [sujeito.texto, verbLower, ...depois].join(" ").replace(/\s+/g, " ").trim();
-      return out2.charAt(0).toUpperCase() + out2.slice(1);
-    }
     const resultado = [];
     for (let i = 0; i < tokens.length; i++) {
       if (i === vi) {

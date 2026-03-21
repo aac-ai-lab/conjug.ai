@@ -11,7 +11,7 @@ const CASOS = [
       tempo: "presente" as const,
       infinitivo: "comer",
       conjugado: "como",
-      correcao: "Eu como maçã.",
+      correcao: "Eu como maçã",
     },
   },
   {
@@ -21,7 +21,7 @@ const CASOS = [
       tempo: "passado" as const,
       infinitivo: "viajar",
       conjugado: "viajou",
-      correcao: "Ele viajou ontem.",
+      correcao: "Ele viajou ontem",
     },
   },
   {
@@ -31,6 +31,7 @@ const CASOS = [
       tempo: "futuro" as const,
       infinitivo: "ir",
       conjugado: "iremos",
+      correcao: "Mamãe e eu iremos shopping amanhã",
     },
   },
   {

@@ -170,7 +170,7 @@ UI (HTML + CSS + app.js)
 | `sujeito.ts` | `detectarSujeito`, `detectarSujeitoComposto` (sujeito simples + composto) |
 | `tempo.ts` | `detectarTempo` (*amanhã*, *ontem*, default presente) |
 | `conjugador.ts` | `conjugar`, `extrairVerbo`, `detectarVerboPorDicionario`, `indiceDoVerboNaFrase`, léxico + presente regular |
-| `corretor.ts` | `corrigir` — pronome + forma verbal + complementos |
+| `corretor.ts` | `corrigir` — substitui só o token verbal (e antecede pronome se sujeito implícito) |
 | `types.ts` | `ResultadoAnalise` e tipos auxiliares |
 | `data/verbos.json` | Léxico (espelhado em `verbos-data.ts` para o bundler) |
 | `scripts/csv_to_verbos.py` | Gera/atualiza `verbos.json` a partir de CSV (ver §4.1) |
@@ -213,13 +213,13 @@ Frases telegráficas podem ter **vários núcleos** no sujeito (*eu e João*, *J
    - existe **tu** ou **você** (`voce` normalizado) → **Vocês**, pessoa **4** (em PT-BR, mesmas terminações que *eles* no sistema);
    - caso contrário → **Eles**, pessoa **4** (ex.: *João e Maria*, *meu pai e minha mãe* — nomes próprios ou grupos nominais simples).
 4. Mantém-se a regra legada **`isCompostoEuOutra`** (*mamãe e eu*, *eu e papai* sem depender estritamente do ponto 3) em `detectarSujeitoSimples`, com `composto: true`.
-5. Na correção da frase, se `sujeito.composto`, o **prefixo inteiro** é substituído pelo pronome resolvido + verbo conjugado + restantes tokens (complementos).
+5. Na correção da frase, **`corrigir`** só substitui a **forma verbal** no sítio certo; os tokens do sujeito (incluindo prefixo *X e Y*) **mantêm-se** na superfície. O pronome em `sujeito.texto` (ex.: Nós, Eles) serve à **UI** e à **pessoa** para `conjugar`, não à reconstrução literal quando `composto` é verdadeiro.
 
 ### 11.3 Limitações
 
 - Não há árvore sintática: ambiguidades (*X e Y* como coordenação de objetos) não são resolvidas.
 - Frases muito longas ou ordem não canónica podem falhar.
-- **Marcador temporal** *amanhã* continua a mapear para **futuro** no motor; uma frase como *João e Maria viajar amanhã* tende a **«Eles viajarão amanhã»**, não ao presente coloquial *viajam*.
+- **Marcador temporal** *amanhã* continua a mapear para **futuro** no motor; *João e Maria viajar amanhã* tende a **«João e Maria viajarão amanhã»** (só o verbo é flexionado para a pessoa do sujeito composto).
 
 ### 11.4 Benefícios
 
