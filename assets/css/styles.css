@@ -1201,6 +1201,12 @@ body {
   background: rgba(74, 222, 128, 0.1);
 }
 
+.conj-pipe__box--out.conj-pipe__box--muted {
+  color: var(--text-muted);
+  border-color: var(--border);
+  background: var(--bg-card);
+}
+
 .conj-pipe__plus,
 .conj-pipe__arrow {
   font-size: 1.1rem;

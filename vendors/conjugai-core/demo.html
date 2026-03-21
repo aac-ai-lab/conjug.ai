@@ -105,12 +105,17 @@
             <code>presente</code>, <code>futuro</code> ou <code>passado</code>.
           </p>
 
-          <div class="demo-conj-visual" role="img" aria-label="Diagrama do fluxo de conjugação">
+          <div
+            class="demo-conj-visual"
+            role="img"
+            id="dialog-demo-conj-visual"
+            aria-label="Diagrama do fluxo de conjugação"
+          >
             <p class="demo-conj-visual__caption">Entrada da função</p>
             <div class="conj-pipe demo-conj-pipe--static">
               <div class="conj-pipe__col">
                 <span class="conj-pipe__cap">Lema</span>
-                <span class="conj-pipe__box">«comer»</span>
+                <span class="conj-pipe__box" id="dialog-demo-conj-lema">«comer»</span>
               </div>
               <span class="conj-pipe__plus">+</span>
               <div class="conj-pipe__col">
@@ -125,7 +130,7 @@
               <span class="conj-pipe__arrow">→</span>
               <div class="conj-pipe__col conj-pipe__col--out">
                 <span class="conj-pipe__cap">Forma</span>
-                <span class="conj-pipe__box conj-pipe__box--out">«…»</span>
+                <span class="conj-pipe__box conj-pipe__box--out" id="dialog-demo-conj-forma">«…»</span>
               </div>
             </div>
 
@@ -186,6 +191,48 @@
         var elTables = document.getElementById("tables");
         var elDialog = document.getElementById("dialog-demo-conj");
         var elExplainOpen = document.getElementById("demo-explain-open");
+        var elDialogLema = document.getElementById("dialog-demo-conj-lema");
+        var elDialogForma = document.getElementById("dialog-demo-conj-forma");
+        var elDialogVisual = document.getElementById("dialog-demo-conj-visual");
+
+        function lemmaForExplain() {
+          var raw = (elVerb.value || "").trim();
+          if (raw) return raw.toLowerCase();
+          if (elLemma && !elOut.hidden && (elLemma.textContent || "").trim()) {
+            return elLemma.textContent.trim();
+          }
+          return "comer";
+        }
+
+        function syncExplainDialog() {
+          if (!elDialogLema || !elDialogForma) return;
+          var C = typeof ConjugaiCore !== "undefined" ? ConjugaiCore : null;
+          var lemma = lemmaForExplain();
+          elDialogLema.textContent = "\u00AB" + lemma + "\u00BB";
+
+          var forma = null;
+          if (C && typeof C.conjugar === "function" && typeof C.isVerbShape === "function" && C.isVerbShape(lemma)) {
+            forma = C.conjugar(lemma, 0, "presente");
+          }
+          if (forma) {
+            elDialogForma.textContent = "\u00AB" + forma + "\u00BB";
+            elDialogForma.classList.remove("conj-pipe__box--muted");
+          } else {
+            elDialogForma.textContent = C && C.isVerbShape && C.isVerbShape(lemma) ? "\u00AB\u2014\u00BB" : "\u00AB\u2026\u00BB";
+            if (!C || !C.isVerbShape || !C.isVerbShape(lemma)) {
+              elDialogForma.classList.add("conj-pipe__box--muted");
+            } else {
+              elDialogForma.classList.remove("conj-pipe__box--muted");
+            }
+          }
+
+          if (elDialogVisual) {
+            elDialogVisual.setAttribute(
+              "aria-label",
+              "Diagrama do fluxo de conjuga\u00E7\u00E3o para o lema \u00AB" + lemma + "\u00BB"
+            );
+          }
+        }
 
         function bindExplainDialog() {
           if (!elDialog) return;
@@ -200,6 +247,7 @@
           });
           if (elExplainOpen) {
             elExplainOpen.addEventListener("click", function () {
+              syncExplainDialog();
               if (typeof elDialog.showModal === "function") elDialog.showModal();
             });
           }
