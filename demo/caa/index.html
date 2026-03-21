@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="ConjugAI: protótipo de tecnologia assistiva para conjugação verbal em comunicação aumentativa (CAA), em português do Brasil — pessoa, tempo e frases telegráficas."
+    />
+    <title>ConjugAI — Demo de Conjugação</title>
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Ir para o conteúdo principal</a>
+
+    <div class="app">
+      <header class="app-header">
+        <div class="brand">
+          <button
+            type="button"
+            id="btn-project-context"
+            class="brand-mark"
+            aria-haspopup="dialog"
+            aria-controls="dialog-project-context"
+            aria-label="Problemática, solução e integração com pranchas de comunicação assistiva"
+            title="Problemática, solução e pranchas de CAA"
+          >
+            <span aria-hidden="true">◆</span>
+          </button>
+          <div>
+            <h1 class="brand-title">ConjugAI</h1>
+            <p class="brand-sub brand-desc">
+              Conjugação verbal assistiva em CAA: apoio a frases telegráficas em português do Brasil (pessoa
+              gramatical e tempos verbais).
+            </p>
+          </div>
+        </div>
+      </header>
+
+      <div class="layout">
+        <aside class="sidebar" aria-labelledby="examples-heading">
+          <h2 id="examples-heading" class="sidebar-title">Exemplos</h2>
+          <label class="sr-only" for="example-select">Selecionar frase de exemplo</label>
+          <select id="example-select" class="example-select" size="12">
+            <option value="0">Eu comer maçã</option>
+            <option value="1">Mamãe e eu ir shopping amanhã</option>
+            <option value="2">Ele viajar ontem</option>
+            <option value="3">Nós querer brincar</option>
+          </select>
+          <p class="hint">Ou edite a frase no painel de entrada.</p>
+        </aside>
+
+        <main id="main" class="main">
+          <section class="panel panel-input" aria-labelledby="input-heading">
+            <div class="panel-head">
+              <h2 id="input-heading" class="panel-title">Entrada</h2>
+              <span class="badge">Texto bruto</span>
+            </div>
+            <label class="sr-only" for="raw-input">Frase telegráfica</label>
+            <textarea
+              id="raw-input"
+              class="raw-input"
+              rows="3"
+              spellcheck="false"
+              placeholder="Digite uma frase sem conjugação completa…"
+            ></textarea>
+            <div class="actions">
+              <button type="button" id="btn-analyze" class="btn btn-primary">
+                Analisar
+              </button>
+              <button type="button" id="btn-reset" class="btn btn-ghost">Limpar</button>
+            </div>
+          </section>
+
+          <div class="flow" aria-hidden="true">
+            <div class="flow-line flow-line--top">
+              <span class="flow-pulse"></span>
+            </div>
+            <div class="flow-arrow" aria-hidden="true">↓</div>
+          </div>
+
+          <section
+            class="panel panel-logic"
+            aria-labelledby="logic-heading"
+            aria-live="polite"
+          >
+            <div class="panel-head">
+              <h2 id="logic-heading" class="panel-title">Processamento</h2>
+              <span class="badge badge-accent">Passo a passo</span>
+            </div>
+
+            <div id="logic-placeholder" class="logic-placeholder">
+              <p>Selecione um exemplo ou digite uma frase e clique em <strong>Analisar</strong>.</p>
+            </div>
+
+            <ol id="steps" class="steps hidden" hidden>
+              <li class="step step--token" data-step="1">
+                <div class="step-head">
+                  <button
+                    type="button"
+                    class="step-head-trigger"
+                    id="token-step-trigger"
+                    aria-haspopup="dialog"
+                    aria-controls="dialog-token-algo"
+                  >
+                    <span class="step-num">1</span>
+                    <span class="step-label">Tokenização</span>
+                    <span class="step-help-hint" aria-hidden="true">ⓘ</span>
+                    <span class="sr-only">Abrir explicação detalhada da tokenização</span>
+                  </button>
+                  <span class="step-status" aria-hidden="true"></span>
+                </div>
+                <div class="step-body">
+                  <p class="step-desc">Separar a frase em unidades (tokens).</p>
+                  <div class="token-row" id="tokens-out"></div>
+                </div>
+              </li>
+              <li class="step step--subject" data-step="2">
+                <div class="step-head">
+                  <button
+                    type="button"
+                    class="step-head-trigger"
+                    id="subject-step-trigger"
+                    aria-haspopup="dialog"
+                    aria-controls="dialog-subject-algo"
+                  >
+                    <span class="step-num">2</span>
+                    <span class="step-label">Sujeito e pessoa</span>
+                    <span class="step-help-hint" aria-hidden="true">ⓘ</span>
+                    <span class="sr-only">Abrir explicação detalhada de como o algoritmo identifica o sujeito</span>
+                  </button>
+                  <span class="step-status" aria-hidden="true"></span>
+                </div>
+                <div class="step-body">
+                  <p class="step-desc" id="subject-desc"></p>
+                  <p class="step-highlight" id="subject-out"></p>
+                </div>
+              </li>
+              <li class="step step--tempo" data-step="3">
+                <div class="step-head">
+                  <button
+                    type="button"
+                    class="step-head-trigger"
+                    id="tempo-step-trigger"
+                    aria-haspopup="dialog"
+                    aria-controls="dialog-tempo-algo"
+                  >
+                    <span class="step-num">3</span>
+                    <span class="step-label">Marcador temporal</span>
+                    <span class="step-help-hint" aria-hidden="true">ⓘ</span>
+                    <span class="sr-only">Abrir explicação detalhada dos marcadores de tempo</span>
+                  </button>
+                  <span class="step-status" aria-hidden="true"></span>
+                </div>
+                <div class="step-body">
+                  <p class="step-desc" id="time-desc"></p>
+                  <p class="step-highlight" id="time-out"></p>
+                </div>
+              </li>
+              <li class="step step--rule" data-step="4">
+                <div class="step-head">
+                  <button
+                    type="button"
+                    class="step-head-trigger"
+                    id="rule-step-trigger"
+                    aria-haspopup="dialog"
+                    aria-controls="dialog-conj-algo"
+                  >
+                    <span class="step-num">4</span>
+                    <span class="step-label">Regra de conjugação</span>
+                    <span class="step-help-hint" aria-hidden="true">ⓘ</span>
+                    <span class="sr-only">Abrir explicação detalhada da conjugação</span>
+                  </button>
+                  <span class="step-status" aria-hidden="true"></span>
+                </div>
+                <div class="step-body">
+                  <p class="step-desc" id="rule-desc"></p>
+                  <p class="step-highlight" id="rule-out"></p>
+                </div>
+              </li>
+            </ol>
+          </section>
+
+          <div class="flow" aria-hidden="true">
+            <div class="flow-arrow" aria-hidden="true">↓</div>
+            <div class="flow-line flow-line--bottom">
+              <span class="flow-pulse flow-pulse--delayed"></span>
+            </div>
+          </div>
+
+          <section class="panel panel-output" aria-labelledby="output-heading">
+            <div class="panel-head">
+              <h2 id="output-heading" class="panel-title">Saída</h2>
+              <span class="badge badge-success">Frase final</span>
+            </div>
+            <p id="output-text" class="output-text" role="status">
+              O resultado aparecerá aqui após a análise.
+            </p>
+          </section>
+        </main>
+      </div>
+
+      <footer class="app-footer">
+        <small>Demonstração educacional · Motor <code>conjugai-core</code> (offline, regras + léxico em <code>vendors/conjugai-core</code>).</small>
+        <nav class="footer-nav" aria-label="Documentação">
+          <a href="README.md">README</a>
+          <span aria-hidden="true">·</span>
+          <a href="vendors/conjugai-core/README.md">conjugai-core</a>
+          <span aria-hidden="true">·</span>
+          <a href="diagrama.html">Diagramas (visual)</a>
+          <span aria-hidden="true">·</span>
+          <a href="docs/diagrama.md">Diagramas (Markdown)</a>
+          <span aria-hidden="true">·</span>
+          <a href="../verbs/diagram.html">Diagramas do motor</a>
+          <span aria-hidden="true">·</span>
+          <a href="../verbs/lexico-verbos.html">Léxico <code>verbos.json</code></a>
+        </nav>
+      </footer>
+    </div>
+
+    <dialog class="algo-dialog" id="dialog-project-context" aria-labelledby="dialog-project-context-title">
+      <div class="algo-dialog__inner">
+        <header class="algo-dialog__head">
+          <h2 id="dialog-project-context-title" class="algo-dialog__title">Problemática, solução e pranchas</h2>
+          <button type="button" class="algo-dialog__close" data-close-dialog aria-label="Fechar">×</button>
+        </header>
+        <div class="algo-dialog__body">
+          <h3 class="algo-dialog__h3">Problemática</h3>
+          <p>
+            Em <strong>comunicação aumentativa e alternativa (CAA)</strong>, muitas mensagens são
+            <strong>telegráficas</strong>: o utilizador pode seleccionar palavras ou pictogramas sem conjugar o verbo
+            nem marcar sempre a <strong>pessoa</strong> ou o <strong>tempo</strong> de forma explícita. Isso produz
+            frases como «eu quer», «nós ir», ou infinitivos isolados — pouco alinhadas com o português falado e
+            escrito, e pouco informativas para quem lê ou ouve a mensagem.
+          </p>
+
+          <h3 class="algo-dialog__h3">Como este protótipo aborda o problema</h3>
+          <p>
+            O <strong>ConjugAI</strong> concentra-se na <strong>conjugação verbal</strong> em função do
+            <strong>sujeito</strong> (incluindo sujeito composto) e do <strong>tempo</strong> (presente, futuro ou
+            passado a partir de marcadores como <em>amanhã</em> e <em>ontem</em>). O núcleo
+            <code>conjugai-core</code> faz tokenização, identificação de sujeito e tempo, consulta a um
+            <strong>léxico</strong> de formas e aplica <strong>regras</strong> de presente regular quando aplicável;
+            em seguida <strong>reconstrói a frase</strong> substituindo a forma verbal pela flexão adequada. Esta
+            página mostra o processo <strong>passo a passo</strong> para discussão com o orientador e para evolução
+            do trabalho.
+          </p>
+
+          <h3 class="algo-dialog__h3">Integração com pranchas de comunicação assistiva</h3>
+          <p>
+            As <strong>pranchas</strong> (conjuntos de símbolos ou pictogramas) podem mapear diretamente para o que o
+            motor já espera: por exemplo, símbolos de <strong>tempo</strong> equivalentes a «ontem» / «amanhã» para
+            escolher passado ou futuro; núcleos de <strong>sujeito</strong> (eu, nós, nomes + «e») para a pessoa
+            gramatical; e o <strong>verbo</strong> como infinitivo ou forma do léxico. O fluxo típico seria:
+            selecção na prancha → <strong>texto linear</strong> (ou lista de tokens) → pipeline ConjugAI → mensagem
+            lida por voz ou mostrada em texto <strong>flexionado</strong>.
+          </p>
+          <p>
+            O motor está empacotado como <strong>JavaScript offline</strong> (<code>conjugai-core.js</code>), o que
+            facilita integrar numa <strong>app</strong> (por exemplo em React) ou num <strong>cliente móvel</strong>,
+            alinhado ao requisito de leveza em dispositivos usados em CAA — sem obrigar a um servidor para a
+            conjugação básica.
+          </p>
+          <p class="algo-dialog__note">
+            Isto é um <strong>protótipo de investigação</strong>: a ligação a um sistema de pranchas concreto (software,
+            vocabulário, layout) depende do ecossistema escolhido e pode ser trabalhada em fases seguintes.
+          </p>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog class="algo-dialog" id="dialog-token-algo" aria-labelledby="dialog-token-title">
+      <div class="algo-dialog__inner">
+        <header class="algo-dialog__head">
+          <h2 id="dialog-token-title" class="algo-dialog__title">Como a tokenização funciona</h2>
+          <button type="button" class="algo-dialog__close" data-close-dialog aria-label="Fechar">×</button>
+        </header>
+        <div class="algo-dialog__body">
+          <p class="algo-dialog__lead">
+            A função <code>tokenize</code> prepara a frase para os passos seguintes: <strong>divide por espaços</strong>, remove segmentos vazios e <strong>limpa pontuação final</strong> em cada pedaço (vírgula, ponto, interrogação, etc. só no fim do token).
+          </p>
+          <div id="token-viz-mount" class="algo-viz-mount" aria-live="polite"></div>
+          <p class="algo-dialog__legend" aria-hidden="true">
+            <span class="algo-dialog__legend-title">Legenda:</span>
+            <span class="algo-legend"><span class="tv-chip tv-chip--idx">t0…</span> índice do token na lista</span>
+            <span class="algo-legend"><span class="sv-tag sv-tag--rest">·</span> não é «nova» palavra — só o mesmo texto repartido</span>
+          </p>
+          <h3 class="algo-dialog__h3">O que não faz (por agora)</h3>
+          <p>
+            Não há segmentação por vírgulas no meio da frase, nem tratamento de contrações tipo <em>do/da</em> como dois morfemas: cada bloco entre espaços é <strong>um</strong> token.
+          </p>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog class="algo-dialog" id="dialog-subject-algo" aria-labelledby="dialog-subject-title">
+      <div class="algo-dialog__inner">
+        <header class="algo-dialog__head">
+          <h2 id="dialog-subject-title" class="algo-dialog__title">Como o algoritmo identifica sujeito e pessoa</h2>
+          <button type="button" class="algo-dialog__close" data-close-dialog aria-label="Fechar">×</button>
+        </header>
+        <div class="algo-dialog__body">
+          <p class="algo-dialog__lead">
+            O motor (<code>conjugai-core</code>) corre <strong>depois da tokenização</strong> e <strong>antes</strong> do tempo verbal e da conjugação. A ideia é obter o <strong>pronome de referência</strong> e o índice de pessoa (0–4) usados na conjugação.
+          </p>
+
+          <div id="subject-viz-mount" class="subject-viz-mount" aria-live="polite"></div>
+          <p class="algo-dialog__legend" aria-hidden="true">
+            <span class="algo-dialog__legend-title">Legenda (estilo anotação):</span>
+            <span class="algo-legend"><span class="sv-tag sv-tag--pre">pre</span> prefixo</span>
+            <span class="algo-legend"><span class="sv-tag sv-tag--pron">pron</span> pronome</span>
+            <span class="algo-legend"><span class="sv-tag sv-tag--conj">conj</span> «e»</span>
+            <span class="algo-legend"><span class="sv-tag sv-tag--verb">V</span> verbo</span>
+            <span class="algo-legend"><span class="sv-tag sv-tag--time">t</span> tempo</span>
+            <span class="algo-legend"><span class="sv-tag sv-tag--rest">·</span> resto</span>
+          </p>
+
+          <h3 class="algo-dialog__h3">1. Onde está o verbo?</h3>
+          <p>
+            Primeiro localiza-se um <strong>infinitivo</strong> (ex.: <em>comer</em>, <em>ir</em>) ou uma forma reconhecida pelo léxico. Tudo o que fica <strong>à esquerda</strong> desse verbo é tratado como <strong>prefixo de sujeito</strong> (pode ser vazio).
+          </p>
+
+          <h3 class="algo-dialog__h3">2. Sujeito composto com «e»</h3>
+          <p>
+            Se o prefixo tiver <strong>pelo menos três tokens</strong>, contiver o conector <strong>«e»</strong> e corresponder ao padrão telegráfico <em>X e Y</em> antes do verbo, aplica-se uma de três regras:
+          </p>
+          <ul class="algo-dialog__list">
+            <li>Se aparecer <strong>«eu»</strong> → sujeito verbal <strong>Nós</strong> (1.ª plural), pessoa <strong>3</strong> no motor.</li>
+            <li>Se aparecer <strong>«tu»</strong> ou <strong>«você»</strong> → <strong>Vocês</strong> e pessoa <strong>4</strong> (forma verbal alinhada a «eles» em PT-BR).</li>
+            <li>Caso contrário (ex.: nomes próprios) → <strong>Eles</strong>, pessoa <strong>4</strong>.</li>
+          </ul>
+
+          <h3 class="algo-dialog__h3">3. Caso especial «Eu + mamãe/papai»</h3>
+          <p>
+            Combinações como <em>eu e mamãe</em> ou <em>mamãe e eu</em> (e variantes com «papai») são mapeadas para <strong>Nós</strong> (1.ª plural), por ser um sujeito composto familiar frequente em CAA.
+          </p>
+
+          <h3 class="algo-dialog__h3">4. Sujeito simples (pronome explícito)</h3>
+          <p>
+            Se nenhuma regra composta se aplicar, procuram-se, nos tokens antes do verbo, pronome(s) como <strong>nós, eles, ela, ele, eu, tu</strong> (comparação normalizada, sem acentos). O primeiro critério que coincidir define o sujeito e a pessoa.
+          </p>
+
+          <h3 class="algo-dialog__h3">5. Sujeito implícito</h3>
+          <p>
+            Se <strong>não houver</strong> pronome reconhecível, assume-se <strong>Eu</strong> (1.ª pessoa do singular) — adequado a muitas telegrafias em que o falante omite o pronome.
+          </p>
+
+          <p class="algo-dialog__note">
+            Os índices <strong>0–4</strong> correspondem a: eu, tu, ele/ela, nós, eles/vocês — o mesmo esquema usado na tabela de conjugação do protótipo.
+          </p>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog class="algo-dialog" id="dialog-tempo-algo" aria-labelledby="dialog-tempo-title">
+      <div class="algo-dialog__inner">
+        <header class="algo-dialog__head">
+          <h2 id="dialog-tempo-title" class="algo-dialog__title">Como o tempo verbal é escolhido</h2>
+          <button type="button" class="algo-dialog__close" data-close-dialog aria-label="Fechar">×</button>
+        </header>
+        <div class="algo-dialog__body">
+          <p class="algo-dialog__lead">
+            O motor olha a <strong>lista de tokens</strong> (já sem acentos na comparação) e procura marcadores <strong>«amanhã»</strong> e <strong>«ontem»</strong>. O resultado é um tempo verbal (<code>presente</code>, <code>futuro</code> ou <code>passado</code>) usado depois na conjugação.
+          </p>
+          <div id="tempo-viz-mount" class="algo-viz-mount" aria-live="polite"></div>
+          <p class="algo-dialog__legend" aria-hidden="true">
+            <span class="algo-dialog__legend-title">Legenda:</span>
+            <span class="algo-legend"><span class="sv-tag sv-tag--time">t</span> token que conta como marcador temporal</span>
+            <span class="algo-legend"><span class="tempo-badge tempo-badge--fut">futuro</span> / <span class="tempo-badge tempo-badge--past">passado</span> / <span class="tempo-badge tempo-badge--pres">presente</span> decisão do algoritmo</span>
+          </p>
+          <h3 class="algo-dialog__h3">Regras (resumo)</h3>
+          <ul class="algo-dialog__list">
+            <li><strong>«ontem»</strong> em qualquer posição → <strong>Pretérito Perfeito</strong> (<code>passado</code>).</li>
+            <li><strong>«amanhã»</strong> → por defeito <strong>Futuro do Presente</strong> (<code>futuro</code>), <em>exceto</em> se a frase começar com perífrase de <strong>ir</strong> no presente (<em>vou/vai/vamos…</em>) e ainda houver «amanhã» — aí o verbo suporte fica no <strong>presente</strong> (caso típico <em>vou viajar amanhã</em>).</li>
+            <li>Sem esses marcadores → <strong>Presente</strong> (<code>presente</code>).</li>
+          </ul>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog class="algo-dialog" id="dialog-conj-algo" aria-labelledby="dialog-conj-title">
+      <div class="algo-dialog__inner">
+        <header class="algo-dialog__head">
+          <h2 id="dialog-conj-title" class="algo-dialog__title">Como a conjugação é aplicada</h2>
+          <button type="button" class="algo-dialog__close" data-close-dialog aria-label="Fechar">×</button>
+        </header>
+        <div class="algo-dialog__body">
+          <p class="algo-dialog__lead">
+            Dados o <strong>infinitivo</strong> (ou forma reconhecida no léxico), a <strong>pessoa</strong> (0–4) e o <strong>tempo</strong>, a função <code>conjugar</code> devolve a forma flexionada. Primeiro tenta o <strong>léxico</strong> <code>verbos.json</code>; se o verbo não estiver no léxico, no <strong>presente</strong> usa-se ainda <strong>regra regular</strong> de sufixos (-ar / -er / -ir).
+          </p>
+          <div id="conj-viz-mount" class="algo-viz-mount" aria-live="polite"></div>
+          <p class="algo-dialog__legend" aria-hidden="true">
+            <span class="algo-dialog__legend-title">Legenda:</span>
+            <span class="algo-legend"><span class="conj-pipe__box conj-pipe__box--lex">léxico</span> forma vinda de <code>verbos.json</code></span>
+            <span class="algo-legend"><span class="conj-pipe__box conj-pipe__box--reg">regra</span> presente regular (-ar/-er/-ir)</span>
+          </p>
+          <h3 class="algo-dialog__h3">Limitações do protótipo</h3>
+          <p>
+            <strong>Futuro</strong> e <strong>passado</strong> de verbos <em>fora</em> do léxico não são gerados por sufixação neste núcleo — só há cobertura completa via dicionário ou, no presente, via regras regulares.
+          </p>
+        </div>
+      </div>
+    </dialog>
+
+    <script src="assets/js/conjugai-core.js" defer></script>
+    <script src="assets/js/app.js" defer></script>
+  </body>
+</html>
