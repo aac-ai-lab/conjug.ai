@@ -47,7 +47,8 @@ Documentação detalhada (fonte vs bundle, fluxo): **`vendors/conjugai-core/READ
 | `vendors/conjugai-core/` | Código-fonte TS do motor (pacote separado da UI) |
 | `vendors/conjugai-core/data/verbos.json` | Léxico de verbos (importado em `verbos-data.ts`) |
 | `vendors/conjugai-core/demo.html` | Página simples “infinitivo → paradigma” (estilo verbe.cc) |
-| `diagrama.html` / `docs/diagrama.md` | Diagramas Mermaid |
+| `vendors/conjugai-core/diagram.html` | Diagramas da biblioteca (`conjugar`, `analisarFrase`, `corrigir` + pipeline visual) |
+| `diagrama.html` / `docs/diagrama.md` | Diagramas Mermaid (app + protótipo) |
 
 ## Regras (resumo)
 

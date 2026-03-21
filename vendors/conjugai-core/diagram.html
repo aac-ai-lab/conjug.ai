@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Diagramas do motor conjugai-core: conjugar, analisarFrase, léxico e correção da frase."
+    />
+    <title>ConjugAI — Diagrama conjugai-core</title>
+    <link rel="stylesheet" href="../../assets/css/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* Mais largura útil em ecrãs grandes (a .app global usa max-width: 1200px). */
+      .app.app--diagram-wide {
+        max-width: min(100%, 1680px);
+        width: 100%;
+        padding-left: clamp(1rem, 4vw, 3rem);
+        padding-right: clamp(1rem, 4vw, 3rem);
+        box-sizing: border-box;
+      }
+      /* demo.html usa .demo-main com max-width: 720px; aqui queremos largura total do contentor. */
+      .app--diagram-wide .demo-main {
+        max-width: none;
+        width: 100%;
+        margin-left: 0;
+        margin-right: 0;
+      }
+      .diagram-doc__nav {
+        margin: 0 0 1.25rem;
+        font-size: 0.95rem;
+      }
+      .diagram-doc__nav a {
+        color: var(--accent);
+        font-weight: 600;
+        text-decoration: none;
+      }
+      .diagram-doc__nav a:hover {
+        text-decoration: underline;
+      }
+      .diagram-doc__nav span {
+        color: var(--text-muted);
+        margin: 0 0.35rem;
+      }
+      .diagram-mermaid {
+        margin: 0;
+        padding: 1rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow-x: auto;
+        text-align: center;
+      }
+      .diagram-mermaid .mermaid {
+        display: inline-block;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+      }
+      .diagram-lemma-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.65rem;
+        margin-bottom: 1rem;
+      }
+      .diagram-lemma-row .demo-verb-input {
+        flex: 1 1 12rem;
+        min-width: 8rem;
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Ir para o conteúdo principal</a>
+
+    <div class="app app--diagram-wide">
+      <header class="app-header">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">◆</span>
+          <div>
+            <h1 class="brand-title">ConjugAI</h1>
+            <p class="brand-sub">Diagrama · biblioteca <code>conjugai-core</code></p>
+          </div>
+        </div>
+        <p class="tagline">
+          Mesmo estilo visual do app: fluxos em <strong>Mermaid</strong>, pipeline de
+          <code>conjugar</code> e ligação ao bundle <code>assets/js/conjugai-core.js</code>.
+        </p>
+        <p class="diagram-doc__nav">
+          <a href="demo.html">Demo paradigma verbal</a>
+          <span aria-hidden="true">·</span>
+          <a href="../../index.html">App principal</a>
+          <span aria-hidden="true">·</span>
+          <a href="../../diagrama.html">Diagramas da app (Mermaid)</a>
+        </p>
+      </header>
+
+      <main id="main" class="main demo-main">
+        <section class="panel" aria-labelledby="diagram-h-pipeline">
+          <div class="panel-head">
+            <h2 id="diagram-h-pipeline" class="panel-title">Pipeline <code>analisarFrase</code></h2>
+            <span class="badge">Mermaid</span>
+          </div>
+          <p class="hint" style="margin-top: 0">
+            Ordem em <code>vendors/conjugai-core/index.ts</code>: tokens → sujeito → tempo → lema verbal →
+            <code>conjugar</code> → <code>corrigir</code>.
+          </p>
+          <div class="diagram-mermaid">
+            <div class="mermaid">
+flowchart LR
+  F[Frase] --> T[tokenize]
+  T --> S[detectarSujeito]
+  S --> M[detectarTempo]
+  M --> E[extrairVerbo]
+  E --> C[conjugar]
+  C --> R[corrigir]
+  R --> Out[correcao]
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="diagram-h-flow">
+          <div class="panel-head">
+            <h2 id="diagram-h-flow" class="panel-title">Fluxo de <code>conjugar</code></h2>
+            <span class="badge">Mermaid</span>
+          </div>
+          <p class="hint" style="margin-top: 0">
+            Implementação em <code>conjugador.ts</code>: léxico <code>VERBOS</code> primeiro; fora do léxico,
+            só <strong>presente</strong> por regra regular em <strong>-ar / -er / -ir</strong>.
+          </p>
+          <div class="diagram-mermaid">
+            <div class="mermaid">
+flowchart TD
+  A["conjugar(verbo, pessoa, tempo)"] --> B{"pessoa 0 a 4?"}
+  B -->|não| N0["null"]
+  B -->|sim| C{"lema em VERBOS?"}
+  C -->|sim| D["coluna presente / futuro / passado"]
+  D --> E{"forma na pessoa?"}
+  E -->|sim| F["string"]
+  E -->|não| N1["null"]
+  C -->|não| G{"tempo e presente?"}
+  G -->|sim| H["conjugarRegularPresente"]
+  H --> I{"sufixo ok?"}
+  I -->|sim| F
+  I -->|não| N2["null"]
+  G -->|não| N3["null"]
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="diagram-h-corr">
+          <div class="panel-head">
+            <h2 id="diagram-h-corr" class="panel-title"><code>corrigir</code> — frase final</h2>
+            <span class="badge">Mermaid</span>
+          </div>
+          <p class="hint" style="margin-top: 0">
+            <code>corretor.ts</code>: localiza o token verbal com <code>indiceDoVerboNaFrase</code> e substitui
+            <strong>só</strong> essa forma pelo conjugado. Sujeito composto mantém os tokens à esquerda do verbo
+            (ex.: «Mamãe e eu iremos…»). Sujeito implícito antecede o pronome em <code>sujeito.texto</code>.
+          </p>
+          <div class="diagram-mermaid">
+            <div class="mermaid">
+flowchart TD
+  K["tokens + conjugado + sujeito"] --> V{índice do verbo}
+  V -->|encontrado| W["substituir token verbal"]
+  W --> X{implícito?}
+  X -->|sim| Y["anteceder pronome"]
+  X -->|não| Z["juntar tokens"]
+  Y --> Z
+  V -->|não| Fb["fallback: pronome + forma"]
+            </div>
+          </div>
+        </section>
+
+        <section class="panel panel-input" aria-labelledby="diagram-h-visual">
+          <div class="panel-head">
+            <h2 id="diagram-h-visual" class="panel-title">Pipeline visual</h2>
+            <span class="badge badge-accent">UI</span>
+          </div>
+          <p class="hint" style="margin-top: 0">
+            Mesmo padrão do diálogo «Como ocorre a conjugação?» na <a href="demo.html">demo</a>. Opcional:
+            infinitivo para atualizar lema e exemplo de 1.ª pessoa do presente.
+          </p>
+          <div class="diagram-lemma-row">
+            <label class="sr-only" for="diagram-lemma">Infinitivo para o exemplo</label>
+            <input
+              id="diagram-lemma"
+              class="demo-verb-input"
+              type="text"
+              placeholder="ex.: comer, dançar"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <button type="button" id="diagram-lemma-btn" class="btn btn-primary">Atualizar exemplo</button>
+          </div>
+
+          <div
+            class="demo-conj-visual"
+            role="img"
+            id="diagram-conj-visual"
+            aria-label="Diagrama do fluxo de conjugação"
+          >
+            <p class="demo-conj-visual__caption">Entrada da função</p>
+            <div class="conj-pipe demo-conj-pipe--static">
+              <div class="conj-pipe__col">
+                <span class="conj-pipe__cap">Lema</span>
+                <span class="conj-pipe__box" id="diagram-conj-lema">«comer»</span>
+              </div>
+              <span class="conj-pipe__plus">+</span>
+              <div class="conj-pipe__col">
+                <span class="conj-pipe__cap">Pessoa</span>
+                <span class="conj-pipe__box">0 … 4</span>
+              </div>
+              <span class="conj-pipe__plus">+</span>
+              <div class="conj-pipe__col">
+                <span class="conj-pipe__cap">Tempo</span>
+                <span class="conj-pipe__box">pres. / fut. / pass.</span>
+              </div>
+              <span class="conj-pipe__arrow">→</span>
+              <div class="conj-pipe__col conj-pipe__col--out">
+                <span class="conj-pipe__cap">Forma</span>
+                <span class="conj-pipe__box conj-pipe__box--out" id="diagram-conj-forma">«…»</span>
+              </div>
+            </div>
+
+            <div class="demo-conj-branch" aria-hidden="true">
+              <div class="demo-conj-branch__from">decisão interna</div>
+              <div class="demo-conj-branch__cols">
+                <div class="demo-conj-branch__path demo-conj-branch__path--lex">
+                  <span class="demo-conj-branch__tag">Léxico</span>
+                  <p>
+                    Infinitivo em <code>verbos.json</code> → <strong>forma guardada</strong> por tempo e pessoa.
+                  </p>
+                </div>
+                <div class="demo-conj-branch__path demo-conj-branch__path--reg">
+                  <span class="demo-conj-branch__tag">Regra</span>
+                  <p>
+                    Fora do léxico, só <strong>presente</strong> em verbos regulares
+                    <strong>-ar / -er / -ir</strong> → desinências por sufixo.
+                  </p>
+                </div>
+                <div class="demo-conj-branch__path demo-conj-branch__path--na">
+                  <span class="demo-conj-branch__tag">—</span>
+                  <p>
+                    Caso contrário (ex.: futuro/passado sem léxico) → <strong>—</strong> na tabela ou
+                    <code>null</code> em <code>conjugar</code>.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="diagram-h-seq">
+          <div class="panel-head">
+            <h2 id="diagram-h-seq" class="panel-title">Demo paradigma: células</h2>
+            <span class="badge">Mermaid</span>
+          </div>
+          <p class="hint" style="margin-top: 0">
+            <a href="demo.html">demo.html</a> — até 15 chamadas a <code>conjugar</code> por infinitivo (3 tempos × 5
+            pessoas).
+          </p>
+          <div class="diagram-mermaid">
+            <div class="mermaid">
+sequenceDiagram
+  participant P as demo.html
+  participant CC as ConjugaiCore
+  loop Cada tempo
+    loop pessoa 0 a 4
+      P->>CC: conjugar(lema, pessoa, tempo)
+      CC-->>P: string ou null
+    end
+  end
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="diagram-h-app">
+          <div class="panel-head">
+            <h2 id="diagram-h-app" class="panel-title">App completa</h2>
+            <span class="badge">Contexto</span>
+          </div>
+          <p class="hint" style="margin-top: 0">
+            O <a href="../../index.html">index.html</a> usa <code>analisarFrase</code> (passos tokenização, sujeito,
+            tempo, regra). Diagramas adicionais: <a href="../../diagrama.html">diagrama.html</a> na raiz.
+          </p>
+          <div class="diagram-mermaid">
+            <div class="mermaid">
+flowchart TB
+  subgraph Lib[conjugai-core]
+    AF[analisarFrase]
+    CJ[conjugar]
+    CR[corrigir]
+  end
+  subgraph UI[index.html + app.js]
+    IN[Entrada telegráfica]
+    ST[Passos 1 a 4]
+    OUT[Saída]
+  end
+  IN --> AF
+  AF --> ST
+  AF --> OUT
+  CJ --> AF
+  CR --> AF
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="app-footer">
+        <small
+          >Abrir com servidor HTTP a partir da raiz do projeto para carregar
+          <code>../../assets/js/conjugai-core.js</code>.</small
+        >
+      </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: "dark",
+        themeVariables: {
+          primaryColor: "#3d9cf0",
+          primaryTextColor: "#e8eef4",
+          lineColor: "#9aa8b8",
+          secondaryColor: "#222c38",
+          tertiaryColor: "#1a222d",
+          fontFamily: '"DM Sans", system-ui, sans-serif',
+        },
+        flowchart: { curve: "basis" },
+      });
+    </script>
+
+    <script src="../../assets/js/conjugai-core.js"></script>
+    <script>
+      (function () {
+        "use strict";
+
+        var elIn = document.getElementById("diagram-lemma");
+        var elBtn = document.getElementById("diagram-lemma-btn");
+        var elLema = document.getElementById("diagram-conj-lema");
+        var elForma = document.getElementById("diagram-conj-forma");
+        var elVis = document.getElementById("diagram-conj-visual");
+
+        function sync() {
+          var C = typeof ConjugaiCore !== "undefined" ? ConjugaiCore : null;
+          var raw = (elIn && elIn.value ? elIn.value : "").trim();
+          var lemma = raw ? raw.toLowerCase() : "comer";
+          if (elLema) elLema.textContent = "\u00AB" + lemma + "\u00BB";
+
+          var forma = null;
+          if (
+            C &&
+            typeof C.conjugar === "function" &&
+            typeof C.isVerbShape === "function" &&
+            C.isVerbShape(lemma)
+          ) {
+            forma = C.conjugar(lemma, 0, "presente");
+          }
+          if (!elForma) return;
+          if (forma) {
+            elForma.textContent = "\u00AB" + forma + "\u00BB";
+            elForma.classList.remove("conj-pipe__box--muted");
+          } else {
+            elForma.textContent =
+              C && C.isVerbShape && C.isVerbShape(lemma) ? "\u00AB\u2014\u00BB" : "\u00AB\u2026\u00BB";
+            if (!C || !C.isVerbShape || !C.isVerbShape(lemma)) {
+              elForma.classList.add("conj-pipe__box--muted");
+            } else {
+              elForma.classList.remove("conj-pipe__box--muted");
+            }
+          }
+          if (elVis) {
+            elVis.setAttribute(
+              "aria-label",
+              "Diagrama do fluxo de conjuga\u00E7\u00E3o para o lema \u00AB" + lemma + "\u00BB"
+            );
+          }
+        }
+
+        if (elBtn) elBtn.addEventListener("click", sync);
+        if (elIn) {
+          elIn.addEventListener("keydown", function (e) {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              sync();
+            }
+          });
+        }
+        sync();
+      })();
+    </script>
+  </body>
+</html>
