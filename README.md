@@ -1,8 +1,8 @@
 # ConjugAI
 
-Protótipo de **Tecnologia Assistiva** focado na **conjugação verbal** em contexto de **CAA** (Comunicação Aumentativa e Alternativa), em **português do Brasil**: entradas telegráficas, **pessoa gramatical** e **tempos** (presente, futuro, passado com marcadores). A interface “análise ao vivo” serve para **visualizar e discutir** o desenho do motor com o orientador.
+**Tecnologia Assistiva** focada na **conjugação verbal** em contexto de **CAA** (Comunicação Aumentativa e Alternativa), em **português do Brasil**: entradas telegráficas, **pessoa gramatical** e **tempos** (presente, futuro, passado com marcadores). A interface “análise ao vivo” serve para **visualizar e discutir** o desenho do motor com o orientador.
 
-O **motor linguístico** (`conjugai-core`) vive em **`vendors/`** de propósito: é um núcleo reutilizável que **pode existir sem** esta interface web experimental; a app é só o protótipo de visualização.
+O **motor linguístico** (`conjugai-core`) vive em **`vendors/`** de propósito: é um núcleo reutilizável que **pode existir sem** esta interface web experimental; a app serve apenas de interface de visualização.
 
 ## Requisitos
 
@@ -49,7 +49,7 @@ Documentação detalhada (fonte vs bundle, fluxo): **`vendors/conjugai-core/READ
 | `vendors/conjugai-core/demo.html` | Página simples “infinitivo → paradigma” (estilo verbe.cc) |
 | `vendors/conjugai-core/diagram.html` | Diagramas da biblioteca (`conjugar`, `analisarFrase`, `corrigir` + pipeline visual) |
 | `vendors/conjugai-core/lexico-verbos.html` | Página HTML sobre origem e atualização de `verbos.json` (MorphoBr, CSV, build) |
-| `diagrama.html` / `docs/diagrama.md` | Diagramas Mermaid (app + protótipo) |
+| `diagrama.html` / `docs/diagrama.md` | Diagramas Mermaid (app + motor) |
 
 ## Regras (resumo)
 

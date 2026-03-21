@@ -1,7 +1,7 @@
 # ConjugAI — regras do projeto
 
 ## Contexto
-- Protótipo de **Tecnologia Assistiva / CAA**: corrigir verbos em texto **telegráfico** em **português do Brasil (PT-BR)**.
+- **Tecnologia Assistiva / CAA**: corrigir verbos em texto **telegráfico** em **português do Brasil (PT-BR)**.
 - **Interface** (`index.html`, `assets/css/`, `assets/js/app.js`): só visualização e orquestração; **não** duplicar lógica linguística aqui.
 - **Motor linguístico** isolado em `vendors/conjugai-core/` (TypeScript). Tratar como biblioteca reutilizável; o bundle para o browser é gerado, não é fonte editável.
 

@@ -4,7 +4,7 @@
 
 **conjugai-core** é uma biblioteca JavaScript/TypeScript isolada (`vendors/conjugai-core/`) que concentra a **inteligência linguística** do projeto ConjugAI: tokenização, deteção de sujeito e tempo, conjugação verbal e montagem da frase corrigida a partir de entradas **telegráficas** (ex.: *eu comer maçã*).
 
-No repositório ConjugAI o código está em **`vendors/`** para deixar explícito que o núcleo **não depende** da interface web experimental (protótipo de visualização em contexto **CAA**); podes tratar esta pasta como um pacote reutilizável à parte.
+No repositório ConjugAI o código está em **`vendors/`** para deixar explícito que o núcleo **não depende** da interface web experimental (visualização em contexto **CAA**); podes tratar esta pasta como um pacote reutilizável à parte.
 
 O objetivo é **acessibilidade linguística** em contexto de Tecnologia Assistiva: o utilizador produz mensagens com estrutura reduzida; o sistema devolve uma forma mais próxima do português normativo, com explicação passo a passo (`debug`) para o pipeline visual já existente na interface.
 
@@ -35,7 +35,7 @@ A lógica que antes estava acoplada ao `app.js` ou a dependências externas foi 
 
 Em **NLP** e lexicografia, recursos como **DELAF** (e ecosistemas **Unitex**/Linguateca) oferecem **cobertura lexical** fina (lemas, flexões, classes). Integrações completas exigem pipelines e formatos específicos.
 
-No ConjugAI adotamos, por agora, um **léxico controlado** (`data/verbos.json`, importado em `data/verbos-data.ts`) complementado por **regras de sufixação** (-AR, -ER, -IR) no **presente**, alinhado a um protótipo leve e auditável.
+No ConjugAI adotamos, por agora, um **léxico controlado** (`data/verbos.json`, importado em `data/verbos-data.ts`) complementado por **regras de sufixação** (-AR, -ER, -IR) no **presente**, numa abordagem leve e auditável.
 
 ### 4.1 MorphoBr (`.dict`) → `verbos.json`
 

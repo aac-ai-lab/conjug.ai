@@ -1,4 +1,4 @@
-# ConjugAI — diagramas da lógica e do protótipo
+# ConjugAI — diagramas da lógica e da interface
 
 Documentação em Mermaid. Pode pré-visualizar no VS Code/Cursor (extensão Mermaid) ou abrir `diagrama.html` na raiz do projeto no navegador.
 
@@ -66,7 +66,7 @@ flowchart TD
 
 ---
 
-## 3. Arquitetura do protótipo (SPA)
+## 3. Arquitetura da aplicação (SPA)
 
 ```mermaid
 flowchart TB
