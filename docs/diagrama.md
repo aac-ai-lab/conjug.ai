@@ -12,7 +12,7 @@ Fluxo em `vendors/conjugai-core/index.ts`: desde o texto bruto até `correcao`. 
 flowchart TD
   A[Texto bruto] --> B[tokenize]
   B --> C{Tokens vazios?}
-  C -->|sim| ERR[Erro: digite uma frase]
+  C -->|sim| ERR[Erro: Digite ou selecione uma frase]
   C -->|não| D[detectarSujeito]
   D --> E[detectarTempo]
   E --> F[extrairVerbo]
@@ -46,20 +46,24 @@ Diagrama interativo e restantes fluxos do núcleo: `demo/verbs/diagram.html`.
 
 ## 2. Sujeito e tempo (detalhe)
 
-**Sujeito**
+**Sujeito** (`sujeito.ts`: primeiro `detectarSujeitoComposto`, depois regras simples)
 
 ```mermaid
 flowchart TD
-  S0[Contém eu + mamãe ou papai?] -->|sim| SN[Nós — 1ª plural]
+  SC{Prefixo X e Y antes do verbo?} -->|sim| SC1[Nós / Vocês / Eles conforme regras]
+  SC -->|não| S0[Eu + mamãe ou papai?]
+  S0 -->|sim| SN[Nós — 1ª plural]
   S0 -->|não| S1[Ordem: nós → eles → ela → ele → eu → padrão eu]
 ```
 
-**Tempo verbal**
+**Tempo verbal** (`tempo.ts`: excepção com *amanhã* + perífrase *vou/vai/…*)
 
 ```mermaid
 flowchart TD
-  T0[Tem token amanhã?] -->|sim| TF[Futuro do Presente]
-  T0 -->|não| T1[Tem token ontem?]
+  T0{Tem amanhã?} -->|não| T1{Tem ontem?}
+  T0 -->|sim| P1{1.º token vou/vai/vamos…?}
+  P1 -->|sim| TN0[Presente]
+  P1 -->|não| TF[Futuro do Presente]
   T1 -->|sim| TP[Pretérito Perfeito]
   T1 -->|não| TN[Presente do indicativo]
 ```
@@ -70,7 +74,7 @@ flowchart TD
 
 ```mermaid
 flowchart TB
-  subgraph ui["Interface — index.html + assets/css/styles.css"]
+  subgraph ui["Interface — demo/caa/index.html + assets/css/styles.css"]
     ASIDE[Lista / select de exemplos]
     IN[Textarea entrada]
     BTN[Analisar / Limpar]
@@ -119,6 +123,6 @@ sequenceDiagram
   U->>UI: clica Analisar
   UI->>C: texto bruto
   C-->>UI: ResultadoAnalise (tokens, correcao, debug)
-  Note over UI: animação em 4 etapas (~1,7 s)
+  Note over UI: animação em 4 etapas (~1,8 s)
   UI->>U: frase corrigida
 ```

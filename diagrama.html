@@ -77,7 +77,7 @@
 flowchart TD
   A[Texto bruto] --> B[tokenize]
   B --> C{Tokens vazios?}
-  C -->|sim| ERR[Erro: digite uma frase]
+  C -->|sim| ERR[Erro: Digite ou selecione uma frase]
   C -->|não| D[detectarSujeito]
   D --> E[detectarTempo]
   E --> F[extrairVerbo]
@@ -93,16 +93,28 @@ flowchart TD
 
       <section class="diagram-block">
         <h2>2a. Sujeito</h2>
+        <p class="hint" style="margin: 0 0 0.75rem; text-align: left; max-width: 56ch; margin-inline: auto">
+          Ordem em <code>sujeito.ts</code>: <code>detectarSujeitoComposto</code> (padrão <em>X e Y</em> antes do verbo);
+          se não aplicar, <code>detectarSujeitoSimples</code> (inclui <em>Eu + mamãe/papai</em> e ordem de pronomes).
+        </p>
         <div class="mermaid">
 flowchart TD
-  S0[Eu + mamãe ou papai?] -->|sim| SN[Nós — 1ª plural]
+  SC{Prefixo X e Y antes do verbo?} -->|sim| SC1[Nós / Vocês / Eles conforme regras]
+  SC -->|não| S0[Eu + mamãe ou papai?]
+  S0 -->|sim| SN[Nós — 1ª plural]
   S0 -->|não| S1[Ordem: nós, eles, ela, ele, eu, padrão eu]
         </div>
         <h2 style="margin-top: 1.5rem">2b. Tempo verbal</h2>
+        <p class="hint" style="margin: 0 0 0.75rem; text-align: left; max-width: 56ch; margin-inline: auto">
+          Implementação em <code>tempo.ts</code>: excepção — com <em>amanhã</em> e 1.º token <em>vou/vai/…</em> (perífrase ir + infinitivo)
+          mantém-se <strong>presente</strong> no verbo suporte.
+        </p>
         <div class="mermaid">
 flowchart TD
-  T0[Tem amanhã?] -->|sim| TF[Futuro do Presente]
-  T0 -->|não| T1[Tem ontem?]
+  T0{Tem amanhã?} -->|não| T1{Tem ontem?}
+  T0 -->|sim| P1{1.º token vou/vai/vamos…?}
+  P1 -->|sim| TN0[Presente]
+  P1 -->|não| TF[Futuro do Presente]
   T1 -->|sim| TP[Pretérito Perfeito]
   T1 -->|não| TN[Presente do indicativo]
         </div>
@@ -112,7 +124,7 @@ flowchart TD
         <h2>3. Arquitetura da aplicação</h2>
         <div class="mermaid">
 flowchart TB
-  subgraph UI[Interface — index.html + assets/css/styles.css]
+  subgraph UI[Interface — demo/caa/index.html + assets/css/styles.css]
     ASIDE[Lista de exemplos]
     IN[Painel de entrada]
     STEPS[Painel: 4 passos]

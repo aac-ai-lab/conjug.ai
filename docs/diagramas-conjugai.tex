@@ -43,7 +43,7 @@ Pode copiar cada ambiente \texttt{tikzpicture} para o seu documento ou incluir e
     \node[proc] (a) {Texto bruto};
     \node[proc, below=of a] (b) {\texttt{tokenize}};
     \node[dec, below=of b] (c) {Tokens vazios?};
-    \node[err, below left=8mm and 4mm of c] (err) {Erro: digite uma frase};
+    \node[err, below left=8mm and 4mm of c, align=center, font=\scriptsize] (err) {Erro:\\Digite ou selecione uma frase};
     \node[proc, below right=8mm and 4mm of c] (d) {\texttt{detectarSujeito}};
     \node[proc, below=of d] (e) {\texttt{detectarTempo}};
     \node[proc, below=of e] (f) {\texttt{extrairVerbo}};
@@ -105,31 +105,43 @@ Pode copiar cada ambiente \texttt{tikzpicture} para o seu documento ou incluir e
 
 \begin{figure}[htbp]
   \centering
-  \begin{tikzpicture}[node distance=8mm]
-    \node[dec] (s0) {Eu + mamãe ou papai?};
-    \node[proc, below left=12mm and 5mm of s0] (sn) {Nós --- 1.\textsuperscript{a} plural};
-    \node[proc, below right=12mm and 5mm of s0] (s1) {Ordem: nós, eles, ela, ele, eu, padrão eu};
+  \resizebox{0.98\textwidth}{!}{%
+  \begin{tikzpicture}[node distance=7mm]
+    \node[dec] (sc) {Prefixo \emph{X e Y} antes do verbo?};
+    \node[proc, below left=14mm and 6mm of sc, align=center, font=\small] (sc1) {Nós / Vocês / Eles\\(\texttt{detectarSujeitoComposto})};
+    \node[dec, below right=14mm and 6mm of sc] (s0) {Eu + mamãe ou papai?};
+    \node[proc, below left=12mm and 4mm of s0] (sn) {Nós --- 1.\textsuperscript{a} plural};
+    \node[proc, below right=12mm and 4mm of s0, align=center, font=\small] (s1) {Ordem: nós, eles, ela, ele, eu, padrão eu};
+    \draw[->] (sc) -| node[near start, left, font=\scriptsize] {sim} (sc1);
+    \draw[->] (sc) -| node[near start, right, font=\scriptsize] {não} (s0);
     \draw[->] (s0) -| node[near start, left, font=\scriptsize] {sim} (sn);
     \draw[->] (s0) -| node[near start, right, font=\scriptsize] {não} (s1);
-  \end{tikzpicture}
-  \caption{Regras simplificadas de sujeito (detalhe).}
+  \end{tikzpicture}%
+  }
+  \caption{Ordem em \texttt{sujeito.ts}: composto antes das regras simples.}
   \label{fig:sujeito}
 \end{figure}
 
 \begin{figure}[htbp]
   \centering
+  \resizebox{0.98\textwidth}{!}{%
   \begin{tikzpicture}[node distance=8mm]
     \node[dec] (t0) {Tem \emph{amanhã}?};
-    \node[proc, below left=10mm and 8mm of t0] (tf) {Futuro do presente};
-    \node[dec, below right=10mm and 8mm of t0] (t1) {Tem \emph{ontem}?};
-    \node[proc, below left=10mm and 5mm of t1] (tp) {Pretérito perfeito};
-    \node[proc, below right=10mm and 5mm of t1] (tn) {Presente do indicativo};
-    \draw[->] (t0) -| node[near start, left, font=\scriptsize] {sim} (tf);
-    \draw[->] (t0) -| node[near start, right, font=\scriptsize] {não} (t1);
+    \node[dec, below left=16mm and 20mm of t0] (t1) {Tem \emph{ontem}?};
+    \node[dec, below right=16mm and 6mm of t0] (p1) {1.\textsuperscript{o} token vou/vai…?};
+    \node[proc, below left=10mm and 2mm of p1, font=\small] (tn0) {Presente};
+    \node[proc, below right=10mm and 2mm of p1, font=\small] (tf) {Futuro do presente};
+    \node[proc, below left=10mm and 4mm of t1, font=\small] (tp) {Pretérito perfeito};
+    \node[proc, below right=10mm and 4mm of t1, font=\small] (tn) {Presente do indicativo};
+    \draw[->] (t0) -| node[near start, left, font=\scriptsize] {não} (t1);
+    \draw[->] (t0) -| node[near start, right, font=\scriptsize] {sim} (p1);
+    \draw[->] (p1) -| node[near start, left, font=\scriptsize] {sim} (tn0);
+    \draw[->] (p1) -| node[near start, right, font=\scriptsize] {não} (tf);
     \draw[->] (t1) -| node[near start, left, font=\scriptsize] {sim} (tp);
     \draw[->] (t1) -| node[near start, right, font=\scriptsize] {não} (tn);
-  \end{tikzpicture}
-  \caption{Marcadores temporais na frase telegráfica.}
+  \end{tikzpicture}%
+  }
+  \caption{Marcadores em \texttt{tempo.ts}; com \emph{amanhã} e perífrase \emph{vou/vai/…} mantém-se o presente.}
   \label{fig:tempo}
 \end{figure}
 
@@ -160,7 +172,7 @@ Pode copiar cada ambiente \texttt{tikzpicture} para o seu documento ou incluir e
     \node[box, right=of an] (anim) {\texttt{runStepAnimation}};
 
     \begin{scope}[on background layer]
-      \node[grp, fit=(aside)(in)(btn)(steps)(out), label=above:\textbf{Interface}] {};
+      \node[grp, fit=(aside)(in)(btn)(steps)(out), label=above:\textbf{Interface (demo CAA)}] {};
       \node[grp, fit=(tok)(af)(sub)(tmp)(cj), label=above:\textbf{conjugai-core.js}] {};
       \node[grp, fit=(an)(anim), label=below:\textbf{app.js}] {};
     \end{scope}
@@ -196,7 +208,7 @@ Pode copiar cada ambiente \texttt{tikzpicture} para o seu documento ou incluir e
     \draw[->, thick] (2,0) -- node[above, font=\tiny, sloped] {clica Analisar} (10,-8);
     \draw[->, thick] (14,-8) -- node[above, font=\tiny, sloped] {texto bruto} (18,-12);
     \draw[->, thick, dashed] (26,-12) -- node[above, font=\tiny, sloped] {\texttt{ResultadoAnalise}} (22,-8);
-    \node[font=\tiny, align=center] at (21,-9.5) {animação 4 etapas};
+    \node[font=\tiny, align=center] at (21,-9.5) {animação 4 etapas ($\sim$1,8 s)};
     \draw[->, thick] (22,-8) -- node[above, font=\tiny, sloped] {frase corrigida} (6,0);
   \end{tikzpicture}
   \caption{Troca de mensagens entre utilizador, entrada, UI e núcleo (conceitual).}
