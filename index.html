@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Demonstração ao vivo: frases telegráficas em português corretamente conjugadas."
+      content="ConjugAI: protótipo de tecnologia assistiva para conjugação verbal em comunicação aumentativa (CAA), em português do Brasil — pessoa, tempo e frases telegráficas."
     />
     <title>ConjugAI — Demo de Conjugação</title>
     <link rel="stylesheet" href="assets/css/styles.css" />
@@ -22,15 +22,25 @@
     <div class="app">
       <header class="app-header">
         <div class="brand">
-          <span class="brand-mark" aria-hidden="true">◆</span>
+          <button
+            type="button"
+            id="btn-project-context"
+            class="brand-mark"
+            aria-haspopup="dialog"
+            aria-controls="dialog-project-context"
+            aria-label="Problemática, solução e integração com pranchas de comunicação assistiva"
+            title="Problemática, solução e pranchas de CAA"
+          >
+            <span aria-hidden="true">◆</span>
+          </button>
           <div>
             <h1 class="brand-title">ConjugAI</h1>
-            <p class="brand-sub">Protótipo TA · Português (BR)</p>
+            <p class="brand-sub brand-desc">
+              Conjugação verbal assistiva em CAA: apoio a frases telegráficas em português do Brasil (pessoa
+              gramatical e tempos verbais).
+            </p>
           </div>
         </div>
-        <p class="tagline">
-          Transformação de frases telegráficas em português gramaticalmente corretas.
-        </p>
       </header>
 
       <div class="layout">
@@ -209,6 +219,57 @@
         </nav>
       </footer>
     </div>
+
+    <dialog class="algo-dialog" id="dialog-project-context" aria-labelledby="dialog-project-context-title">
+      <div class="algo-dialog__inner">
+        <header class="algo-dialog__head">
+          <h2 id="dialog-project-context-title" class="algo-dialog__title">Problemática, solução e pranchas</h2>
+          <button type="button" class="algo-dialog__close" data-close-dialog aria-label="Fechar">×</button>
+        </header>
+        <div class="algo-dialog__body">
+          <h3 class="algo-dialog__h3">Problemática</h3>
+          <p>
+            Em <strong>comunicação aumentativa e alternativa (CAA)</strong>, muitas mensagens são
+            <strong>telegráficas</strong>: o utilizador pode seleccionar palavras ou pictogramas sem conjugar o verbo
+            nem marcar sempre a <strong>pessoa</strong> ou o <strong>tempo</strong> de forma explícita. Isso produz
+            frases como «eu quer», «nós ir», ou infinitivos isolados — pouco alinhadas com o português falado e
+            escrito, e pouco informativas para quem lê ou ouve a mensagem.
+          </p>
+
+          <h3 class="algo-dialog__h3">Como este protótipo aborda o problema</h3>
+          <p>
+            O <strong>ConjugAI</strong> concentra-se na <strong>conjugação verbal</strong> em função do
+            <strong>sujeito</strong> (incluindo sujeito composto) e do <strong>tempo</strong> (presente, futuro ou
+            passado a partir de marcadores como <em>amanhã</em> e <em>ontem</em>). O núcleo
+            <code>conjugai-core</code> faz tokenização, identificação de sujeito e tempo, consulta a um
+            <strong>léxico</strong> de formas e aplica <strong>regras</strong> de presente regular quando aplicável;
+            em seguida <strong>reconstrói a frase</strong> substituindo a forma verbal pela flexão adequada. Esta
+            página mostra o processo <strong>passo a passo</strong> para discussão com o orientador e para evolução
+            do trabalho.
+          </p>
+
+          <h3 class="algo-dialog__h3">Integração com pranchas de comunicação assistiva</h3>
+          <p>
+            As <strong>pranchas</strong> (conjuntos de símbolos ou pictogramas) podem mapear diretamente para o que o
+            motor já espera: por exemplo, símbolos de <strong>tempo</strong> equivalentes a «ontem» / «amanhã» para
+            escolher passado ou futuro; núcleos de <strong>sujeito</strong> (eu, nós, nomes + «e») para a pessoa
+            gramatical; e o <strong>verbo</strong> como infinitivo ou forma do léxico. O fluxo típico seria:
+            selecção na prancha → <strong>texto linear</strong> (ou lista de tokens) → pipeline ConjugAI → mensagem
+            lida por voz ou mostrada em texto <strong>flexionado</strong>.
+          </p>
+          <p>
+            O motor está empacotado como <strong>JavaScript offline</strong> (<code>conjugai-core.js</code>), o que
+            facilita integrar numa <strong>app</strong> (por exemplo em React) ou num <strong>cliente móvel</strong>,
+            alinhado ao requisito de leveza em dispositivos usados em CAA — sem obrigar a um servidor para a
+            conjugação básica.
+          </p>
+          <p class="algo-dialog__note">
+            Isto é um <strong>protótipo de investigação</strong>: a ligação a um sistema de pranchas concreto (software,
+            vocabulário, layout) depende do ecossistema escolhido e pode ser trabalhada em fases seguintes.
+          </p>
+        </div>
+      </div>
+    </dialog>
 
     <dialog class="algo-dialog" id="dialog-token-algo" aria-labelledby="dialog-token-title">
       <div class="algo-dialog__inner">

@@ -46,6 +46,8 @@
     dialogToken: document.getElementById("dialog-token-algo"),
     dialogTempo: document.getElementById("dialog-tempo-algo"),
     dialogConj: document.getElementById("dialog-conj-algo"),
+    dialogProject: document.getElementById("dialog-project-context"),
+    btnProjectContext: document.getElementById("btn-project-context"),
   };
 
   function getCore() {
@@ -612,11 +614,33 @@
     }
   }
 
+  function bindStaticDialog(dialog, openBtn) {
+    if (!dialog) return;
+    var closeBtn = dialog.querySelector("[data-close-dialog]");
+    if (closeBtn) {
+      closeBtn.addEventListener("click", function () {
+        dialog.close();
+      });
+    }
+    dialog.addEventListener("click", function (e) {
+      if (e.target === dialog) dialog.close();
+    });
+    if (openBtn) {
+      openBtn.addEventListener("click", function () {
+        if (typeof dialog.showModal === "function") dialog.showModal();
+      });
+    }
+    dialog.addEventListener("close", function () {
+      if (openBtn) openBtn.focus();
+    });
+  }
+
   function bindAlgoDialogs() {
     bindOneDialog(el.dialogToken, el.tokenStepTrigger, renderTokenViz);
     bindOneDialog(el.dialogSubject, el.subjectStepTrigger, renderSubjectViz);
     bindOneDialog(el.dialogTempo, el.tempoStepTrigger, renderTempoViz);
     bindOneDialog(el.dialogConj, el.ruleStepTrigger, renderConjViz);
+    bindStaticDialog(el.dialogProject, el.btnProjectContext);
 
     window.addEventListener("resize", function () {
       if (el.dialogSubject && el.dialogSubject.open && el.subjectVizMount) {

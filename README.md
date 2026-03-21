@@ -1,6 +1,6 @@
 # ConjugAI
 
-Protótipo de **Tecnologia Assistiva** que transforma frases telegráficas em português do Brasil **gramaticalmente mais corretas**, com interface tipo “análise ao vivo”, no âmbito de **CAA** (Comunicação Aumentativa e Alternativa): serve para **visualizar e discutir** com o orientador o objetivo de corrigir verbos em texto telegráfico.
+Protótipo de **Tecnologia Assistiva** focado na **conjugação verbal** em contexto de **CAA** (Comunicação Aumentativa e Alternativa), em **português do Brasil**: entradas telegráficas, **pessoa gramatical** e **tempos** (presente, futuro, passado com marcadores). A interface “análise ao vivo” serve para **visualizar e discutir** o desenho do motor com o orientador.
 
 O **motor linguístico** (`conjugai-core`) vive em **`vendors/`** de propósito: é um núcleo reutilizável que **pode existir sem** esta interface web experimental; a app é só o protótipo de visualização.
 
