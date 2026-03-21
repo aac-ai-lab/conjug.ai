@@ -1,2 +1,8 @@
 node_modules/
 vendors/conjugai-core/scripts/cache/
+
+# LaTeX (docs/diagramas-conjugai.tex)
+docs/*.aux
+docs/*.log
+docs/*.out
+docs/*.synctex.gz
