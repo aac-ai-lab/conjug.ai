@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Demonstração ao vivo: frases telegráficas em português corretamente conjugadas."
+    />
+    <title>ConjugAI — Demo de Conjugação</title>
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Ir para o conteúdo principal</a>
+
+    <div class="app">
+      <header class="app-header">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">◆</span>
+          <div>
+            <h1 class="brand-title">ConjugAI</h1>
+            <p class="brand-sub">Protótipo TA · Português (BR)</p>
+          </div>
+        </div>
+        <p class="tagline">
+          Transformação de frases telegráficas em português gramaticalmente corretas.
+        </p>
+      </header>
+
+      <div class="layout">
+        <aside class="sidebar" aria-labelledby="examples-heading">
+          <h2 id="examples-heading" class="sidebar-title">Exemplos</h2>
+          <label class="sr-only" for="example-select">Selecionar frase de exemplo</label>
+          <select id="example-select" class="example-select" size="6">
+            <option value="0">Eu comer maçã</option>
+            <option value="1">Mamãe e eu ir shopping amanhã</option>
+            <option value="2">Ele viajar ontem</option>
+            <option value="3">Nós querer brincar</option>
+          </select>
+          <p class="hint">Ou edite a frase no painel de entrada.</p>
+        </aside>
+
+        <main id="main" class="main">
+          <section class="panel panel-input" aria-labelledby="input-heading">
+            <div class="panel-head">
+              <h2 id="input-heading" class="panel-title">Entrada</h2>
+              <span class="badge">Texto bruto</span>
+            </div>
+            <label class="sr-only" for="raw-input">Frase telegráfica</label>
+            <textarea
+              id="raw-input"
+              class="raw-input"
+              rows="3"
+              spellcheck="false"
+              placeholder="Digite uma frase sem conjugação completa…"
+            ></textarea>
+            <div class="actions">
+              <button type="button" id="btn-analyze" class="btn btn-primary">
+                Analisar
+              </button>
+              <button type="button" id="btn-reset" class="btn btn-ghost">Limpar</button>
+            </div>
+          </section>
+
+          <div class="flow" aria-hidden="true">
+            <div class="flow-line flow-line--top">
+              <span class="flow-pulse"></span>
+            </div>
+            <div class="flow-arrow" aria-hidden="true">↓</div>
+          </div>
+
+          <section
+            class="panel panel-logic"
+            aria-labelledby="logic-heading"
+            aria-live="polite"
+          >
+            <div class="panel-head">
+              <h2 id="logic-heading" class="panel-title">Processamento</h2>
+              <span class="badge badge-accent">Passo a passo</span>
+            </div>
+
+            <div id="logic-placeholder" class="logic-placeholder">
+              <p>Selecione um exemplo ou digite uma frase e clique em <strong>Analisar</strong>.</p>
+            </div>
+
+            <ol id="steps" class="steps hidden" hidden>
+              <li class="step" data-step="1">
+                <div class="step-head">
+                  <span class="step-num">1</span>
+                  <span class="step-label">Tokenização</span>
+                  <span class="step-status" aria-hidden="true"></span>
+                </div>
+                <div class="step-body">
+                  <p class="step-desc">Separar a frase em unidades (tokens).</p>
+                  <div class="token-row" id="tokens-out"></div>
+                </div>
+              </li>
+              <li class="step" data-step="2">
+                <div class="step-head">
+                  <span class="step-num">2</span>
+                  <span class="step-label">Sujeito e pessoa</span>
+                  <span class="step-status" aria-hidden="true"></span>
+                </div>
+                <div class="step-body">
+                  <p class="step-desc" id="subject-desc"></p>
+                  <p class="step-highlight" id="subject-out"></p>
+                </div>
+              </li>
+              <li class="step" data-step="3">
+                <div class="step-head">
+                  <span class="step-num">3</span>
+                  <span class="step-label">Marcador temporal</span>
+                  <span class="step-status" aria-hidden="true"></span>
+                </div>
+                <div class="step-body">
+                  <p class="step-desc" id="time-desc"></p>
+                  <p class="step-highlight" id="time-out"></p>
+                </div>
+              </li>
+              <li class="step" data-step="4">
+                <div class="step-head">
+                  <span class="step-num">4</span>
+                  <span class="step-label">Regra de conjugação</span>
+                  <span class="step-status" aria-hidden="true"></span>
+                </div>
+                <div class="step-body">
+                  <p class="step-desc" id="rule-desc"></p>
+                  <p class="step-highlight" id="rule-out"></p>
+                </div>
+              </li>
+            </ol>
+          </section>
+
+          <div class="flow" aria-hidden="true">
+            <div class="flow-arrow" aria-hidden="true">↓</div>
+            <div class="flow-line flow-line--bottom">
+              <span class="flow-pulse flow-pulse--delayed"></span>
+            </div>
+          </div>
+
+          <section class="panel panel-output" aria-labelledby="output-heading">
+            <div class="panel-head">
+              <h2 id="output-heading" class="panel-title">Saída</h2>
+              <span class="badge badge-success">Frase final</span>
+            </div>
+            <p id="output-text" class="output-text" role="status">
+              O resultado aparecerá aqui após a análise.
+            </p>
+          </section>
+        </main>
+      </div>
+
+      <footer class="app-footer">
+        <small>Demonstração educacional · Motor <code>conjugai-core</code> (offline, regras + léxico em <code>src/lib/conjugai-core</code>).</small>
+        <nav class="footer-nav" aria-label="Documentação">
+          <a href="README.md">README</a>
+          <span aria-hidden="true">·</span>
+          <a href="docs/conjugai-core.md">conjugai-core</a>
+          <span aria-hidden="true">·</span>
+          <a href="diagrama.html">Diagramas (visual)</a>
+          <span aria-hidden="true">·</span>
+          <a href="docs/diagrama.md">Diagramas (Markdown)</a>
+        </nav>
+      </footer>
+    </div>
+
+    <script src="assets/js/conjugai-core.js" defer></script>
+    <script src="assets/js/app.js" defer></script>
+  </body>
+</html>

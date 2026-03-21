@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ConjugAI — Diagramas</title>
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      .doc-page {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 1.5rem 1.25rem 3rem;
+      }
+      .doc-page h1 {
+        font-size: 1.5rem;
+        margin: 0 0 0.5rem;
+      }
+      .doc-page .lead {
+        color: var(--text-muted);
+        margin: 0 0 2rem;
+        max-width: 60ch;
+      }
+      .doc-page .lead code {
+        font-size: 0.9em;
+        padding: 0.1em 0.35em;
+        background: var(--bg-card);
+        border-radius: 4px;
+      }
+      .diagram-block {
+        margin-bottom: 2.5rem;
+      }
+      .diagram-block h2 {
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-muted);
+        margin: 0 0 1rem;
+      }
+      .diagram-block .mermaid {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1rem;
+        overflow-x: auto;
+        text-align: center;
+      }
+      .back-link {
+        display: inline-block;
+        margin-bottom: 1.5rem;
+        color: var(--accent);
+        text-decoration: none;
+        font-weight: 600;
+      }
+      .back-link:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="doc-page">
+      <a class="back-link" href="index.html">← Voltar ao demo</a>
+      <h1>Diagramas — lógica e protótipo</h1>
+      <p class="lead">
+        Fluxos em <code>conjugai-core</code> (<code>assets/js/conjugai-core.js</code>) e UI em <code>assets/js/app.js</code>. Renderização com
+        <a href="https://mermaid.js.org/" rel="noopener noreferrer">Mermaid</a>.
+      </p>
+
+      <section class="diagram-block">
+        <h2>1. Pipeline de análise</h2>
+        <div class="mermaid">
+flowchart TD
+  A[Texto bruto] --> B[tokenize]
+  B --> C{Tokens vazios?}
+  C -->|sim| ERR[Erro: digite uma frase]
+  C -->|não| D[findVerbInfinitive]
+  D --> E{Infinitivo conhecido?}
+  E -->|não| ERR2[Erro: verbo não reconhecido]
+  E -->|sim| F[resolveSubject]
+  F --> G[resolveTemporal]
+  G --> H[pickForm + pronome + complementos]
+  H --> I[Frase final]
+        </div>
+      </section>
+
+      <section class="diagram-block">
+        <h2>2a. Sujeito</h2>
+        <div class="mermaid">
+flowchart TD
+  S0[Eu + mamãe ou papai?] -->|sim| SN[Nós — 1ª plural]
+  S0 -->|não| S1[Ordem: nós, eles, ela, ele, eu, padrão eu]
+        </div>
+        <h2 style="margin-top: 1.5rem">2b. Tempo verbal</h2>
+        <div class="mermaid">
+flowchart TD
+  T0[Tem amanhã?] -->|sim| TF[Futuro do Presente]
+  T0 -->|não| T1[Tem ontem?]
+  T1 -->|sim| TP[Pretérito Perfeito]
+  T1 -->|não| TN[Presente do indicativo]
+        </div>
+      </section>
+
+      <section class="diagram-block">
+        <h2>3. Arquitetura do protótipo</h2>
+        <div class="mermaid">
+flowchart TB
+  subgraph UI[Interface — index.html + assets/css/styles.css]
+    ASIDE[Lista de exemplos]
+    IN[Painel de entrada]
+    STEPS[Painel: 4 passos]
+    OUT[Painel de saída]
+  end
+  subgraph CORE[conjugai-core.js]
+    AF[analisarFrase]
+  end
+  subgraph APP[app.js]
+    AN[analyze]
+    ANIM[runStepAnimation]
+  end
+  ASIDE --> IN
+  IN --> AN
+  AN --> AF
+  AN --> ANIM
+  ANIM --> STEPS
+  ANIM --> OUT
+        </div>
+      </section>
+
+      <section class="diagram-block">
+        <h2>4. Sequência — demo ao vivo</h2>
+        <div class="mermaid">
+sequenceDiagram
+  participant U as Utilizador
+  participant UI as Interface
+  participant C as ConjugaiCore.analisarFrase
+  U->>UI: clica Analisar
+  UI->>C: texto bruto
+  C-->>UI: ResultadoAnalise
+  Note over UI: animação dos 4 passos
+  UI->>U: frase corrigida
+        </div>
+      </section>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: "dark",
+        themeVariables: {
+          primaryColor: "#3d9cf0",
+          primaryTextColor: "#e8eef4",
+          lineColor: "#9aa8b8",
+          secondaryColor: "#222c38",
+          tertiaryColor: "#1a222d",
+          fontFamily: "DM Sans, system-ui, sans-serif",
+        },
+        flowchart: { curve: "basis" },
+      });
+    </script>
+  </body>
+</html>

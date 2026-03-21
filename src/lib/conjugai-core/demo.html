@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ConjugAI — Paradigma verbal (demo)</title>
+    <style>
+      :root {
+        --bg: #f6f7f9;
+        --card: #fff;
+        --text: #1a1d23;
+        --muted: #5c6570;
+        --accent: #2563eb;
+        --border: #e2e6ee;
+        --radius: 12px;
+        --font: system-ui, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+        --mono: ui-monospace, "Cascadia Code", "JetBrains Mono", monospace;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: var(--font);
+        color: var(--text);
+        background: var(--bg);
+        line-height: 1.5;
+      }
+      .wrap {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 2rem 1.25rem 3rem;
+      }
+      h1 {
+        font-size: 1.35rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        margin: 0 0 0.35rem;
+      }
+      .lead {
+        margin: 0 0 1.75rem;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+      .lead a {
+        color: var(--accent);
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1.25rem 1.35rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+      }
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.65rem;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+      label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--muted);
+        width: 100%;
+      }
+      input[type="text"] {
+        flex: 1;
+        min-width: 200px;
+        padding: 0.65rem 0.85rem;
+        font-size: 1rem;
+        font-family: var(--mono);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+      }
+      input:focus {
+        outline: 2px solid rgba(37, 99, 235, 0.35);
+        border-color: var(--accent);
+      }
+      button {
+        padding: 0.65rem 1.1rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #fff;
+        background: var(--accent);
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+      button:hover {
+        filter: brightness(1.05);
+      }
+      button:active {
+        transform: scale(0.98);
+      }
+      .verb-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        font-family: var(--mono);
+        margin: 0.5rem 0 1.25rem;
+        color: var(--text);
+      }
+      .hint {
+        font-size: 0.8rem;
+        color: var(--muted);
+        margin-top: 0.75rem;
+      }
+      .err {
+        color: #b91c1c;
+        font-size: 0.9rem;
+        margin: 0.5rem 0 0;
+      }
+      .tables {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+      .tbl-wrap h2 {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--muted);
+        margin: 0 0 0.5rem;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.95rem;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 0.45rem 0.5rem;
+        border-bottom: 1px solid var(--border);
+      }
+      th {
+        font-weight: 600;
+        color: var(--muted);
+        font-size: 0.8rem;
+        width: 42%;
+      }
+      td.form {
+        font-family: var(--mono);
+        font-weight: 500;
+      }
+      tr:last-child th,
+      tr:last-child td {
+        border-bottom: none;
+      }
+      .na {
+        color: #94a3b8;
+        font-style: italic;
+      }
+      footer {
+        margin-top: 2rem;
+        font-size: 0.8rem;
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>Paradigma verbal</h1>
+      <p class="lead">
+        Demo inspirada em páginas como
+        <a href="https://verbe.cc/" rel="noopener noreferrer">verbe.cc</a>: introduza um
+        <strong>infinitivo</strong> em português (ex.: <em>comer</em>, <em>falar</em>) e veja as formas
+        geradas pelo <strong>conjugai-core</strong> (indicativo: presente, futuro e pretérito perfeito).
+      </p>
+
+      <div class="card">
+        <div class="row">
+          <label for="verb">Infinitivo</label>
+          <input
+            id="verb"
+            type="text"
+            placeholder="ex.: dançar, comer, partir"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button type="button" id="btn">Conjugar</button>
+        </div>
+        <p id="error" class="err" hidden></p>
+        <div id="out" hidden>
+          <p class="verb-title" id="lemma"></p>
+          <div class="tables" id="tables"></div>
+        </div>
+        <p class="hint">
+          Serve o projeto com um servidor HTTP (ex. na raiz do repositório:
+          <code>python3 -m http.server</code>) e abra esta página. Para verbos fora do léxico,
+          futuro e passado só aparecem se estiverem em <code>data/verbos.json</code>; no presente,
+          verbos regulares em <strong>-ar / -er / -ir</strong> usam regras automáticas.
+        </p>
+      </div>
+
+      <footer>
+        Motor: <code>assets/js/conjugai-core.js</code> · ConjugAI
+      </footer>
+    </div>
+
+    <script src="../../../assets/js/conjugai-core.js"></script>
+    <script>
+      (function () {
+        "use strict";
+
+        var PERSONAS = ["eu", "tu", "ele / ela", "nós", "eles"];
+        var TEMPOS = [
+          { key: "presente", label: "Presente do indicativo" },
+          { key: "futuro", label: "Futuro do presente (indicativo)" },
+          { key: "passado", label: "Pretérito perfeito (indicativo)" },
+        ];
+
+        var elVerb = document.getElementById("verb");
+        var elBtn = document.getElementById("btn");
+        var elErr = document.getElementById("error");
+        var elOut = document.getElementById("out");
+        var elLemma = document.getElementById("lemma");
+        var elTables = document.getElementById("tables");
+
+        function showError(msg) {
+          elErr.hidden = !msg;
+          elErr.textContent = msg || "";
+          elOut.hidden = true;
+        }
+
+        function render() {
+          var C = typeof ConjugaiCore !== "undefined" ? ConjugaiCore : null;
+          if (!C || typeof C.conjugar !== "function" || typeof C.isVerbShape !== "function") {
+            showError(
+              "Não foi possível carregar conjugai-core.js. Verifique o caminho do &lt;script&gt; ou use um servidor HTTP a partir da raiz do projeto."
+            );
+            return;
+          }
+
+          var raw = (elVerb.value || "").trim();
+          if (!raw) {
+            showError("Introduza um infinitivo.");
+            return;
+          }
+
+          if (!C.isVerbShape(raw)) {
+            showError("Formato inválido: use um infinitivo terminado em -ar, -er, -ir ou -pôr.");
+            return;
+          }
+
+          var lemma = raw.toLowerCase();
+          showError("");
+
+          elLemma.textContent = lemma;
+          elTables.innerHTML = "";
+
+          TEMPOS.forEach(function (T) {
+            var wrap = document.createElement("div");
+            wrap.className = "tbl-wrap";
+            var h2 = document.createElement("h2");
+            h2.textContent = T.label;
+            var table = document.createElement("table");
+            var tbody = document.createElement("tbody");
+
+            for (var p = 0; p <= 4; p++) {
+              var form = C.conjugar(lemma, p, T.key);
+              var tr = document.createElement("tr");
+              var th = document.createElement("th");
+              th.textContent = PERSONAS[p];
+              var td = document.createElement("td");
+              td.className = "form";
+              if (form) td.textContent = form;
+              else {
+                td.innerHTML = '<span class="na">—</span>';
+              }
+              tr.appendChild(th);
+              tr.appendChild(td);
+              tbody.appendChild(tr);
+            }
+
+            table.appendChild(tbody);
+            wrap.appendChild(h2);
+            wrap.appendChild(table);
+            elTables.appendChild(wrap);
+          });
+
+          elOut.hidden = false;
+        }
+
+        elBtn.addEventListener("click", render);
+        elVerb.addEventListener("keydown", function (e) {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            render();
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>

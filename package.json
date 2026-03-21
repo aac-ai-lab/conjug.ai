@@ -1,0 +1,12 @@
+{
+  "name": "conjugai",
+  "private": true,
+  "scripts": {
+    "build:core": "esbuild src/lib/conjugai-core/index.ts --bundle --format=iife --global-name=ConjugaiCore --outfile=assets/js/conjugai-core.js --platform=neutral",
+    "build": "npm run build:core"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.2",
+    "typescript": "^5.7.2"
+  }
+}
