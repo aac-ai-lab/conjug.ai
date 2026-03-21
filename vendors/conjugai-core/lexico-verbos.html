@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Origem e atualização do léxico verbal verbos.json no conjugai-core (MorphoBr, CSV, build)."
+    />
+    <title>ConjugAI — Léxico verbos.json</title>
+    <link rel="stylesheet" href="../../assets/css/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      .lexico-doc__back {
+        margin: 0 0 1.25rem;
+        font-size: 0.95rem;
+      }
+      .lexico-doc__back a {
+        color: var(--accent);
+        font-weight: 600;
+        text-decoration: none;
+      }
+      .lexico-doc__back a:hover {
+        text-decoration: underline;
+      }
+      .lexico-doc__body h3 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 1.25rem 0 0.5rem;
+        color: var(--text);
+      }
+      .lexico-doc__body p,
+      .lexico-doc__body li {
+        margin: 0.5rem 0;
+        color: var(--text-muted);
+      }
+      .lexico-doc__body ul {
+        margin: 0.35rem 0 0.75rem 1.25rem;
+        padding: 0;
+      }
+      .lexico-doc__body code {
+        font-size: 0.88em;
+        padding: 0.12em 0.35em;
+        background: var(--bg-card);
+        border-radius: 4px;
+      }
+      .lexico-doc__body a {
+        color: var(--accent);
+        font-weight: 600;
+      }
+      .lexico-doc__note {
+        margin-top: 1rem;
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Ir para o conteúdo principal</a>
+
+    <div class="app">
+      <header class="app-header">
+        <p class="lexico-doc__back">
+          <a href="demo.html">← Voltar à demo do paradigma</a>
+        </p>
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">◆</span>
+          <div>
+            <h1 class="brand-title">Léxico <code>verbos.json</code></h1>
+            <p class="brand-sub">conjugai-core · origem e atualização</p>
+          </div>
+        </div>
+      </header>
+
+      <main id="main" class="main demo-main">
+        <section class="panel" aria-labelledby="lex-h-what">
+          <div class="panel-head">
+            <h2 id="lex-h-what" class="panel-title">O que é</h2>
+            <span class="badge">Dados</span>
+          </div>
+          <div class="lexico-doc__body">
+            <p>
+              O ficheiro <code>vendors/conjugai-core/data/verbos.json</code> guarda, por <strong>infinitivo</strong>
+              (lema), as formas conjugadas nos três tempos usados pelo motor — <strong>presente</strong>,
+              <strong>futuro</strong> e <strong>passado</strong> (pretérito perfeito do indicativo) — para cada uma
+              das <strong>cinco pessoas</strong> (0–4). O TypeScript importa esse JSON em
+              <code>verbos-data.ts</code> e o bundle <code>assets/js/conjugai-core.js</code> inclui o léxico para
+              uso offline no navegador.
+            </p>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="lex-h-morpho">
+          <div class="panel-head">
+            <h2 id="lex-h-morpho" class="panel-title">Origem típica: MorphoBr</h2>
+            <span class="badge badge-accent">Apache-2.0</span>
+          </div>
+          <div class="lexico-doc__body">
+            <p>
+              Uma forma de <strong>preencher ou alargar</strong> o léxico é usar o recurso público
+              <a href="https://github.com/LR-POR/MorphoBr" target="_blank" rel="noopener noreferrer"
+                >LR-POR/MorphoBr</a
+              >, que publica flexões em ficheiros <code>verbs-*.dict</code> (por letra do alfabeto).
+            </p>
+            <p>
+              No repositório ConjugAI, o script
+              <code>vendors/conjugai-core/scripts/morphobr_dict_to_verbos.py</code> converte esses
+              <code>.dict</code> para o formato <code>verbos.json</code>, com <strong>merge</strong> sobre o ficheiro
+              já existente e, em geral, uma <strong>lista branca</strong> de lemas — para manter o bundle
+              leve e auditável (não importar dezenas de milhares de verbos de uma vez).
+            </p>
+            <p>
+              Há também um script auxiliar para descarregar os <code>.dict</code> (
+              <code>fetch_morphobr_verb_dicts.sh</code>). O passo a passo completo está na documentação do pacote.
+            </p>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="lex-h-csv">
+          <div class="panel-head">
+            <h2 id="lex-h-csv" class="panel-title">Alternativa: CSV</h2>
+            <span class="badge">Validação humana</span>
+          </div>
+          <div class="lexico-doc__body">
+            <p>
+              Para dados revistos manualmente ou vindos de exportação (por exemplo fluxos DELAF/Unitex/Linguateca
+              convertidos para tabela), usa-se <code>vendors/conjugai-core/scripts/csv_to_verbos.py</code>, que
+              espera colunas <code>lemma</code>, <code>form</code>, <code>tense</code>, <code>person</code> (UTF-8).
+            </p>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="lex-h-build">
+          <div class="panel-head">
+            <h2 id="lex-h-build" class="panel-title">Depois de alterar o JSON</h2>
+            <span class="badge">Build</span>
+          </div>
+          <div class="lexico-doc__body">
+            <p>
+              Na <strong>raiz</strong> do projeto: <code>npm run build:core</code> (ou <code>npm run build</code>) para
+              regenerar <code>assets/js/conjugai-core.js</code> a partir do TypeScript e do
+              <code>verbos.json</code> atualizado.
+            </p>
+            <p class="lexico-doc__note">
+              Documentação detalhada (comandos exactos, formato CSV, notas sobre paradigmas completos):
+              <a href="README.md" target="_blank" rel="noopener noreferrer"><code>vendors/conjugai-core/README.md</code></a>
+              — secção <strong>«Uso de dicionários linguísticos»</strong>.
+            </p>
+          </div>
+        </section>
+      </main>
+
+      <footer class="app-footer">
+        <small>ConjugAI · conjugai-core</small>
+      </footer>
+    </div>
+  </body>
+</html>

@@ -48,6 +48,7 @@ Documentação detalhada (fonte vs bundle, fluxo): **`vendors/conjugai-core/READ
 | `vendors/conjugai-core/data/verbos.json` | Léxico de verbos (importado em `verbos-data.ts`) |
 | `vendors/conjugai-core/demo.html` | Página simples “infinitivo → paradigma” (estilo verbe.cc) |
 | `vendors/conjugai-core/diagram.html` | Diagramas da biblioteca (`conjugar`, `analisarFrase`, `corrigir` + pipeline visual) |
+| `vendors/conjugai-core/lexico-verbos.html` | Página HTML sobre origem e atualização de `verbos.json` (MorphoBr, CSV, build) |
 | `diagrama.html` / `docs/diagrama.md` | Diagramas Mermaid (app + protótipo) |
 
 ## Regras (resumo)

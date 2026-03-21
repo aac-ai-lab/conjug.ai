@@ -80,8 +80,14 @@
           </div>
           <p class="hint">
             Para verbos fora do léxico, futuro e passado só aparecem se existirem em
-            <code>data/verbos.json</code>; no presente, verbos regulares em
-            <strong>-ar / -er / -ir</strong> usam regras automáticas.
+            <code>data/verbos.json</code>
+            (<a
+              class="demo-lexico-doc-link"
+              href="lexico-verbos.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              >de onde vem e como se gera</a
+            >); no presente, verbos regulares em <strong>-ar / -er / -ir</strong> usam regras automáticas.
           </p>
         </section>
       </main>
@@ -140,8 +146,18 @@
                 <div class="demo-conj-branch__path demo-conj-branch__path--lex">
                   <span class="demo-conj-branch__tag">Léxico</span>
                   <p>
-                    Se o infinitivo existe em <code>verbos.json</code>, usa-se a <strong>forma guardada</strong>
-                    para aquele tempo e pessoa (presente, futuro e passado completos no léxico).
+                    Se o infinitivo existe em <code>data/verbos.json</code>, usa-se a <strong>forma guardada</strong>
+                    para aquele tempo e pessoa (presente, futuro e passado completos no léxico). O ficheiro é um
+                    <strong>léxico controlado</strong> no repositório — em geral gerado ou actualizado com dados do
+                    recurso público <strong>MorphoBr</strong> (ficheiros <code>.dict</code>) ou com importação
+                    <strong>CSV</strong>, via scripts Python no pacote.
+                    <a
+                      class="demo-lexico-doc-link"
+                      href="lexico-verbos.html"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      >Origem e como atualizar o léxico</a
+                    >
                   </p>
                 </div>
                 <div class="demo-conj-branch__path demo-conj-branch__path--reg">
