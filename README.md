@@ -82,6 +82,22 @@ Para **aumentar a cobertura de conjugação** (ir além do léxico manual `verbo
 
 Integrar DELAF/Unitex implica tratar **formato**, **licença**, **norma** (ex. PT-BR) e **peso** em cliente móvel (subconjunto ou índice compactado). O pipeline de sujeito, tempo e reconstrução da frase mantém-se; o recurso externo **alimenta** a camada **“qual forma verbal / lema”**.
 
+## Referências (conjugação verbal, outros projetos)
+
+Recursos **independentes** do ConjugAI, úteis como contexto ou comparação de abordagens (léxico vs regras, norma europeia vs brasileira, biblioteca vs app completa):
+
+| Recurso | Ligação | Notas breves |
+|--------|---------|----------------|
+| **VerbosPT** (IntersoftDev) | [github.com/IntersoftDev/verbos-pt](https://github.com/IntersoftDev/verbos-pt) | App **HTML/CSS/JS** no browser; conjugação por **regras hierárquicas** (Google Sheets + Apps Script), quiz; doc. indica **português europeu**, adaptável ao **PT-BR**. MIT. |
+| **conjugador** (portujs) | [github.com/portujs/conjugador](https://github.com/portujs/conjugador) | **Biblioteca JavaScript** para conjugar verbos em português. |
+| **conjugador** (npm) | [npmjs.com/package/conjugador](https://www.npmjs.com/package/conjugador) | Pacote **npm** de conjugação em português no ecossistema JS (ver README do pacote para âmbito e licença). |
+| **flexoes** (DesignLiquido) | [github.com/DesignLiquido/flexoes](https://github.com/DesignLiquido/flexoes) | Biblioteca de **flexões** para português em JavaScript. |
+| **Conjugue** (danxexe) | [github.com/danxexe/Conjugue](https://github.com/danxexe/Conjugue) | **Português do Brasil**; implementação em **Ruby** (não JS). |
+| **portuguese-verbs** (jarrodmedrano) | [github.com/jarrodmedrano/portuguese-verbs](https://github.com/jarrodmedrano/portuguese-verbs) | Quiz com **Next.js**; uso de **OpenAI** (abordagem distinta de motor determinístico). |
+| **thomasrandell.github.io** | [github.com/thomasrandell/thomasrandell.github.io](https://github.com/thomasrandell/thomasrandell.github.io) | Repositório de página estática com **conjugador** de verbos em português (HTML/CSS/JS). |
+
+O recurso morfológico **MorphoBr** usado no ConjugAI para dados de flexão está documentado em `vendors/conjugai-core/README.md` (não duplicado aqui).
+
 ## Licença
 
 Código do projeto ConjugAI: conforme o uso no teu trabalho/repositório.
