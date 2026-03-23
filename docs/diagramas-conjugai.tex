@@ -49,7 +49,7 @@ Pode copiar cada ambiente \texttt{tikzpicture} para o seu documento ou incluir e
     \node[proc, below=of e] (f) {\texttt{extrairVerbo}};
     \node[dec, below=of f] (g) {Lema verbal?};
     \node[err, below left=8mm and 4mm of g] (err2) {Erro: verbo não identificado};
-    \node[proc, below right=8mm and 4mm of g] (h) {\texttt{conjugar}};
+    \node[proc, below right=8mm and 4mm of g] (h) {\texttt{conjugarTempo}};
     \node[dec, below=of h] (i) {Forma no tempo?};
     \node[err, below left=8mm and 4mm of i] (err3) {Erro: não foi possível conjugar};
     \node[proc, below right=8mm and 4mm of i] (j) {\texttt{corrigir}};
@@ -129,24 +129,40 @@ Pode copiar cada ambiente \texttt{tikzpicture} para o seu documento ou incluir e
   \centering
   \resizebox{0.98\textwidth}{!}{%
   \begin{tikzpicture}[node distance=8mm]
-    \node[dec] (t0) {Tem \emph{amanhã}?};
-    \node[dec, below left=14mm and 23mm of t0] (t1) {Tem \emph{ontem}?};
-    \node[dec, below right=14mm and 23mm of t0] (p1) {1.\textsuperscript{o} token vou/vai…?};
-    \node[proc, below=14mm of t1, font=\small] (tp) {Pretérito perfeito};
-    \node[proc, below=14mm of p1, font=\small] (tf) {Futuro do presente};
-    \node[proc, below=31mm of t0, font=\small] (tn) {Presente do indicativo};
-    \node[proc, below=9mm of tn, font=\small] (tn0) {Presente};
+    \node[dec] (ovr) {Tempo explícito\\\texttt{tempo:x} / \texttt{[tempo=x]}?};
+    \node[dec, below left=12mm and 18mm of ovr] (j1) {Tem \emph{ontem}+\emph{já}?};
+    \node[dec, below right=12mm and 18mm of ovr] (j2) {Tem \emph{amanhã}+\emph{já}?};
+    \node[proc, below=11mm of j1, font=\small] (ppc) {Pretérito perfeito composto};
+    \node[proc, below=11mm of j2, font=\small] (fc) {Futuro composto};
+    \node[dec, below=16mm of ovr] (s1) {Tem \emph{se}/\emph{quando}/\emph{talvez}/\emph{que}?};
+    \node[proc, below=11mm of s1, font=\small] (sub) {Subjuntivo (heurística)};
+    \node[dec, below=11mm of sub] (t0) {Tem \emph{amanhã}?};
+    \node[dec, below left=12mm and 17mm of t0] (t1) {Tem \emph{ontem}?};
+    \node[dec, below right=12mm and 17mm of t0] (p1) {1.\textsuperscript{o} token vou/vai…?};
+    \node[proc, below=11mm of t1, font=\small] (tp) {Pretérito perfeito};
+    \node[proc, below=11mm of p1, font=\small] (tf) {Futuro do presente};
+    \node[proc, below=27mm of t0, font=\small] (tn) {Presente do indicativo};
+    \node[proc, right=20mm of ovr, font=\small] (texp) {Usa tempo explícito};
 
+    \draw[->] (ovr.east) -- node[midway, above, font=\scriptsize] {sim} (texp.west);
+    \draw[->] (ovr.south west) -- node[midway, left, font=\scriptsize] {não} (j1.north);
+    \draw[->] (ovr.south east) -- node[midway, right, font=\scriptsize] {não} (j2.north);
+    \draw[->] (j1.south) -- node[midway, left, font=\scriptsize] {sim} (ppc.north);
+    \draw[->] (j2.south) -- node[midway, right, font=\scriptsize] {sim} (fc.north);
+    \draw[->] (j1.east) -- ++(6mm,0) |- node[pos=0.35, above, font=\scriptsize] {não} (s1.west);
+    \draw[->] (j2.west) -- ++(-6mm,0) |- node[pos=0.35, above, font=\scriptsize] {não} (s1.east);
+    \draw[->] (s1.south) -- node[midway, left, font=\scriptsize] {sim} (sub.north);
+    \draw[->] (s1.south) -- ++(0,-4mm) node[right, font=\scriptsize] {não} -- ++(0,-2mm) -- (t0.north);
+    \draw[->] (sub.south) -- (t0.north);
     \draw[->] (t0.south west) -- node[midway, left, font=\scriptsize] {não} (t1.north);
     \draw[->] (t0.south east) -- node[midway, right, font=\scriptsize] {sim} (p1.north);
     \draw[->] (t1.south) -- node[midway, left, font=\scriptsize] {sim} (tp.north);
     \draw[->] (p1.south) -- node[midway, right, font=\scriptsize] {não} (tf.north);
     \draw[->] (t1.east) -- ++(6mm,0) |- node[pos=0.30, above, font=\scriptsize] {não} (tn.west);
     \draw[->] (p1.west) -- ++(-6mm,0) |- node[pos=0.30, above, font=\scriptsize] {sim} (tn.east);
-    \draw[->] (tn.south) -- (tn0.north);
   \end{tikzpicture}%
   }
-  \caption{Marcadores em \texttt{tempo.ts}; com \emph{amanhã} e perífrase \emph{vou/vai/…} mantém-se o presente.}
+  \caption{Seleção de tempo em \texttt{tempo.ts}: override explícito e heurísticas por marcadores.}
   \label{fig:tempo}
 \end{figure}
 

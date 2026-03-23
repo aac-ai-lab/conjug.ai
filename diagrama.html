@@ -89,7 +89,7 @@ flowchart TD
   E --> F[extrairVerbo]
   F --> G{Lema verbal?}
   G -->|não| ERR2[Erro: verbo não identificado]
-  G -->|sim| H[conjugar]
+  G -->|sim| H[conjugarTempo]
   H --> I{Forma no tempo?}
   I -->|não| ERR3[Erro: não foi possível conjugar neste tempo]
   I -->|sim| J[corrigir]
@@ -132,15 +132,23 @@ flowchart TD
         </div>
         <h2 style="margin-top: 1.5rem">2b. Tempo verbal</h2>
         <p class="hint" style="margin: 0 0 0.75rem; text-align: left; max-width: 56ch; margin-inline: auto">
-          Implementação em <code>tempo.ts</code>: excepção — com <em>amanhã</em> e 1.º token <em>vou/vai/…</em> (perífrase ir + infinitivo)
-          mantém-se <strong>presente</strong> no verbo suporte.
+          Implementação em <code>tempo.ts</code>: marcadores + possibilidade de tempo explícito por
+          <code>tempo:&lt;chave&gt;</code> ou <code>[tempo=&lt;chave&gt;]</code>.
         </p>
         <div class="mermaid">
 flowchart TD
-  T0{Tem amanhã?} -->|não| T1{Tem ontem?}
+  OVR{tempo:<chave> / [tempo=<chave>] ?} -->|sim| TEXP[Usa tempo explícito]
+  OVR -->|não| J1{Tem ontem + já?}
+  J1 -->|sim| PPC[Pretérito perfeito composto]
+  J1 -->|não| J2{Tem amanhã + já?}
+  J2 -->|sim| FC[Futuro composto]
+  J2 -->|não| S1{Tem se/quando/talvez/que?}
+  S1 -->|sim| SUB[Subjuntivo conforme marcador]
+  S1 -->|não| T0{Tem amanhã?}
   T0 -->|sim| P1{1.º token vou/vai/vamos…?}
   P1 -->|sim| TN0[Presente]
   P1 -->|não| TF[Futuro do Presente]
+  T0 -->|não| T1{Tem ontem?}
   T1 -->|sim| TP[Pretérito Perfeito]
   T1 -->|não| TN[Presente do indicativo]
         </div>
