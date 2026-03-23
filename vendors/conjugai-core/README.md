@@ -210,7 +210,7 @@ UI (HTML + CSS + app.js)
 
 O `index.html` na **raiz** do repositório referencia apenas `assets/js/conjugai-core.js`; não importa os `.ts` diretamente. A demo CAA em `demo/caa/index.html` acrescenta `assets/js/app.js`.
 
-**Demo estilo verbe.cc: infinitivo em português e tabelas geradas pelo `conjugai-core` (tempos simples e compostos).** Abrir com servidor HTTP a partir da raiz do repositório, por exemplo  
+**Demo: infinitivo em português e tabelas geradas pelo `conjugai-core` (tempos simples e compostos).** Abrir com servidor HTTP a partir da raiz do repositório, por exemplo  
 `http://localhost:8765/` (ficheiro `index.html` na raiz) — usa `ConjugaiCore.conjugarPessoaTabela` para renderizar tempos suportados em **seis pessoas** (incluindo `vós`).
 
 ## 10. Integração no browser (resumo)
