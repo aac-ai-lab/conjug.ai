@@ -3,7 +3,7 @@ import {
   type EntradaVerbo,
   VERBOS,
 } from "./data/verbos-data";
-import type { GeneroParticipio, NumeroParticipio, TempoVerbal } from "./types";
+import type { GeneroParticipio, NumeroParticipio, PessoaIndiceTabela, TempoVerbal } from "./types";
 
 const verbos = VERBOS;
 
@@ -202,6 +202,144 @@ export function conjugar(verbo: string, pessoa: number, tempo: TempoVerbal): str
   }
 
   return null;
+}
+
+export const TEMPOS_SIMPLES: readonly TempoVerbal[] = [
+  "presente",
+  "futuro",
+  "passado",
+  "preterito_imperfeito",
+  "preterito_mais_que_perfeito",
+  "condicional",
+  "subjuntivo_presente",
+  "subjuntivo_imperfeito",
+  "subjuntivo_futuro",
+  "imperativo",
+  "infinitivo_pessoal",
+] as const;
+
+const TER_VOS: Partial<Record<TempoVerbal, string>> = {
+  presente: "tendes",
+  futuro: "tereis",
+  passado: "tivestes",
+  preterito_imperfeito: "tínheis",
+  preterito_mais_que_perfeito: "tivéreis",
+  condicional: "teríeis",
+  subjuntivo_presente: "tenhais",
+  subjuntivo_imperfeito: "tivésseis",
+  subjuntivo_futuro: "tiverdes",
+  imperativo: "tende",
+  infinitivo_pessoal: "terdes",
+  infinitivo: "ter",
+  gerundio: "tendo",
+  participio: "tido",
+};
+
+function radicalVerbo(v: string): string | null {
+  if (v.endsWith("ar") || v.endsWith("er") || v.endsWith("ir")) return v.slice(0, -2);
+  return null;
+}
+
+function conjugarVosRegular(verbo: string, tempo: TempoVerbal): string | null {
+  const v = verbo.toLowerCase().trim();
+  const r = radicalVerbo(v);
+  if (!r) return null;
+
+  if (tempo === "presente") {
+    if (v.endsWith("ar")) return r + "ais";
+    if (v.endsWith("er")) return r + "eis";
+    if (v.endsWith("ir")) return r + "is";
+  }
+  if (tempo === "futuro") return v + "eis";
+  if (tempo === "passado") {
+    if (v.endsWith("ar")) return r + "astes";
+    if (v.endsWith("er")) return r + "estes";
+    if (v.endsWith("ir")) return r + "istes";
+  }
+  if (tempo === "preterito_imperfeito") {
+    if (v.endsWith("ar")) return r + "áveis";
+    return r + "íeis";
+  }
+  if (tempo === "preterito_mais_que_perfeito") {
+    if (v.endsWith("ar")) return r + "áreis";
+    if (v.endsWith("er")) return r + "êreis";
+    if (v.endsWith("ir")) return r + "íreis";
+  }
+  if (tempo === "condicional") return v + "íeis";
+  if (tempo === "subjuntivo_presente") {
+    if (v.endsWith("ar")) return r + "eis";
+    return r + "ais";
+  }
+  if (tempo === "subjuntivo_imperfeito") return r + "sseis";
+  if (tempo === "subjuntivo_futuro") return v + "des";
+  if (tempo === "imperativo") {
+    if (v.endsWith("ar")) return r + "ai";
+    if (v.endsWith("er")) return r + "ei";
+    if (v.endsWith("ir")) return r + "i";
+  }
+  if (tempo === "infinitivo_pessoal") return v + "des";
+  return null;
+}
+
+function conjugarVos(verbo: string, tempo: TempoVerbal): string | null {
+  const v = verbo.toLowerCase().trim();
+  if (v === "ter") return TER_VOS[tempo] ?? null;
+  if (tempo === "infinitivo") return infinitivoLexico(v);
+  if (tempo === "gerundio") return gerundio(v);
+  if (tempo === "participio") return participio(v, "m", "sg");
+  const tempoAux = AUXILIAR_TER_POR_TEMPO[tempo];
+  if (tempoAux) {
+    const aux = TER_VOS[tempoAux] ?? null;
+    const part = participio(v, "m", "sg");
+    if (!aux || !part) return null;
+    return `${aux} ${part}`;
+  }
+
+  const entry = verbos[v];
+  const arr = entry ? paradigmaCinco(entry, tempo) : undefined;
+  if (arr && arr.length >= 6 && arr[4]) return arr[4]!;
+
+  return conjugarVosRegular(v, tempo);
+}
+
+const AUXILIAR_TER_POR_TEMPO: Partial<Record<TempoVerbal, TempoVerbal>> = {
+  preterito_perfeito_composto: "presente",
+  preterito_mais_que_perfeito_composto: "preterito_imperfeito",
+  preterito_mais_que_perfeito_anterior: "preterito_mais_que_perfeito",
+  futuro_composto: "futuro",
+  futuro_do_preterito_composto: "condicional",
+  subjuntivo_preterito_perfeito: "subjuntivo_presente",
+  subjuntivo_preterito_mais_que_perfeito: "subjuntivo_imperfeito",
+  subjuntivo_futuro_composto: "subjuntivo_futuro",
+  infinitivo_pessoal_composto: "infinitivo_pessoal",
+};
+
+/** Conjugação ampliada: tempos simples + compostos e formas não finitas. */
+export function conjugarTempo(verbo: string, pessoa: number, tempo: TempoVerbal): string | null {
+  if (tempo === "infinitivo") return infinitivoLexico(verbo);
+  if (tempo === "gerundio") return gerundio(verbo);
+  if (tempo === "participio") return participio(verbo, "m", "sg");
+
+  const tempoAux = AUXILIAR_TER_POR_TEMPO[tempo];
+  if (tempoAux) {
+    const aux = conjugar("ter", pessoa, tempoAux);
+    const part = participio(verbo, "m", "sg");
+    if (!aux || !part) return null;
+    return `${aux} ${part}`;
+  }
+
+  return conjugar(verbo, pessoa, tempo);
+}
+
+/** API para paradigmas completos de 6 pessoas: eu, tu, ele/ela, nós, vós, eles/elas/vocês. */
+export function conjugarPessoaTabela(
+  verbo: string,
+  pessoa: PessoaIndiceTabela,
+  tempo: TempoVerbal
+): string | null {
+  if (pessoa === 4) return conjugarVos(verbo, tempo);
+  const pessoaCore = pessoa === 5 ? 4 : pessoa;
+  return conjugarTempo(verbo, pessoaCore, tempo);
 }
 
 /** Gerúndio (forma única por lema), se existir no léxico. */

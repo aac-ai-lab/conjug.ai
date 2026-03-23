@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   conjugar,
+  conjugarPessoaTabela,
+  conjugarTempo,
   detectarVerboPorDicionario,
   extrairVerbo,
   gerundio,
@@ -72,5 +74,24 @@ describe("conjugar", () => {
     expect(gerundio("comer")).toBe("comendo");
     expect(participio("comer", "m", "sg")).toBe("comido");
     expect(participio("comer", "f", "pl")).toBe("comidas");
+  });
+
+  it("conjugarTempo: pretérito perfeito composto", () => {
+    expect(conjugarTempo("comer", 0, "preterito_perfeito_composto")).toBe("tenho comido");
+  });
+
+  it("conjugarTempo: infinitivo e particípio", () => {
+    expect(conjugarTempo("comer", 0, "infinitivo")).toBe("comer");
+    expect(conjugarTempo("comer", 0, "participio")).toBe("comido");
+  });
+
+  it("conjugarPessoaTabela: vós em tempos simples", () => {
+    expect(conjugarPessoaTabela("comer", 4, "presente")).toBe("comeis");
+    expect(conjugarPessoaTabela("comer", 4, "futuro")).toBe("comereis");
+  });
+
+  it("conjugarPessoaTabela: vós em tempos compostos", () => {
+    expect(conjugarPessoaTabela("comer", 4, "preterito_perfeito_composto")).toBe("tendes comido");
+    expect(conjugarPessoaTabela("comer", 4, "futuro_composto")).toBe("tereis comido");
   });
 });

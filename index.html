@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Paradigma verbal: infinitivo → presente, futuro e pretérito perfeito (conjugai-core)."
+      content="Paradigma verbal completo: infinitivo → tempos simples e compostos (conjugai-core)."
     />
     <title>ConjugAI — Paradigma verbal (demo)</title>
     <link rel="stylesheet" href="assets/css/styles.css" />
@@ -29,10 +29,8 @@
           </div>
         </div>
         <p class="tagline">
-          Demo estilo
-          <a href="https://verbe.cc/" target="_blank" rel="noopener noreferrer">verbe.cc</a>:
-          infinitivo em português e tabelas geradas pelo
-          <code>conjugai-core</code> (indicativo: presente, futuro, pretérito perfeito).
+          Demo estilo verbe.cc: infinitivo em português e tabelas geradas pelo
+          <code>conjugai-core</code> (tempos simples e compostos suportados pelo núcleo).
         </p>
         <p class="demo-explain-actions">
           <button type="button" id="demo-explain-open" class="btn btn-ghost">
@@ -71,7 +69,7 @@
         <section class="panel panel-output" aria-labelledby="demo-out-heading">
           <div class="panel-head">
             <h2 id="demo-out-heading" class="panel-title">Tabelas</h2>
-            <span class="badge badge-accent">Indicativo</span>
+            <span class="badge badge-accent">Modos e tempos</span>
           </div>
           <p id="error" class="demo-error" hidden></p>
           <div id="out" hidden>
@@ -79,7 +77,7 @@
             <div id="tables" class="demo-tables"></div>
           </div>
           <p class="hint">
-            Para verbos fora do léxico, futuro e passado só aparecem se existirem em
+            Para verbos fora do léxico, tempos além do presente só aparecem se existirem em
             <code>data/verbos.json</code>
             (<a
               class="demo-lexico-doc-link"
@@ -113,8 +111,8 @@
           <p class="algo-dialog__lead">
             Para cada <strong>linha</strong> das tabelas, o núcleo chama
             <code>conjugar(infinitivo, pessoa, tempo)</code>: a <strong>pessoa</strong> é um número de
-            <strong>0 a 4</strong> (eu, tu, ele/ela, nós, eles). Nesta página o <strong>tempo</strong> é só
-            <code>presente</code>, <code>futuro</code> ou <code>passado</code>; na biblioteca, outros tempos do
+            <strong>0 a 5</strong> (eu, tu, ele/ela, nós, vós, eles). Nesta página o <strong>tempo</strong> é
+            qualquer <code>tempo</code> suportado; na biblioteca, tempos do
             <code>verbos.json</code> (ex. condicional, subjuntivo) também podem ser pedidos à função.
           </p>
 
@@ -133,12 +131,12 @@
               <span class="conj-pipe__plus">+</span>
               <div class="conj-pipe__col">
                 <span class="conj-pipe__cap">Pessoa</span>
-                <span class="conj-pipe__box">0 … 4</span>
+                <span class="conj-pipe__box">0 … 5</span>
               </div>
               <span class="conj-pipe__plus">+</span>
               <div class="conj-pipe__col">
                 <span class="conj-pipe__cap">Tempo</span>
-                <span class="conj-pipe__box">pres. / fut. / pass.</span>
+                <span class="conj-pipe__box">simples / compostos</span>
               </div>
               <span class="conj-pipe__arrow">→</span>
               <div class="conj-pipe__col conj-pipe__col--out">
@@ -187,8 +185,8 @@
           </div>
 
           <p class="algo-dialog__note">
-            Esta página repete esse processo para <strong>cada</strong> célula: três tempos × cinco pessoas =
-            até 15 chamadas a <code>conjugar</code> por infinitivo.
+            Esta página repete esse processo para <strong>cada</strong> célula, em todos os tempos listados pelo
+            demo.
           </p>
         </div>
       </div>
@@ -199,11 +197,43 @@
       (function () {
         "use strict";
 
-        var PERSONAS = ["eu", "tu", "ele / ela", "nós", "eles"];
+        var PERSONAS = ["eu", "tu", "ele / ela / você", "nós", "vós", "eles / elas / vocês"];
         var TEMPOS = [
-          { key: "presente", label: "Presente do indicativo" },
-          { key: "futuro", label: "Futuro do presente (indicativo)" },
-          { key: "passado", label: "Pretérito perfeito (indicativo)" },
+          { key: "presente", label: "Indicativo · Presente" },
+          { key: "preterito_imperfeito", label: "Indicativo · Pretérito imperfeito" },
+          { key: "preterito_mais_que_perfeito", label: "Indicativo · Pretérito mais-que-perfeito" },
+          { key: "passado", label: "Indicativo · Pretérito perfeito" },
+          { key: "futuro", label: "Indicativo · Futuro do presente" },
+          { key: "preterito_perfeito_composto", label: "Indicativo · Pretérito perfeito composto" },
+          {
+            key: "preterito_mais_que_perfeito_composto",
+            label: "Indicativo · Pretérito mais-que-perfeito composto",
+          },
+          {
+            key: "preterito_mais_que_perfeito_anterior",
+            label: "Indicativo · Pretérito mais-que-perfeito anterior",
+          },
+          { key: "futuro_composto", label: "Indicativo · Futuro do presente composto" },
+          { key: "condicional", label: "Condicional · Futuro do pretérito" },
+          {
+            key: "futuro_do_preterito_composto",
+            label: "Condicional · Futuro do pretérito composto",
+          },
+          { key: "subjuntivo_presente", label: "Subjuntivo · Presente" },
+          { key: "subjuntivo_imperfeito", label: "Subjuntivo · Pretérito imperfeito" },
+          { key: "subjuntivo_futuro", label: "Subjuntivo · Futuro" },
+          { key: "subjuntivo_preterito_perfeito", label: "Subjuntivo · Pretérito perfeito composto" },
+          {
+            key: "subjuntivo_preterito_mais_que_perfeito",
+            label: "Subjuntivo · Pretérito mais-que-perfeito composto",
+          },
+          { key: "subjuntivo_futuro_composto", label: "Subjuntivo · Futuro composto" },
+          { key: "infinitivo", label: "Infinitivo" },
+          { key: "infinitivo_pessoal", label: "Infinitivo pessoal" },
+          { key: "infinitivo_pessoal_composto", label: "Infinitivo pessoal composto" },
+          { key: "imperativo", label: "Imperativo" },
+          { key: "gerundio", label: "Gerúndio" },
+          { key: "participio", label: "Particípio" },
         ];
 
         var elVerb = document.getElementById("verb");
@@ -234,7 +264,19 @@
           elDialogLema.textContent = "\u00AB" + lemma + "\u00BB";
 
           var forma = null;
-          if (C && typeof C.conjugar === "function" && typeof C.isVerbShape === "function" && C.isVerbShape(lemma)) {
+          if (
+            C &&
+            typeof C.conjugarTempo === "function" &&
+            typeof C.isVerbShape === "function" &&
+            C.isVerbShape(lemma)
+          ) {
+            forma = C.conjugarTempo(lemma, 0, "presente");
+          } else if (
+            C &&
+            typeof C.conjugar === "function" &&
+            typeof C.isVerbShape === "function" &&
+            C.isVerbShape(lemma)
+          ) {
             forma = C.conjugar(lemma, 0, "presente");
           }
           if (forma) {
@@ -289,7 +331,11 @@
 
         function render() {
           var C = typeof ConjugaiCore !== "undefined" ? ConjugaiCore : null;
-          if (!C || typeof C.conjugar !== "function" || typeof C.isVerbShape !== "function") {
+          if (
+            !C ||
+            (typeof C.conjugar !== "function" && typeof C.conjugarTempo !== "function") ||
+            typeof C.isVerbShape !== "function"
+          ) {
             showError(
               "Não foi possível carregar conjugai-core.js. Use um servidor HTTP a partir da raiz do projeto e verifique o caminho do script."
             );
@@ -322,8 +368,13 @@
             var table = document.createElement("table");
             var tbody = document.createElement("tbody");
 
-            for (var p = 0; p <= 4; p++) {
-              var form = C.conjugar(lemma, p, T.key);
+            for (var p = 0; p <= 5; p++) {
+              var form =
+                typeof C.conjugarPessoaTabela === "function"
+                  ? C.conjugarPessoaTabela(lemma, p, T.key)
+                  : typeof C.conjugarTempo === "function"
+                  ? C.conjugarTempo(lemma, p, T.key)
+                  : C.conjugar(lemma, p, T.key);
               var tr = document.createElement("tr");
               var th = document.createElement("th");
               th.textContent = PERSONAS[p];

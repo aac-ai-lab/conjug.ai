@@ -55,6 +55,35 @@
     return g && g.ConjugaiCore ? g.ConjugaiCore : null;
   }
 
+  function labelTempo(tempo) {
+    var labels = {
+      presente: "Presente do indicativo",
+      futuro: "Futuro do presente",
+      passado: "Pretérito perfeito",
+      preterito_imperfeito: "Pretérito imperfeito",
+      preterito_mais_que_perfeito: "Pretérito mais-que-perfeito",
+      condicional: "Futuro do pretérito",
+      subjuntivo_presente: "Subjuntivo presente",
+      subjuntivo_imperfeito: "Subjuntivo imperfeito",
+      subjuntivo_futuro: "Subjuntivo futuro",
+      imperativo: "Imperativo",
+      infinitivo_pessoal: "Infinitivo pessoal",
+      infinitivo: "Infinitivo",
+      gerundio: "Gerúndio",
+      participio: "Particípio",
+      preterito_perfeito_composto: "Pretérito perfeito composto",
+      preterito_mais_que_perfeito_composto: "Pretérito mais-que-perfeito composto",
+      preterito_mais_que_perfeito_anterior: "Pretérito mais-que-perfeito anterior",
+      futuro_composto: "Futuro composto",
+      futuro_do_preterito_composto: "Futuro do pretérito composto",
+      subjuntivo_preterito_perfeito: "Subjuntivo pretérito perfeito",
+      subjuntivo_preterito_mais_que_perfeito: "Subjuntivo pretérito mais-que-perfeito",
+      subjuntivo_futuro_composto: "Subjuntivo futuro composto",
+      infinitivo_pessoal_composto: "Infinitivo pessoal composto",
+    };
+    return labels[tempo] || tempo;
+  }
+
   /**
    * @param {string} raw
    * @returns {{ ok: boolean, error?: string, analysis?: object }}
@@ -73,12 +102,7 @@
       return { ok: false, error: r.erro };
     }
 
-    var nomeTempo =
-      r.tempo.tipo === "futuro"
-        ? "Futuro do Presente"
-        : r.tempo.tipo === "passado"
-          ? "Pretérito Perfeito"
-          : "Presente do indicativo";
+    var nomeTempo = labelTempo(r.tempo.tipo);
 
     var ruleLine = "Aplicar " + nomeTempo + " de «" + r.verbo.infinitivo + "» para " + r.sujeito.texto + ".";
 
@@ -449,8 +473,19 @@
     var rotulo = data.tempoRotulo || "";
     var nome = data.nomeTempo || "Presente do indicativo";
     var badgeClass = "tempo-badge--pres";
-    if (tipo === "futuro") badgeClass = "tempo-badge--fut";
-    if (tipo === "passado") badgeClass = "tempo-badge--past";
+    if (tipo === "futuro" || tipo === "futuro_composto" || tipo === "subjuntivo_futuro" || tipo === "subjuntivo_futuro_composto") {
+      badgeClass = "tempo-badge--fut";
+    }
+    if (
+      tipo === "passado" ||
+      tipo === "preterito_imperfeito" ||
+      tipo === "preterito_mais_que_perfeito" ||
+      tipo === "preterito_perfeito_composto" ||
+      tipo === "preterito_mais_que_perfeito_composto" ||
+      tipo === "preterito_mais_que_perfeito_anterior"
+    ) {
+      badgeClass = "tempo-badge--past";
+    }
 
     var parts = [];
     parts.push('<div class="tempo-viz" role="img" aria-label="Marcadores de tempo na frase">');

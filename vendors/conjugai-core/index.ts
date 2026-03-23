@@ -1,4 +1,4 @@
-import { conjugar, extrairVerbo } from "./conjugador";
+import { conjugar, conjugarPessoaTabela, conjugarTempo, extrairVerbo } from "./conjugador";
 import { corrigir } from "./corretor";
 import { detectarSujeito } from "./sujeito";
 import { detectarTempo } from "./tempo";
@@ -8,6 +8,7 @@ import { tokenize } from "./tokenizer";
 export type {
   GeneroParticipio,
   NumeroParticipio,
+  PessoaIndiceTabela,
   ResultadoAnalise,
   TempoVerbal,
 } from "./types";
@@ -16,6 +17,8 @@ export { detectarSujeito, detectarSujeitoComposto } from "./sujeito";
 export { detectarTempo } from "./tempo";
 export {
   conjugar,
+  conjugarPessoaTabela,
+  conjugarTempo,
   detectarVerboPorDicionario,
   extrairVerbo,
   gerundio,
@@ -77,7 +80,7 @@ export function analisarFrase(frase: string): ResultadoAnalise {
     };
   }
 
-  const conjugado = conjugar(infinitivo, sujeito.pessoa, tempo.tipo);
+  const conjugado = conjugarTempo(infinitivo, sujeito.pessoa, tempo.tipo);
 
   if (!conjugado) {
     return {
