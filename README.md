@@ -26,7 +26,7 @@ Abrir: `http://localhost:8765/`
 ## Repositório Git
 
 - **`main`** — ramo predefinido para desenvolvimento e integração.
-- **`gh-pages`** — ramo usado pelo **GitHub Pages** para servir a demo pública; mantém-se em paralelo a `main` (merge ou deploy ao publicar alterações no site).
+- **`gh-pages`** — ramo de publicação do **GitHub Pages**, atualizado automaticamente pelo workflow `.github/workflows/deploy-pages.yml` em pushes na `main`.
 
 Versões estáveis para quem consome o repositório: preferir **tags** (`v1.0.0`, etc.) e **GitHub Releases**, não o nome do ramo em si.
 
