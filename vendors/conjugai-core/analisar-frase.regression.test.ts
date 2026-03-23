@@ -61,7 +61,7 @@ describe("analisarFrase — regressão (integração)", () => {
   });
 
   it("sem verbo reconhecível → erro", () => {
-    const r = analisarFrase("Eu gosto de casa");
+    const r = analisarFrase("Eu qqqqqwwwww rrrrrrrrr");
     expect(r.erro).toBeTruthy();
     expect(r.verbo.infinitivo).toBe("");
   });

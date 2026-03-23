@@ -1,7 +1,24 @@
 /** Pessoa gramatical (0–4): eu, tu, ele/ela, nós, eles. */
 export type PessoaIndice = 0 | 1 | 2 | 3 | 4;
 
-export type TempoVerbal = "presente" | "futuro" | "passado";
+/**
+ * Tempos/modos com paradigma de 5 pessoas no `verbos.json` (MorphoBr → JSON).
+ * Deteção na frase (CAA) usa sobretudo presente | futuro | passado.
+ */
+export type TempoVerbal =
+  | "presente"
+  | "futuro"
+  | "passado"
+  | "preterito_imperfeito"
+  | "preterito_mais_que_perfeito"
+  | "condicional"
+  | "subjuntivo_presente"
+  | "subjuntivo_imperfeito"
+  | "subjuntivo_futuro"
+  | "imperativo";
+
+export type GeneroParticipio = "m" | "f";
+export type NumeroParticipio = "sg" | "pl";
 
 export type ResultadoAnalise = {
   tokens: string[];

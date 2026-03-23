@@ -5,7 +5,12 @@ import { detectarTempo } from "./tempo";
 import type { ResultadoAnalise } from "./types";
 import { tokenize } from "./tokenizer";
 
-export type { ResultadoAnalise, TempoVerbal } from "./types";
+export type {
+  GeneroParticipio,
+  NumeroParticipio,
+  ResultadoAnalise,
+  TempoVerbal,
+} from "./types";
 export { tokenize } from "./tokenizer";
 export { detectarSujeito, detectarSujeitoComposto } from "./sujeito";
 export { detectarTempo } from "./tempo";
@@ -13,8 +18,11 @@ export {
   conjugar,
   detectarVerboPorDicionario,
   extrairVerbo,
+  gerundio,
   indiceDoVerboNaFrase,
+  infinitivoLexico,
   isVerbShape,
+  participio,
 } from "./conjugador";
 export { corrigir } from "./corretor";
 

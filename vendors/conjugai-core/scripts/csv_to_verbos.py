@@ -17,7 +17,8 @@ Uso:
   python3 csv_to_verbos.py --input flexoes.csv --merge verbos_atual.json --output verbos.json
   python3 csv_to_verbos.py -i flexoes.csv -m data/verbos.json -o verbos.json --merge-overwrites
 
-Depois: copiar verbos.json para data/ e sincronizar verbos-data.ts; npm run build:core na raiz do projeto.
+Depois: copiar verbos.json para data/; npm run build:core na raiz do projeto.
+Para tempos além de presente/futuro/passado, usar o pipeline MorphoBr (`morphobr_dict_to_verbos.py` / `npm run build:lexicon`).
 """
 
 from __future__ import annotations

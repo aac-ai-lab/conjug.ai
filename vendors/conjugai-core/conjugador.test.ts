@@ -3,8 +3,10 @@ import {
   conjugar,
   detectarVerboPorDicionario,
   extrairVerbo,
+  gerundio,
   indiceDoVerboNaFrase,
   isVerbShape,
+  participio,
 } from "./conjugador";
 
 describe("isVerbShape", () => {
@@ -58,7 +60,17 @@ describe("conjugar", () => {
     expect(conjugar("cantar", 2, "presente")).toBe("canta");
   });
 
-  it("futuro sem entrada no léxico → null", () => {
-    expect(conjugar("cantar", 0, "futuro")).toBeNull();
+  it("futuro sem lema no léxico → null", () => {
+    expect(conjugar("verboinexistentexyz", 0, "futuro")).toBeNull();
+  });
+
+  it("léxico: comer subjuntivo presente 1ª sg", () => {
+    expect(conjugar("comer", 0, "subjuntivo_presente")).toBe("coma");
+  });
+
+  it("léxico: gerúndio e particípio de comer", () => {
+    expect(gerundio("comer")).toBe("comendo");
+    expect(participio("comer", "m", "sg")).toBe("comido");
+    expect(participio("comer", "f", "pl")).toBe("comidas");
   });
 });

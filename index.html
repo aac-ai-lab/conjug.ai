@@ -111,8 +111,9 @@
           <p class="algo-dialog__lead">
             Para cada <strong>linha</strong> das tabelas, o núcleo chama
             <code>conjugar(infinitivo, pessoa, tempo)</code>: a <strong>pessoa</strong> é um número de
-            <strong>0 a 4</strong> (eu, tu, ele/ela, nós, eles) e o <strong>tempo</strong> é
-            <code>presente</code>, <code>futuro</code> ou <code>passado</code>.
+            <strong>0 a 4</strong> (eu, tu, ele/ela, nós, eles). Nesta página o <strong>tempo</strong> é só
+            <code>presente</code>, <code>futuro</code> ou <code>passado</code>; na biblioteca, outros tempos do
+            <code>verbos.json</code> (ex. condicional, subjuntivo) também podem ser pedidos à função.
           </p>
 
           <div
@@ -151,10 +152,10 @@
                   <span class="demo-conj-branch__tag">Léxico</span>
                   <p>
                     Se o infinitivo existe em <code>data/verbos.json</code>, usa-se a <strong>forma guardada</strong>
-                    para aquele tempo e pessoa (presente, futuro e passado completos no léxico). O ficheiro é um
-                    <strong>léxico controlado</strong> no repositório — em geral gerado ou actualizado com dados do
-                    recurso público <strong>MorphoBr</strong> (ficheiros <code>.dict</code>) ou com importação
-                    <strong>CSV</strong>, via scripts Python no pacote.
+                    para aquele tempo e pessoa. O JSON costuma vir do <strong>MorphoBr</strong>
+                    (<code>npm run build:lexicon</code>), em formato <strong>minificado</strong>, com muitos lemas e
+                    vários tempos por lema; esta demo só consulta <strong>três</strong> tempos. Ajustes pontuais:
+                    <strong>CSV</strong> e scripts em <code>vendors/conjugai-core/scripts/</code>.
                     <a
                       class="demo-lexico-doc-link"
                       href="demo/verbs/lexico-verbos.html"

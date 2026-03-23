@@ -90,10 +90,18 @@
           <div class="lexico-doc__body">
             <p>
               O ficheiro <code>vendors/conjugai-core/data/verbos.json</code> guarda, por <strong>infinitivo</strong>
-              (lema), as formas conjugadas nos três tempos usados pelo motor — <strong>presente</strong>,
-              <strong>futuro</strong> e <strong>passado</strong> (pretérito perfeito do indicativo) — para cada uma
-              das <strong>cinco pessoas</strong> (0–4). O TypeScript importa esse JSON em
-              <code>verbos-data.ts</code> e o bundle <code>assets/js/conjugai-core.js</code> inclui o léxico para
+              (lema), paradigmas de <strong>cinco pessoas</strong> (0–4) para vários tempos e modos quando o
+              <strong>MorphoBr</strong> tem paradigma completo — por exemplo <strong>presente</strong>,
+              <strong>futuro</strong>, <strong>passado</strong> (pretérito perfeito), pretérito imperfeito,
+              mais-que-perfeito, condicional, subjuntivos, imperativo, e ainda <strong>gerúndio</strong>,
+              <strong>particípio</strong> (m/f × sg/pl) e <strong>infinitivo pessoal</strong> quando existem. O
+              pipeline da demo CAA (<code>analisarFrase</code>) continua a usar só três tempos lógicos na deteção;
+              <code>conjugar</code> na API aceita o conjunto alargado.
+            </p>
+            <p>
+              O JSON gerado pelo script oficial é <strong>minificado</strong> (sem indentação) para reduzir tamanho;
+              o ficheiro pode ter <strong>dezenas de MB</strong>. O TypeScript importa o JSON em
+              <code>verbos-data.ts</code> e o bundle <code>assets/js/conjugai-core.js</code> embute o léxico para
               uso offline no navegador.
             </p>
           </div>
@@ -112,15 +120,17 @@
               >, que publica flexões em ficheiros <code>verbs-*.dict</code> (por letra do alfabeto).
             </p>
             <p>
-              No repositório ConjugAI, o script
-              <code>vendors/conjugai-core/scripts/morphobr_dict_to_verbos.py</code> converte esses
-              <code>.dict</code> para o formato <code>verbos.json</code>, com <strong>merge</strong> sobre o ficheiro
-              já existente e, em geral, uma <strong>lista branca</strong> de lemas — para manter o bundle
-              leve e auditável (não importar dezenas de milhares de verbos de uma vez).
+              No repositório ConjugAI, na <strong>raiz</strong>: <code>npm run build:lexicon</code> executa
+              <code>scripts/build_verbos_from_morphobr.sh</code>, que descarrega (se necessário) os ficheiros
+              <code>verbs-a.dict</code> … <code>verbs-z.dict</code> para <code>scripts/cache/</code> e corre
+              <code>morphobr_dict_to_verbos.py</code> para gerar <code>data/verbos.json</code> minificado. Opções
+              como <code>--whitelist</code>, <code>--require-core</code> e merge com <code>-m</code> permitem
+              léxico menor ou mais restrito.
             </p>
             <p>
-              Há também um script auxiliar para descarregar os <code>.dict</code> (
-              <code>fetch_morphobr_verb_dicts.sh</code>). O passo a passo completo está na documentação do pacote.
+              Para descarregar só algumas letras, usa-se <code>fetch_morphobr_verb_dicts.sh</code> (variável
+              <code>LETRAS</code>). O passo a passo e as etiquetas MorphoBr → JSON estão em
+              <code>vendors/conjugai-core/README.md</code> (secção «Uso de dicionários linguísticos»).
             </p>
           </div>
         </section>
@@ -146,13 +156,16 @@
           </div>
           <div class="lexico-doc__body">
             <p>
-              Na <strong>raiz</strong> do projeto: <code>npm run build:core</code> (ou <code>npm run build</code>) para
-              regenerar <code>assets/js/conjugai-core.js</code> a partir do TypeScript e do
-              <code>verbos.json</code> atualizado.
+              Na <strong>raiz</strong> do projeto: <code>npm run build:lexicon</code> quando atualizares os
+              <code>.dict</code> ou o conversor; depois <code>npm run build:core</code> (ou
+              <code>npm run build</code>) para regenerar <code>assets/js/conjugai-core.js</code> a partir do
+              TypeScript e do <code>verbos.json</code> atual.
             </p>
             <p class="lexico-doc__note">
-              Documentação detalhada (comandos exactos, formato CSV, notas sobre paradigmas completos):
-              <a href="README.md" target="_blank" rel="noopener noreferrer"><code>vendors/conjugai-core/README.md</code></a>
+              Documentação detalhada (comandos exactos, formato CSV, etiquetas MorphoBr):
+              <a href="../../vendors/conjugai-core/README.md" target="_blank" rel="noopener noreferrer"
+                ><code>vendors/conjugai-core/README.md</code></a
+              >
               — secção <strong>«Uso de dicionários linguísticos»</strong>.
             </p>
           </div>
