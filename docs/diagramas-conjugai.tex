@@ -81,20 +81,23 @@ Pode copiar cada ambiente \texttt{tikzpicture} para o seu documento ou incluir e
   \resizebox{0.92\textwidth}{!}{%
   \begin{tikzpicture}[node distance=7mm, auto]
     \node[proc] (x) {\texttt{extrairVerbo(tokens)}};
-    \node[proc, below=of x] (y) {\texttt{detectarVerboPorDicionario}};
-    \node[dec, below=of y] (z) {lema?};
-    \node[proc, below left=10mm and 2mm of z] (r) {retorna infinitivo};
-    \node[proc, below right=10mm and 2mm of z] (w) {percorrer tokens em ordem};
-    \node[dec, below=of w] (v) {\texttt{isVerbShape(token)}?};
-    \node[proc, below=of v] (n0) {\texttt{null}};
+    \node[dec, below=of x] (a) {há infinitivo\\\texttt{-ar/-er/-ir/-pôr}?};
+    \node[proc, below left=10mm and 2mm of a] (b) {retorna 1.\textsuperscript{o} infinitivo};
+    \node[dec, below right=10mm and 2mm of a] (c) {1.\textsuperscript{o} token é\\\texttt{vou/vais/vai/...}\\e há infinitivo?};
+    \node[proc, below left=10mm and 2mm of c] (d) {retorna \texttt{ir}};
+    \node[proc, below right=10mm and 2mm of c] (e) {\texttt{detectarVerboPorDicionario}\\(filtro funcional)};
+    \node[dec, below=of e] (f) {lema?};
+    \node[proc, below left=10mm and 2mm of f] (g) {retorna infinitivo};
+    \node[proc, below right=10mm and 2mm of f] (h) {\texttt{null}};
 
-    \draw[->] (x) -- (y);
-    \draw[->] (y) -- (z);
-    \draw[->] (z) -| node[near start, left, font=\scriptsize] {sim} (r);
-    \draw[->] (z) -| node[near start, right, font=\scriptsize] {não} (w);
-    \draw[->] (w) -- (v);
-    \draw[->] (v) -- node[right, font=\scriptsize] {não} (n0);
-    \draw[->] (v.west) .. controls +(-1.5,0) and +(-1.5,0) .. node[left, font=\scriptsize] {sim} (r.west);
+    \draw[->] (x) -- (a);
+    \draw[->] (a) -| node[near start, left, font=\scriptsize] {sim} (b);
+    \draw[->] (a) -| node[near start, right, font=\scriptsize] {não} (c);
+    \draw[->] (c) -| node[near start, left, font=\scriptsize] {sim} (d);
+    \draw[->] (c) -| node[near start, right, font=\scriptsize] {não} (e);
+    \draw[->] (e) -- (f);
+    \draw[->] (f) -| node[near start, left, font=\scriptsize] {sim} (g);
+    \draw[->] (f) -| node[near start, right, font=\scriptsize] {não} (h);
   \end{tikzpicture}%
   }
   \caption{Identificação do lema verbal (\texttt{conjugador.ts}).}
@@ -198,19 +201,63 @@ Pode copiar cada ambiente \texttt{tikzpicture} para o seu documento ou incluir e
 
 \begin{figure}[htbp]
   \centering
-  \begin{tikzpicture}[x=0.14cm, y=0.55cm]
-    \foreach \y/\name in {0/Utilizador, 4/Select / Textarea, 8/Painel de passos + saída, 12/\texttt{ConjugaiCore.analisarFrase}} {
-      \node[anchor=east, font=\scriptsize] at (-1, -\y) {\name};
-      \draw[gray!60] (0, -\y) -- (42, -\y);
-    }
-    % Mensagens (y negativo para baixo na figura)
-    \draw[->, thick] (2,0) -- node[above, font=\tiny, sloped] {exemplo / texto} (6,-4);
-    \draw[->, thick] (2,0) -- node[above, font=\tiny, sloped] {clica Analisar} (10,-8);
-    \draw[->, thick] (14,-8) -- node[above, font=\tiny, sloped] {texto bruto} (18,-12);
-    \draw[->, thick, dashed] (26,-12) -- node[above, font=\tiny, sloped] {\texttt{ResultadoAnalise}} (22,-8);
-    \node[font=\tiny, align=center] at (21,-9.5) {animação 4 etapas ($\sim$1,8 s)};
-    \draw[->, thick] (22,-8) -- node[above, font=\tiny, sloped] {frase corrigida} (6,0);
+  \resizebox{0.98\textwidth}{!}{%
+  \begin{tikzpicture}[
+    >=Stealth,
+    actor/.style={rectangle, draw, rounded corners, align=center, font=\scriptsize, minimum width=3.1cm, minimum height=7mm},
+    msg/.style={->, thick},
+    rmsg/.style={->, thick, dashed}
+  ]
+    % Colunas (mesma linha de base)
+    \node[actor] (u) at (0,0) {Utilizador};
+    \node[actor] (s) at (4.2,0) {Select / Textarea};
+    \node[actor] (ui) at (8.7,0) {Painel de passos + saída};
+    \node[actor] (core) at (13.6,0) {\texttt{ConjugaiCore.analisarFrase}};
+
+    % Lifelines (tempo desce no eixo $y$)
+    \draw[gray!60, dashed] (u.south) -- ++(0,-6.2);
+    \draw[gray!60, dashed] (s.south) -- ++(0,-6.2);
+    \draw[gray!60, dashed] (ui.south) -- ++(0,-6.2);
+    \draw[gray!60, dashed] (core.south) -- ++(0,-6.2);
+
+    % Ancoragem explícita com calc ($\cdot$): evita setas diagonais espúrias
+    \def\ya{-0.55}
+    \def\yb{-1.35}
+    \def\yc{-2.15}
+    \def\yd{-2.95}
+    \def\ye{-3.75}
+    \def\yf{-4.85}
+
+    % 1: utilizador edita o select/textarea
+    \draw[msg]
+      ($(u.south)+(0,\ya)$) -- ($(s.south)+(0,\ya)$)
+      node[midway, above, font=\tiny, inner sep=1pt] {escolhe exemplo / edita texto};
+
+    % 2: utilizador dispara análise na UI
+    \draw[msg]
+      ($(u.south)+(0,\yb)$) -- ($(ui.south)+(0,\yb)$)
+      node[midway, above, font=\tiny, inner sep=1pt] {clica Analisar};
+
+    % 3: UI envia texto ao núcleo
+    \draw[msg]
+      ($(ui.south)+(0,\yc)$) -- ($(core.south)+(0,\yc)$)
+      node[midway, above, font=\tiny, inner sep=1pt] {texto bruto};
+
+    % 4: retorno do núcleo para a UI
+    \draw[rmsg]
+      ($(core.south)+(0,\yd)$) -- ($(ui.south)+(0,\yd)$)
+      node[midway, above, font=\tiny, inner sep=1pt] {\texttt{ResultadoAnalise}};
+
+    % Nota: processamento local na UI (sem seta cruzada)
+    \node[anchor=west, font=\tiny, align=left] at ($(ui.south)+(0.35,\ye)$)
+      {$\hookrightarrow$ animação 4 etapas ($\sim$1{,}8 s)};
+
+    % 5: resultado apresentado ao utilizador
+    \draw[msg]
+      ($(ui.south)+(0,\yf)$) -- ($(u.south)+(0,\yf)$)
+      node[midway, above, font=\tiny, inner sep=1pt] {frase corrigida (saída)};
   \end{tikzpicture}
+  }
   \caption{Troca de mensagens entre utilizador, entrada, UI e núcleo (conceitual).}
   \label{fig:sequencia}
 \end{figure}

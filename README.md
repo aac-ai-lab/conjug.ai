@@ -48,7 +48,8 @@ npm test      # Vitest: testes unitários e de regressão do conjugai-core
 
 Sem `build:core`, o ficheiro em `assets/js/` pode ficar **desatualizado** em relação a `vendors/conjugai-core/`. O `build:lexicon` só é necessário quando atualizares os `.dict` MorphoBr ou o script de conversão.
 
-Documentação detalhada (fonte vs bundle, fluxo): **`vendors/conjugai-core/README.md`**.
+Documentação detalhada (fonte vs bundle, fluxo): **`vendors/conjugai-core/README.md`**.  
+Leitura visual no browser (GitHub Pages): `docs/readme-viewer.html?file=../README.md` e `docs/readme-viewer.html?file=../vendors/conjugai-core/README.md`.
 
 ## Estrutura (principal)
 

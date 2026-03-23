@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ConjugAI — Leitor de README</title>
+    <link rel="stylesheet" href="../assets/css/styles.css" />
+    <style>
+      .md-page {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 1.25rem 1rem 3rem;
+      }
+      .md-nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin: 0 0 1rem;
+        align-items: center;
+      }
+      .md-nav a {
+        color: var(--accent);
+        text-decoration: none;
+        font-weight: 600;
+      }
+      .md-nav a:hover {
+        text-decoration: underline;
+      }
+      .md-source {
+        color: var(--text-muted);
+        margin-bottom: 1rem;
+        font-size: 0.95rem;
+      }
+      .md-source code {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 0.1em 0.35em;
+      }
+      .md-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1.25rem;
+      }
+      .md-card h1,
+      .md-card h2,
+      .md-card h3 {
+        margin-top: 1.1em;
+      }
+      .md-card h1:first-child {
+        margin-top: 0;
+      }
+      .md-card code {
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+      }
+      .md-card pre {
+        overflow-x: auto;
+        padding: 0.75rem;
+        background: #111827;
+        border: 1px solid #243041;
+        border-radius: 8px;
+      }
+      .md-card pre code {
+        background: transparent;
+        border: 0;
+        padding: 0;
+        color: #dbe7f5;
+      }
+      .md-card table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      .md-card th,
+      .md-card td {
+        border: 1px solid var(--border);
+        padding: 0.45rem 0.5rem;
+        text-align: left;
+      }
+      .md-empty {
+        color: var(--text-muted);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="md-page">
+      <nav class="md-nav" aria-label="Navegação">
+        <a href="../index.html">Demo paradigma</a>
+        <span aria-hidden="true">·</span>
+        <a href="../demo/caa/index.html">Demo CAA</a>
+        <span aria-hidden="true">·</span>
+        <a href="../demo/verbs/diagram.html">Diagramas do motor</a>
+      </nav>
+
+      <p id="md-source" class="md-source"></p>
+      <article id="md-out" class="md-card" aria-live="polite">
+        <p class="md-empty">A carregar documentação…</p>
+      </article>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+    <script>
+      (function () {
+        "use strict";
+
+        var params = new URLSearchParams(window.location.search);
+        var file = params.get("file") || "../README.md";
+        var title = params.get("title") || "README";
+        var source = document.getElementById("md-source");
+        var out = document.getElementById("md-out");
+        document.title = "ConjugAI — " + title;
+
+        function escapeHtml(s) {
+          return String(s)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;");
+        }
+
+        source.innerHTML =
+          "Fonte: <code>" +
+          escapeHtml(file) +
+          "</code> · " +
+          '<a href="' +
+          file +
+          '" target="_blank" rel="noopener noreferrer">abrir Markdown bruto</a>';
+
+        fetch(file)
+          .then(function (res) {
+            if (!res.ok) throw new Error("HTTP " + res.status);
+            return res.text();
+          })
+          .then(function (md) {
+            out.innerHTML = marked.parse(md);
+          })
+          .catch(function (err) {
+            out.innerHTML =
+              '<p class="md-empty">Não foi possível carregar este ficheiro Markdown.</p>' +
+              "<pre><code>" +
+              escapeHtml(String(err && err.message ? err.message : err)) +
+              "</code></pre>";
+          });
+      })();
+    </script>
+  </body>
+</html>

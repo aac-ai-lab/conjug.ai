@@ -31,13 +31,14 @@ Detalhe de `conjugador.ts`, invocado dentro de `analisarFrase` após sujeito e t
 
 ```mermaid
 flowchart TD
-  X["extrairVerbo(tokens)"] --> Y["detectarVerboPorDicionario"]
-  Y --> Z{lema?}
-  Z -->|sim| R["retorna infinitivo"]
-  Z -->|não| W["percorrer tokens em ordem"]
-  W --> V{"isVerbShape(token)?"}
-  V -->|sim| R
-  V -->|não| N0["null"]
+  X["extrairVerbo(tokens)"] --> A{"há infinitivo -ar/-er/-ir/-pôr?"}
+  A -->|sim| B["retorna 1.º infinitivo"]
+  A -->|não| C{"1.º token é vou/vais/vai/vamos/vão<br/>e há infinitivo à frente?"}
+  C -->|sim| D["retorna 'ir'"]
+  C -->|não| E["detectarVerboPorDicionario<br/>(ignora pronomes/partículas)"]
+  E --> F{lema?}
+  F -->|sim| G["retorna infinitivo"]
+  F -->|não| H["null"]
 ```
 
 Diagrama interativo e restantes fluxos do núcleo: `demo/verbs/diagram.html`.

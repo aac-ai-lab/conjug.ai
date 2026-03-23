@@ -70,6 +70,12 @@
         Fluxos em <code>conjugai-core</code> (<code>assets/js/conjugai-core.js</code>) e UI em <code>assets/js/app.js</code>. Renderização com
         <a href="https://mermaid.js.org/" rel="noopener noreferrer">Mermaid</a>.
       </p>
+      <p class="lead" style="margin-top: -1.25rem">
+        READMEs em modo visual:
+        <a href="docs/readme-viewer.html?file=../README.md&title=README%20ConjugAI">raiz</a>
+        ·
+        <a href="docs/readme-viewer.html?file=../vendors/conjugai-core/README.md&title=README%20conjugai-core">conjugai-core</a>.
+      </p>
 
       <section class="diagram-block">
         <h2>1. Pipeline <code>analisarFrase</code></h2>
@@ -88,6 +94,26 @@ flowchart TD
   I -->|não| ERR3[Erro: não foi possível conjugar neste tempo]
   I -->|sim| J[corrigir]
   J --> K[Frase corrigida]
+        </div>
+      </section>
+
+      <section class="diagram-block">
+        <h2>1.1. Extração de lema (<code>extrairVerbo</code>)</h2>
+        <p class="hint" style="margin: 0 0 0.75rem; text-align: left; max-width: 64ch; margin-inline: auto">
+          Ordem atual em <code>conjugador.ts</code>: primeiro infinitivo explícito na frase; caso especial
+          <em>ir + infinitivo</em> no início (<em>vou viajar</em>); depois dicionário
+          (<code>detectarVerboPorDicionario</code>) com filtro de pronomes/partículas.
+        </p>
+        <div class="mermaid">
+flowchart TD
+  X["extrairVerbo(tokens)"] --> A{"há infinitivo -ar/-er/-ir/-pôr?"}
+  A -->|sim| B["retorna 1.º infinitivo"]
+  A -->|não| C{"1.º token é vou/vais/vai/vamos/vão<br/>e há infinitivo à frente?"}
+  C -->|sim| D["retorna 'ir'"]
+  C -->|não| E["detectarVerboPorDicionario<br/>(ignora pronomes/partículas)"]
+  E --> F{lema?}
+  F -->|sim| G["retorna infinitivo"]
+  F -->|não| H["null"]
         </div>
       </section>
 

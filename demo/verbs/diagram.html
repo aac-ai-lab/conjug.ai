@@ -95,6 +95,8 @@
           <a href="../../index.html">Demo</a>
           <span aria-hidden="true">·</span>
           <a href="../../diagrama.html">Diagramas demo CAA (Mermaid)</a>
+          <span aria-hidden="true">·</span>
+          <a href="../../docs/readme-viewer.html?file=../vendors/conjugai-core/README.md&title=README%20conjugai-core">README core (visual)</a>
         </p>
       </header>
 
@@ -128,20 +130,21 @@ flowchart LR
             <span class="badge">Mermaid</span>
           </div>
           <p class="hint" style="margin-top: 0">
-            Implementação em <code>conjugador.ts</code>: primeiro <code>detectarVerboPorDicionario</code> (forma do
-            léxico ou infinitivo em <code>VERBOS</code>); se falhar, primeiro token com <code>isVerbShape</code>
-            (sufixo <strong>-ar / -er / -ir</strong> ou <strong>-pôr</strong>).
+            Implementação em <code>conjugador.ts</code>: primeiro infinitivo explícito; depois caso
+            <em>ir + infinitivo</em> no início (<em>vou viajar</em>); por fim
+            <code>detectarVerboPorDicionario</code> (com filtro de pronomes/partículas).
           </p>
           <div class="diagram-mermaid">
             <div class="mermaid">
 flowchart TD
-  X["extrairVerbo(tokens)"] --> Y["detectarVerboPorDicionario"]
-  Y --> Z{lema?}
-  Z -->|sim| R["retorna infinitivo"]
-  Z -->|não| W["percorrer tokens em ordem"]
-  W --> V{"isVerbShape(token)?"}
-  V -->|sim| R
-  V -->|não| N0["null"]
+  X["extrairVerbo(tokens)"] --> A{"há infinitivo -ar/-er/-ir/-pôr?"}
+  A -->|sim| B["retorna 1.º infinitivo"]
+  A -->|não| C{"1.º token é vou/vais/vai/vamos/vão<br/>e há infinitivo à frente?"}
+  C -->|sim| D["retorna 'ir'"]
+  C -->|não| E["detectarVerboPorDicionario<br/>(ignora pronomes/partículas)"]
+  E --> F{lema?}
+  F -->|sim| G["retorna infinitivo"]
+  F -->|não| H["null"]
             </div>
           </div>
         </section>
@@ -161,7 +164,7 @@ flowchart TD
   A["conjugar(verbo, pessoa, tempo)"] --> B{"pessoa 0 a 4?"}
   B -->|não| N0["null"]
   B -->|sim| C{"lema em VERBOS?"}
-  C -->|sim| D["coluna presente / futuro / passado"]
+  C -->|sim| D["coluna do tempo solicitado"]
   D --> E{"forma na pessoa?"}
   E -->|sim| F["string"]
   E -->|não| N1["null"]
@@ -284,7 +287,8 @@ flowchart TD
           </div>
           <p class="hint" style="margin-top: 0">
             <a href="../../index.html">index.html</a> (raiz) — até 15 chamadas a <code>conjugar</code> por infinitivo
-            (3 tempos × 5 pessoas).
+            (3 tempos da demo × 5 pessoas). O motor suporta mais tempos via <code>TempoVerbal</code> quando existirem
+            no léxico.
           </p>
           <div class="diagram-mermaid">
             <div class="mermaid">
