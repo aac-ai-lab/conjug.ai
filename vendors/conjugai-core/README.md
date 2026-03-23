@@ -279,6 +279,8 @@ Frases telegráficas podem ter **vários núcleos** no sujeito (*eu e João*, *J
 
 ## 12. Possíveis evoluções
 
+- Publicação do `conjugai-core` como pacote npm público (nome final, licença e versionamento semântico).
+- Pipeline de release automatizada (build de `dist`, changelog e publicação no npm/GitHub Releases).
 - Análise sintática mais rica (ordem de constituintes, vários verbos).  
 - Novas heurísticas e marcadores para `detectarTempo` (incluindo modo explícito por tag) e calibração linguística por corpus CAA real.  
 - **Carregamento lazy** ou ficheiros de léxico fatiados para reduzir RAM e tempo de arranque no mobile.  
