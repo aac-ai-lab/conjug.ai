@@ -1,10 +1,10 @@
 # ConjugAI
 
-Biblioteca e demos de **conjugação verbal** em **português do Brasil**, para **uso geral**: paradigmas a partir do infinitivo, análise de frases e correção de verbos em texto **minimalista** (pessoa gramatical, tempos com marcadores — presente, futuro, passado).
+Biblioteca e demos de **conjugação verbal** em **português do Brasil**, para **uso geral**: paradigmas a partir do infinitivo, análise de frases e correção de verbos em texto **minimalista** (pessoa gramatical, tempos simples e compostos).
 
 **Motivação:** cenários de **tecnologia assistiva** e **CAA** (Comunicação Aumentativa e Alternativa), onde entradas **telegráficas** são comuns; o núcleo não está limitado a essa aplicação.
 
-Há **duas** páginas de demonstração na raiz do repositório: **`index.html`** — Demo estilo verbe.cc: infinitivo em português e tabelas geradas pelo `conjugai-core` (indicativo: presente, futuro, pretérito perfeito), só `conjugai-core.js`; e **`demo/caa/index.html`** — frases telegráficas com passos e `analisarFrase`, com `app.js` + `conjugai-core.js`. A interface de **análise ao vivo** (quatro passos) é esta segunda; serve para **inspecionar** o pipeline do motor em contexto **CAA**.
+Há **duas** páginas de demonstração na raiz do repositório: **`index.html`** — Demo estilo verbe.cc: infinitivo em português e tabelas geradas pelo `conjugai-core` (tempos simples e compostos, incluindo linha de `vós`), só `conjugai-core.js`; e **`demo/caa/index.html`** — frases telegráficas com passos e `analisarFrase`, com `app.js` + `conjugai-core.js`. A interface de **análise ao vivo** (quatro passos) é esta segunda; serve para **inspecionar** o pipeline do motor em contexto **CAA**.
 
 O **motor linguístico** (`conjugai-core`) vive em **`vendors/`** de propósito: núcleo reutilizável que **pode existir sem** estas páginas; as demos são interfaces de visualização.
 
@@ -34,7 +34,7 @@ Versões estáveis para quem consome o repositório: preferir **tags** (`v1.0.0`
 
 - **Fonte:** `vendors/conjugai-core/` (ficheiros `.ts`) — biblioteca isolada do resto da UI.  
 - **No browser:** `assets/js/conjugai-core.js` — **bundle IIFE** gerado a partir dessa fonte; expõe `ConjugaiCore` (ex.: `analisarFrase`, `conjugar`). É a **mesma lib**, empacotada para `<script src="...">`.
-- **Léxico verbal** (`verbos.json`): em geral gerado a partir do **MorphoBr** (Apache-2.0) com `npm run build:lexicon` — ficheiro **minificado** (uma linha, sem indentação), com dezenas de milhares de lemas e **vários tempos/modos** por lema (indicativo alargado, condicional, subjuntivos, imperativo, gerúndio, particípio, infinitivo pessoal, quando o paradigma no MorphoBr está completo). O pipeline CAA em `analisarFrase` continua a usar só **presente / futuro / passado** na deteção de tempo (`tempo.ts`); `conjugar` aceita o conjunto alargado de `TempoVerbal` para integrações que precisem de mais formas.
+- **Léxico verbal** (`verbos.json`): em geral gerado a partir do **MorphoBr** (Apache-2.0) com `npm run build:lexicon` — ficheiro **minificado** (uma linha, sem indentação), com dezenas de milhares de lemas e **vários tempos/modos** por lema (indicativo alargado, condicional, subjuntivos, imperativo, gerúndio, particípio, infinitivo pessoal, quando o paradigma no MorphoBr está completo). O pipeline CAA em `analisarFrase` usa heurísticas por marcadores e também pode receber **tempo explícito** no texto via `tempo:<chave>` ou `[tempo=<chave>]`; `conjugar`/`conjugarTempo` aceitam o conjunto alargado de `TempoVerbal`.
 - **Peso do bundle:** com o léxico completo MorphoBr, `verbos.json` e `conjugai-core.js` ficam da ordem de **dezenas de MB**; para cenários muito limitados, usar **whitelist** ou subconjunto de `.dict` (ver `vendors/conjugai-core/README.md`).
 
 Após alterar o TypeScript, regenerar o bundle:
@@ -71,6 +71,14 @@ Leitura visual no browser (GitHub Pages): `docs/readme-viewer.html?file=../READM
 
 | Marcador | Tempo |
 |----------|--------|
+| `tempo:<chave>` / `[tempo=<chave>]` | Tempo explícito (qualquer `TempoVerbal`) |
+| *talvez* / *que* | Subjuntivo presente |
+| *se* | Subjuntivo imperfeito |
+| *quando* | Subjuntivo futuro |
+| *ontem + já* | Pretérito perfeito composto |
+| *amanhã + já* | Futuro composto |
+| *antes* | Pretérito mais-que-perfeito |
+| *antigamente* / *sempre* | Pretérito imperfeito |
 | *amanhã* | Futuro do Presente |
 | *ontem* | Pretérito Perfeito |
 | (outros) | Presente |

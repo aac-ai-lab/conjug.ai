@@ -307,7 +307,7 @@
         </header>
         <div class="algo-dialog__body">
           <p class="algo-dialog__lead">
-            O motor (<code>conjugai-core</code>) corre <strong>depois da tokenização</strong> e <strong>antes</strong> do tempo verbal e da conjugação. A ideia é obter o <strong>pronome de referência</strong> e o índice de pessoa (0–4) usados na conjugação.
+            O motor (<code>conjugai-core</code>) corre <strong>depois da tokenização</strong> e <strong>antes</strong> do tempo verbal e da conjugação. A ideia é obter o <strong>pronome de referência</strong> e o índice de pessoa (0–4) usados na conjugação do pipeline CAA.
           </p>
 
           <div id="subject-viz-mount" class="subject-viz-mount" aria-live="polite"></div>
@@ -352,7 +352,7 @@
           </p>
 
           <p class="algo-dialog__note">
-            Os índices <strong>0–4</strong> correspondem a: eu, tu, ele/ela, nós, eles/vocês — o mesmo esquema usado na tabela de conjugação desta demonstração.
+            No pipeline CAA, os índices <strong>0–4</strong> correspondem a: eu, tu, ele/ela, nós, eles/vocês. Na demo de paradigma da raiz existe também API de tabela com <strong>0–5</strong> (inclui <em>vós</em>).
           </p>
         </div>
       </div>
@@ -392,7 +392,7 @@
         </header>
         <div class="algo-dialog__body">
           <p class="algo-dialog__lead">
-            Dados o <strong>infinitivo</strong> (ou forma reconhecida no léxico), a <strong>pessoa</strong> (0–4) e o <strong>tempo</strong>, a função <code>conjugar</code> devolve a forma flexionada. Primeiro tenta o <strong>léxico</strong> <code>verbos.json</code>; se o verbo não estiver no léxico, no <strong>presente</strong> usa-se ainda <strong>regra regular</strong> de sufixos (-ar / -er / -ir).
+            Dados o <strong>infinitivo</strong> (ou forma reconhecida no léxico), a <strong>pessoa</strong> (0–4) e o <strong>tempo</strong>, o pipeline chama <code>conjugarTempo</code>. Primeiro tenta o <strong>léxico</strong> <code>verbos.json</code>; se o verbo não estiver no léxico, no <strong>presente</strong> usa-se ainda <strong>regra regular</strong> de sufixos (-ar / -er / -ir), e tempos compostos usam auxiliar + particípio.
           </p>
           <div id="conj-viz-mount" class="algo-viz-mount" aria-live="polite"></div>
           <p class="algo-dialog__legend" aria-hidden="true">

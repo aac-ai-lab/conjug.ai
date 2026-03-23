@@ -108,7 +108,7 @@
           </div>
           <p class="hint" style="margin-top: 0">
             Ordem em <code>vendors/conjugai-core/index.ts</code>: tokens → sujeito → tempo → lema verbal →
-            <code>conjugar</code> → <code>corrigir</code>.
+            <code>conjugarTempo</code> → <code>corrigir</code>.
           </p>
           <div class="diagram-mermaid">
             <div class="mermaid">
@@ -117,7 +117,7 @@ flowchart LR
   T --> S[detectarSujeito]
   S --> M[detectarTempo]
   M --> E[extrairVerbo]
-  E --> C[conjugar]
+  E --> C[conjugarTempo]
   C --> R[corrigir]
   R --> Out[correcao]
             </div>
@@ -155,23 +155,25 @@ flowchart TD
             <span class="badge">Mermaid</span>
           </div>
           <p class="hint" style="margin-top: 0">
-            Implementação em <code>conjugador.ts</code>: léxico <code>VERBOS</code> primeiro; fora do léxico,
-            só <strong>presente</strong> por regra regular em <strong>-ar / -er / -ir</strong>.
+            Implementação em <code>conjugador.ts</code>: <code>conjugarPessoaTabela</code> (demo raiz) e
+            <code>conjugarTempo</code> (pipeline) usam léxico <code>VERBOS</code> + regras/fallbacks.
           </p>
           <div class="diagram-mermaid">
             <div class="mermaid">
 flowchart TD
-  A["conjugar(verbo, pessoa, tempo)"] --> B{"pessoa 0 a 4?"}
+  A["conjugarPessoaTabela(verbo, pessoa, tempo)"] --> B{"pessoa 0 a 5?"}
   B -->|não| N0["null"]
-  B -->|sim| C{"lema em VERBOS?"}
-  C -->|sim| D["coluna do tempo solicitado"]
-  D --> E{"forma na pessoa?"}
-  E -->|sim| F["string"]
-  E -->|não| N1["null"]
-  C -->|não| G{"tempo e presente?"}
+  B -->|sim| C{"pessoa = vós (4)?"}
+  C -->|sim| CV["conjugarVos / fallback regular"]
+  C -->|não| D{"lema em VERBOS?"}
+  D -->|sim| E["coluna do tempo solicitado"]
+  E --> F{"forma na pessoa?"}
+  F -->|sim| R["string"]
+  F -->|não| N1["null"]
+  D -->|não| G{"tempo e presente?"}
   G -->|sim| H["conjugarRegularPresente"]
   H --> I{"sufixo ok?"}
-  I -->|sim| F
+  I -->|sim| R
   I -->|não| N2["null"]
   G -->|não| N3["null"]
             </div>
@@ -238,12 +240,12 @@ flowchart TD
               <span class="conj-pipe__plus">+</span>
               <div class="conj-pipe__col">
                 <span class="conj-pipe__cap">Pessoa</span>
-                <span class="conj-pipe__box">0 … 4</span>
+                <span class="conj-pipe__box">0 … 5</span>
               </div>
               <span class="conj-pipe__plus">+</span>
               <div class="conj-pipe__col">
                 <span class="conj-pipe__cap">Tempo</span>
-                <span class="conj-pipe__box">pres. / fut. / pass.</span>
+                <span class="conj-pipe__box">simples / compostos</span>
               </div>
               <span class="conj-pipe__arrow">→</span>
               <div class="conj-pipe__col conj-pipe__col--out">
@@ -286,9 +288,8 @@ flowchart TD
             <span class="badge">Mermaid</span>
           </div>
           <p class="hint" style="margin-top: 0">
-            <a href="../../index.html">index.html</a> (raiz) — até 15 chamadas a <code>conjugar</code> por infinitivo
-            (3 tempos da demo × 5 pessoas). O motor suporta mais tempos via <code>TempoVerbal</code> quando existirem
-            no léxico.
+            <a href="../../index.html">index.html</a> (raiz) — ciclo por tempos simples/compostos e 6 pessoas
+            com <code>conjugarPessoaTabela</code>.
           </p>
           <div class="diagram-mermaid">
             <div class="mermaid">
@@ -296,8 +297,8 @@ sequenceDiagram
   participant P as index.html
   participant CC as ConjugaiCore
   loop Cada tempo
-    loop pessoa 0 a 4
-      P->>CC: conjugar(lema, pessoa, tempo)
+    loop pessoa 0 a 5
+      P->>CC: conjugarPessoaTabela(lema, pessoa, tempo)
       CC-->>P: string ou null
     end
   end
@@ -382,13 +383,14 @@ flowchart TB
           if (elLema) elLema.textContent = "\u00AB" + lemma + "\u00BB";
 
           var forma = null;
-          if (
-            C &&
-            typeof C.conjugar === "function" &&
-            typeof C.isVerbShape === "function" &&
-            C.isVerbShape(lemma)
-          ) {
-            forma = C.conjugar(lemma, 0, "presente");
+          if (C && typeof C.isVerbShape === "function" && C.isVerbShape(lemma)) {
+            if (typeof C.conjugarPessoaTabela === "function") {
+              forma = C.conjugarPessoaTabela(lemma, 0, "presente");
+            } else if (typeof C.conjugarTempo === "function") {
+              forma = C.conjugarTempo(lemma, 0, "presente");
+            } else if (typeof C.conjugar === "function") {
+              forma = C.conjugar(lemma, 0, "presente");
+            }
           }
           if (!elForma) return;
           if (forma) {

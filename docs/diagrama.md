@@ -18,7 +18,7 @@ flowchart TD
   E --> F[extrairVerbo]
   F --> G{Lema verbal?}
   G -->|não| ERR2[Erro: verbo não identificado]
-  G -->|sim| H[conjugar]
+  G -->|sim| H[conjugarTempo]
   H --> I{Forma no tempo?}
   I -->|não| ERR3[Erro: não foi possível conjugar neste tempo]
   I -->|sim| J[corrigir]
@@ -57,14 +57,22 @@ flowchart TD
   S0 -->|não| S1[Ordem: nós → eles → ela → ele → eu → padrão eu]
 ```
 
-**Tempo verbal** (`tempo.ts`: excepção com *amanhã* + perífrase *vou/vai/…*)
+**Tempo verbal** (`tempo.ts`: marcadores + override explícito por tag)
 
 ```mermaid
 flowchart TD
-  T0{Tem amanhã?} -->|não| T1{Tem ontem?}
+  OVR{tempo:<chave> / [tempo=<chave>] ?} -->|sim| TEXP[Usa tempo explícito]
+  OVR -->|não| J1{Tem "ontem" + "já"?}
+  J1 -->|sim| PPC[Pretérito perfeito composto]
+  J1 -->|não| J2{Tem "amanhã" + "já"?}
+  J2 -->|sim| FC[Futuro composto]
+  J2 -->|não| S1{Tem "se" / "quando" / "talvez" / "que"?}
+  S1 -->|sim| SUB[Subjuntivo conforme marcador]
+  S1 -->|não| T0{Tem amanhã?}
   T0 -->|sim| P1{1.º token vou/vai/vamos…?}
   P1 -->|sim| TN0[Presente]
   P1 -->|não| TF[Futuro do Presente]
+  T0 -->|não| T1{Tem ontem?}
   T1 -->|sim| TP[Pretérito Perfeito]
   T1 -->|não| TN[Presente do indicativo]
 ```

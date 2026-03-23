@@ -183,7 +183,7 @@ function conjugarRegularPresente(infinitivo: string, pessoa: number): string | n
 
 /**
  * @param verbo infinitivo (minúsculas)
- * @param pessoa 0–4
+ * @param pessoa 0–4 (pipeline CAA). Para paradigma completo com `vós`, usar `conjugarPessoaTabela` (0–5).
  * @param tempo ver verbo-data / MorphoBr
  */
 export function conjugar(verbo: string, pessoa: number, tempo: TempoVerbal): string | null {

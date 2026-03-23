@@ -1,11 +1,12 @@
-/** Pessoa gramatical (0–4): eu, tu, ele/ela, nós, eles. */
+/** Pessoa gramatical do pipeline CAA (0–4): eu, tu, ele/ela, nós, eles/vocês. */
 export type PessoaIndice = 0 | 1 | 2 | 3 | 4;
 /** Pessoa gramatical para tabelas completas (0–5): eu, tu, ele/ela, nós, vós, eles/elas. */
 export type PessoaIndiceTabela = 0 | 1 | 2 | 3 | 4 | 5;
 
 /**
- * Tempos/modos com paradigma de 5 pessoas no `verbos.json` (MorphoBr → JSON).
- * Deteção na frase (CAA) usa sobretudo presente | futuro | passado.
+ * Tempos/modos suportados pelo núcleo.
+ * A deteção no pipeline CAA usa heurísticas por marcadores e também aceita tag explícita:
+ * `tempo:<chave>` ou `[tempo=<chave>]`.
  */
 export type TempoVerbal =
   | "presente"

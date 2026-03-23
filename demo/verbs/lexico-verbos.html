@@ -95,8 +95,9 @@
               <strong>futuro</strong>, <strong>passado</strong> (pretérito perfeito), pretérito imperfeito,
               mais-que-perfeito, condicional, subjuntivos, imperativo, e ainda <strong>gerúndio</strong>,
               <strong>particípio</strong> (m/f × sg/pl) e <strong>infinitivo pessoal</strong> quando existem. O
-              pipeline da demo CAA (<code>analisarFrase</code>) continua a usar só três tempos lógicos na deteção;
-              <code>conjugar</code> na API aceita o conjunto alargado.
+              pipeline da demo CAA (<code>analisarFrase</code>) usa marcadores e também aceita tempo explícito por
+              <code>tempo:&lt;chave&gt;</code> ou <code>[tempo=&lt;chave&gt;]</code>; a API oferece
+              <code>conjugar</code>, <code>conjugarTempo</code> e <code>conjugarPessoaTabela</code>.
             </p>
             <p>
               O JSON gerado pelo script oficial é <strong>minificado</strong> (sem indentação) para reduzir tamanho;

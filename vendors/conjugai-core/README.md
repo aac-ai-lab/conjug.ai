@@ -78,7 +78,8 @@ Para **aumentar o léxico** a partir de dados **humanos** (exportação de DELAF
 | `tense` | `presente` \| `futuro` \| `passado` (alinhado a `tempo.ts` / `conjugar`) |
 | `person` | `0`–`4` → eu, tu, ele/ela, nós, eles (igual a `conjugar` em `conjugador.ts`) |
 
-Cada lema precisa de **15 linhas** (3 tempos × 5 pessoas) para ser emitido no JSON por omissão; com `--allow-incomplete` aceitam-se buracos (preenchidos com string vazia — evitar em produção).
+Cada lema precisa de **15 linhas** (3 tempos × 5 pessoas) para ser emitido no JSON por omissão; com `--allow-incomplete` aceitam-se buracos (preenchidos com string vazia — evitar em produção).  
+Nota: este script CSV mantém foco no formato base (5 pessoas / 3 tempos); o runtime já suporta tempos compostos e a demo de paradigma inclui linha de `vós`.
 
 **Exemplo:**
 
@@ -95,10 +96,12 @@ Recursos DELAF em formato nativo exigem um passo prévio (conversão para este C
 
 ### 4.3 Tempos verbais na API e no pipeline CAA
 
-- **`TempoVerbal` (TypeScript):** inclui, além de `presente`, `futuro` e `passado`, chaves como `preterito_imperfeito`, `preterito_mais_que_perfeito`, `condicional`, `subjuntivo_presente`, `subjuntivo_imperfeito`, `subjuntivo_futuro`, `imperativo` — desde que existam no `verbos.json` para o lema.
-- **`conjugar(verbo, pessoa, tempo)`:** devolve a forma para qualquer `TempoVerbal` com paradigma de cinco pessoas no JSON; fora do léxico, só o **presente** regular por sufixo (-ar/-er/-ir) é gerado (igual ao comportamento anterior).
+- **`TempoVerbal` (TypeScript):** inclui tempos simples e compostos (ex.: `preterito_perfeito_composto`, `futuro_composto`, `subjuntivo_futuro_composto`) além de não-finitos (`infinitivo`, `gerundio`, `participio`).
+- **`conjugar(verbo, pessoa, tempo)`:** base de conjugação em 5 pessoas (pipeline CAA).
+- **`conjugarTempo(verbo, pessoa, tempo)`:** camada ampliada para tempos simples + compostos e não-finitos.
+- **`conjugarPessoaTabela(verbo, pessoa, tempo)`:** API para paradigma de **6 pessoas** (`eu, tu, ele/ela, nós, vós, eles/elas/vocês`) usada na demo da raiz.
 - **`gerundio(verbo)`**, **`participio(verbo, 'm'|'f', 'sg'|'pl')`**, **`infinitivoLexico(verbo)`:** leitura de campos não paradigmáticos no JSON.
-- **`detectarTempo` / `analisarFrase`:** mantêm apenas **três** tempos lógicos para a demo CAA (*amanhã* → futuro, *ontem* → passado, caso contrário presente); não usam subjuntivo/imperfeito/etc. até a UI ou regras novas passarem esses valores a `conjugar`.
+- **`detectarTempo` / `analisarFrase`:** usam marcadores adicionais (incluindo subjuntivo/imperfeito/compostos) e aceitam **tempo explícito** no texto por `tempo:<chave>` ou `[tempo=<chave>]`.
 
 ## 5. Decisão arquitetural
 
@@ -180,8 +183,8 @@ UI (HTML + CSS + app.js)
 | `index.ts` | `analisarFrase`, exportações públicas |
 | `tokenizer.ts` | `tokenize` |
 | `sujeito.ts` | `detectarSujeito`, `detectarSujeitoComposto` (sujeito simples + composto) |
-| `tempo.ts` | `detectarTempo` (*amanhã*, *ontem*, default presente) |
-| `conjugador.ts` | `conjugar`, `extrairVerbo`, `detectarVerboPorDicionario`, `indiceDoVerboNaFrase`, `gerundio`, `participio`, `infinitivoLexico`, léxico + presente regular |
+| `tempo.ts` | `detectarTempo` (marcadores + seleção explícita de tempo) |
+| `conjugador.ts` | `conjugar`, `conjugarTempo`, `conjugarPessoaTabela`, `extrairVerbo`, `detectarVerboPorDicionario`, `indiceDoVerboNaFrase`, `gerundio`, `participio`, `infinitivoLexico`, léxico + presente regular |
 | `corretor.ts` | `corrigir` — substitui só o token verbal (e antecede pronome se sujeito implícito) |
 | `types.ts` | `ResultadoAnalise`, `TempoVerbal`, `GeneroParticipio`, `NumeroParticipio`, … |
 | `data/verbos.json` | Léxico (importado em `verbos-data.ts`); tipicamente minificado; ver §4.1 |
@@ -207,8 +210,8 @@ UI (HTML + CSS + app.js)
 
 O `index.html` na **raiz** do repositório referencia apenas `assets/js/conjugai-core.js`; não importa os `.ts` diretamente. A demo CAA em `demo/caa/index.html` acrescenta `assets/js/app.js`.
 
-**Demo estilo verbe.cc: infinitivo em português e tabelas geradas pelo `conjugai-core` (indicativo: presente, futuro, pretérito perfeito).** Abrir com servidor HTTP a partir da raiz do repositório, por exemplo  
-`http://localhost:8765/` (ficheiro `index.html` na raiz) — usa `ConjugaiCore.conjugar` em ciclo sobre **presente, futuro e passado** × cinco pessoas (a UI não lista ainda todos os tempos do JSON, mas a API aceita-os).
+**Demo estilo verbe.cc: infinitivo em português e tabelas geradas pelo `conjugai-core` (tempos simples e compostos).** Abrir com servidor HTTP a partir da raiz do repositório, por exemplo  
+`http://localhost:8765/` (ficheiro `index.html` na raiz) — usa `ConjugaiCore.conjugarPessoaTabela` para renderizar tempos suportados em **seis pessoas** (incluindo `vós`).
 
 ## 10. Integração no browser (resumo)
 
@@ -246,7 +249,7 @@ Frases telegráficas podem ter **vários núcleos** no sujeito (*eu e João*, *J
 ## 12. Possíveis evoluções
 
 - Análise sintática mais rica (ordem de constituintes, vários verbos).  
-- UI e `detectarTempo` alargados a **mais tempos** (subjuntivo, imperfeito, etc.) alinhados ao `verbos.json`.  
+- Novas heurísticas e marcadores para `detectarTempo` (incluindo modo explícito por tag) e calibração linguística por corpus CAA real.  
 - **Carregamento lazy** ou ficheiros de léxico fatiados para reduzir RAM e tempo de arranque no mobile.  
 - Importação ou reconciliação com **DELAF/Unitex** nativos além do pipeline MorphoBr.  
 - Deteção de erros mais complexos (concordância além do verbo).  
