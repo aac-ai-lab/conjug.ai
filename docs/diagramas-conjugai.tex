@@ -130,18 +130,20 @@ Pode copiar cada ambiente \texttt{tikzpicture} para o seu documento ou incluir e
   \resizebox{0.98\textwidth}{!}{%
   \begin{tikzpicture}[node distance=8mm]
     \node[dec] (t0) {Tem \emph{amanhã}?};
-    \node[dec, below left=16mm and 20mm of t0] (t1) {Tem \emph{ontem}?};
-    \node[dec, below right=16mm and 6mm of t0] (p1) {1.\textsuperscript{o} token vou/vai…?};
-    \node[proc, below left=10mm and 2mm of p1, font=\small] (tn0) {Presente};
-    \node[proc, below right=10mm and 2mm of p1, font=\small] (tf) {Futuro do presente};
-    \node[proc, below left=10mm and 4mm of t1, font=\small] (tp) {Pretérito perfeito};
-    \node[proc, below right=10mm and 4mm of t1, font=\small] (tn) {Presente do indicativo};
-    \draw[->] (t0) -| node[near start, left, font=\scriptsize] {não} (t1);
-    \draw[->] (t0) -| node[near start, right, font=\scriptsize] {sim} (p1);
-    \draw[->] (p1) -| node[near start, left, font=\scriptsize] {sim} (tn0);
-    \draw[->] (p1) -| node[near start, right, font=\scriptsize] {não} (tf);
-    \draw[->] (t1) -| node[near start, left, font=\scriptsize] {sim} (tp);
-    \draw[->] (t1) -| node[near start, right, font=\scriptsize] {não} (tn);
+    \node[dec, below left=14mm and 23mm of t0] (t1) {Tem \emph{ontem}?};
+    \node[dec, below right=14mm and 23mm of t0] (p1) {1.\textsuperscript{o} token vou/vai…?};
+    \node[proc, below=14mm of t1, font=\small] (tp) {Pretérito perfeito};
+    \node[proc, below=14mm of p1, font=\small] (tf) {Futuro do presente};
+    \node[proc, below=31mm of t0, font=\small] (tn) {Presente do indicativo};
+    \node[proc, below=9mm of tn, font=\small] (tn0) {Presente};
+
+    \draw[->] (t0.south west) -- node[midway, left, font=\scriptsize] {não} (t1.north);
+    \draw[->] (t0.south east) -- node[midway, right, font=\scriptsize] {sim} (p1.north);
+    \draw[->] (t1.south) -- node[midway, left, font=\scriptsize] {sim} (tp.north);
+    \draw[->] (p1.south) -- node[midway, right, font=\scriptsize] {não} (tf.north);
+    \draw[->] (t1.east) -- ++(6mm,0) |- node[pos=0.30, above, font=\scriptsize] {não} (tn.west);
+    \draw[->] (p1.west) -- ++(-6mm,0) |- node[pos=0.30, above, font=\scriptsize] {sim} (tn.east);
+    \draw[->] (tn.south) -- (tn0.north);
   \end{tikzpicture}%
   }
   \caption{Marcadores em \texttt{tempo.ts}; com \emph{amanhã} e perífrase \emph{vou/vai/…} mantém-se o presente.}
@@ -182,15 +184,15 @@ Pode copiar cada ambiente \texttt{tikzpicture} para o seu documento ou incluir e
 
     \draw[->] (aside) -- (in);
     \draw[->] (in) -- (btn);
-    \draw[->] (btn.south) |- ++(0,-2mm) -| (an.north);
+    \draw[->] (btn.south) -- ++(0,-4mm) -| (an.north);
     \draw[->] (an) -- (af);
-    \draw[->] (an) -- (anim);
-    \draw[->] (anim) |- (steps.west);
-    \draw[->] (anim) -| (out.south);
     \draw[->] (af) -- (tok);
-    \draw[->] (af) -- (sub);
-    \draw[->] (af) -- (tmp);
-    \draw[->] (af) -- (cj);
+    \draw[->] (tok) -- (sub);
+    \draw[->] (sub) -- (tmp);
+    \draw[->] (tmp) -- (cj);
+    \draw[->] (an) -- (anim);
+    \draw[->] (anim.north) |- (steps.west);
+    \draw[->] (anim.north) -| (out.south);
   \end{tikzpicture}%
   }
   \caption{Componentes da SPA e chamadas ao núcleo (simplificado).}
