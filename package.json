@@ -4,6 +4,7 @@
   "scripts": {
     "build:lexicon": "bash vendors/conjugai-core/scripts/build_verbos_from_morphobr.sh",
     "build:core": "npx esbuild vendors/conjugai-core/index.ts --bundle --format=iife --global-name=ConjugaiCore --outfile=assets/js/conjugai-core.js --platform=neutral",
+    "build:core:package": "npm --prefix vendors/conjugai-core run build",
     "build": "npm run build:core",
     "test": "vitest run",
     "test:watch": "vitest"

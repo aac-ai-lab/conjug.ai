@@ -218,6 +218,37 @@ O `index.html` na **raiz** do repositório referencia apenas `assets/js/conjugai
 - O bundle IIFE `assets/js/conjugai-core.js` expõe `ConjugaiCore.analisarFrase`, `conjugar`, `gerundio`, `participio`, etc.  
 - `npm run build:core` gera esse ficheiro a partir de `vendors/conjugai-core/index.ts` (com `verbos.json` resolvido em tempo de bundle).
 
+### 10.1 Uso em projetos React / JavaScript / TypeScript
+
+O diretório `vendors/conjugai-core/` também funciona como pacote JS/TS:
+
+```bash
+# na raiz do repositório
+npm install
+npm run build:core:package
+```
+
+Esse comando gera:
+
+- `vendors/conjugai-core/dist/index.js` (ESM)
+- `vendors/conjugai-core/dist/index.cjs` (CommonJS)
+- `vendors/conjugai-core/dist/index.d.ts` (tipos TypeScript)
+
+No projeto consumidor (exemplo com dependência local):
+
+```bash
+npm install file:/caminho/absoluto/para/conjugai/vendors/conjugai-core
+```
+
+Exemplo de uso (React/TS):
+
+```ts
+import { analisarFrase } from "conjugai-core";
+
+const resultado = analisarFrase("eu comer maçã");
+console.log(resultado.correcao);
+```
+
 ## 11. Sujeito composto
 
 ### 11.1 Problema

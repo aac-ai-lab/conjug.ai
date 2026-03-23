@@ -45,6 +45,7 @@ Versões estáveis para quem consome o repositório: preferir **tags** (`v1.0.0`
 
 - **Fonte:** `vendors/conjugai-core/` (ficheiros `.ts`) — biblioteca isolada do resto da UI.  
 - **No browser:** `assets/js/conjugai-core.js` — **bundle IIFE** gerado a partir dessa fonte; expõe `ConjugaiCore` (ex.: `analisarFrase`, `conjugar`). É a **mesma lib**, empacotada para `<script src="...">`.
+- **Como pacote JS/TS (React, Vite, Next):** `vendors/conjugai-core/` também pode ser empacotado em `dist/` (ESM + CJS + tipos) via `npm run build:core:package`.
 - **Léxico verbal** (`verbos.json`): em geral gerado a partir do **MorphoBr** (Apache-2.0) com `npm run build:lexicon` — ficheiro **minificado** (uma linha, sem indentação), com dezenas de milhares de lemas e **vários tempos/modos** por lema (indicativo alargado, condicional, subjuntivos, imperativo, gerúndio, particípio, infinitivo pessoal, quando o paradigma no MorphoBr está completo). O pipeline CAA em `analisarFrase` usa heurísticas por marcadores e também pode receber **tempo explícito** no texto via `tempo:<chave>` ou `[tempo=<chave>]`; `conjugar`/`conjugarTempo` aceitam o conjunto alargado de `TempoVerbal`.
 - **Peso do bundle:** com o léxico completo MorphoBr, `verbos.json` e `conjugai-core.js` ficam da ordem de **dezenas de MB**; para cenários muito limitados, usar **whitelist** ou subconjunto de `.dict` (ver `vendors/conjugai-core/README.md`).
 
@@ -54,6 +55,7 @@ Após alterar o TypeScript, regenerar o bundle:
 npm install   # necessário para instalar esbuild em node_modules
 npm run build:lexicon   # opcional: regerar `verbos.json` a partir do MorphoBr (ver `vendors/conjugai-core/README.md`)
 npm run build:core
+npm run build:core:package  # opcional: gera pacote JS/TS em `vendors/conjugai-core/dist`
 npm test      # Vitest: testes unitários e de regressão do conjugai-core
 ```
 
