@@ -8,6 +8,17 @@ Há **duas** páginas de demonstração na raiz do repositório: **`index.html`*
 
 O **motor linguístico** (`conjugai-core`) vive em **`vendors/`** de propósito: núcleo reutilizável que **pode existir sem** estas páginas; as demos são interfaces de visualização.
 
+## Outros domínios de aplicação
+
+Além de CAA, o núcleo pode ser reutilizado em:
+
+- **EdTech / ensino de português**: feedback imediato de flexão verbal em exercícios.
+- **Apoio à escrita**: pré-correção verbal em editores, teclados e extensões.
+- **Assistentes locais/offline**: normalização de texto telegráfico antes de NLU.
+- **Saúde digital**: apps de reabilitação da linguagem com apoio à produção verbal.
+- **Atendimento e formulários**: melhoria de mensagens curtas em contextos de serviço.
+- **Pré-processamento NLP**: enriquecimento morfológico para pipelines simbólicos/híbridos.
+
 ## Requisitos
 
 - **Demos no browser:** navegador moderno; servidor HTTP local recomendado (paths relativos a `assets/`).
@@ -95,6 +106,14 @@ Para ir **além** do que o MorphoBr já traz (outras normas, etiquetas DELAF nat
 **WordNet** e **VerbNet** resolvem sobretudo **relações semânticas** e classes de predicados; são **complementares**, não substitutos de um léxico de flexão para o núcleo atual do ConjugAI.
 
 Integrar DELAF/Unitex em profundidade implica tratar **formato**, **licença**, **norma** (ex. PT-BR) e **peso** em cliente móvel (subconjunto, lazy load ou índice compactado). O pipeline de sujeito, tempo e reconstrução da frase mantém-se; o recurso externo **alimenta** a camada **“qual forma verbal / lema”**.
+
+## Limitações conhecidas
+
+- O pipeline de `analisarFrase` foi desenhado para texto telegráfico curto; frases longas, com várias orações ou vários verbos, podem produzir leituras simplificadas.
+- A correção atual foca sobretudo a flexão verbal; concordância nominal, pontuação e reordenação sintática não são tratadas de forma completa.
+- A deteção de sujeito composto e de tempo usa heurísticas por marcadores; casos ambíguos de linguagem natural podem sair com pessoa/tempo inesperados.
+- Com léxico MorphoBr completo, `verbos.json` e `assets/js/conjugai-core.js` ficam pesados (dezenas de MB), o que afeta arranque e consumo de memória em dispositivos limitados.
+- O bundle web é gerado a partir do TypeScript em `vendors/conjugai-core/`; se não correr `npm run build:core` após alterações, a demo pode divergir do código-fonte.
 
 ## Referências bibliográficas (artigos)
 
