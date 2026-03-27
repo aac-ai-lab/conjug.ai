@@ -16,6 +16,8 @@ Na **raiz** do repositório ConjugAI: `npm install`, depois `npm test` (ou `npm 
 
 **MorphoBr vs WordNet / VerbNet** (por que o léxico de flexão é a base): **`../docs/morphobr-e-recursos-semanticos.md`**.
 
+**Manutenção de documentação e diagramas** (o que atualizar quando o código muda): **`../docs/manutencao-documentacao.md`**.
+
 ## 2. Estado atual da aplicação
 
 A UI (HTML/CSS) já expõe etapas alinhadas ao fluxo interno:

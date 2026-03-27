@@ -69,6 +69,9 @@ Sem `build:core`, o ficheiro em `assets/js/` pode ficar **desatualizado** em rel
 | **`docs/morphobr-e-recursos-semanticos.md`** | Por que **MorphoBr** (flexão em PT) e não **WordNet**/**VerbNet** como base; papéis complementares |
 | **`vendors/conjugai-core/README.md`** | Fonte vs bundle, fluxo técnico, léxico MorphoBr |
 | **`docs/diagrama.md`** | Diagramas Mermaid (fluxo CAA + motor) |
+| **`docs/manutencao-documentacao.md`** | Regra de projeto: o que manter alinhado ao mudar código (docs, diagramas, demos, bundle) |
+
+**Manutenção:** ao alterar o motor, a UI CAA ou fluxos documentados, atualizar também **testes**, **`npm run build:core`**, e os **diagramas** / **docs** afetados — ver `docs/manutencao-documentacao.md` e `.cursorrules`.
 
 Leitura visual no browser (GitHub Pages): `docs/readme-viewer.html?file=../README.md` e `docs/readme-viewer.html?file=../vendors/conjugai-core/README.md`.
 
@@ -89,6 +92,7 @@ Leitura visual no browser (GitHub Pages): `docs/readme-viewer.html?file=../READM
 | `diagrama.html` / `docs/diagrama.md` | Diagramas Mermaid da demo CAA + fluxo do motor |
 | `docs/limites-e-nao-cobertura.md` | Limites do motor e da demo CAA (o que não está coberto) |
 | `docs/morphobr-e-recursos-semanticos.md` | MorphoBr vs WordNet/VerbNet (escolha de léxico) |
+| `docs/manutencao-documentacao.md` | Checklist: documentação e diagramas alinhados às alterações |
 
 ## Regras (resumo)
 
