@@ -197,47 +197,98 @@ button.brand-mark:focus-visible {
   color: var(--text-muted);
 }
 
-.example-select {
+.example-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
   width: 100%;
-  padding: 0.5rem;
+  max-height: 22rem;
+  overflow-y: auto;
   font-family: var(--font);
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   color: var(--text);
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  cursor: pointer;
 }
 
-.example-select:focus {
+.example-list:focus {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
-.example-select option {
-  padding: 0.35rem;
+.example-item {
+  margin: 0;
+  padding: 0.45rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.12s ease;
 }
 
-.example-ident {
-  margin: 0.65rem 0 0;
-  padding: 0.6rem 0.65rem;
-  font-size: 0.78rem;
-  line-height: 1.45;
-  color: var(--text-muted);
+.example-item:last-child {
+  border-bottom: none;
+}
+
+.example-item:hover {
   background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  border-left: 3px solid var(--accent);
 }
 
-.example-ident strong {
-  display: block;
-  margin-bottom: 0.2rem;
-  font-size: 0.7rem;
+.example-item.is-selected {
+  background: color-mix(in srgb, var(--accent) 14%, var(--bg-card));
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.example-item__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-bottom: 0.35rem;
+}
+
+.example-badge {
+  display: inline-block;
+  padding: 0.12rem 0.4rem;
+  font-size: 0.62rem;
   font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--border));
+  border-radius: 999px;
+}
+
+.example-badge--subject {
+  color: #7c9cff;
+  background: rgba(124, 156, 255, 0.12);
+  border-color: rgba(124, 156, 255, 0.35);
+}
+
+.example-badge--time {
+  color: #c9a227;
+  background: rgba(201, 162, 39, 0.12);
+  border-color: rgba(201, 162, 39, 0.35);
+}
+
+.example-badge--verb {
+  color: #3ecf8e;
+  background: rgba(62, 207, 142, 0.12);
+  border-color: rgba(62, 207, 142, 0.35);
+}
+
+.example-badge--other {
+  color: #c084fc;
+  background: rgba(192, 132, 252, 0.12);
+  border-color: rgba(192, 132, 252, 0.35);
+}
+
+.example-item__phrase {
+  display: block;
+  font-size: 0.88rem;
+  line-height: 1.35;
   color: var(--text);
+  word-break: break-word;
 }
 
 .hint {

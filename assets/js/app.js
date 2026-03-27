@@ -4,71 +4,144 @@
 (function () {
   "use strict";
 
-  /** Cada exemplo: frase telegráfica + o que o caso ilustra no pipeline (CAA). */
+  /**
+   * Cada exemplo: frase + badges na lista (tipo: subject | time | verb | other).
+   * `rotulo` = descrição longa (tooltip no item).
+   */
   const EXAMPLES = [
     {
       texto: "Eu comer maçã",
       rotulo:
         "Tokenização; sujeito explícito «eu»; tempo presente; conjugação do infinitivo para a pessoa certa (léxico).",
+      badges: [
+        { texto: "Sujeito explícito", tipo: "subject" },
+        { texto: "Presente", tipo: "time" },
+        { texto: "Conjugação (léxico)", tipo: "verb" },
+      ],
     },
     {
       texto: "Mamãe e eu ir shopping amanhã",
       rotulo:
         "Sujeito composto (contém «eu» → rótulo «nós»); futuro; verbo «ir»; regência «ao shopping» (a + o).",
+      badges: [
+        { texto: "Sujeito composto", tipo: "subject" },
+        { texto: "Futuro", tipo: "time" },
+        { texto: "Ir + regência", tipo: "other" },
+      ],
     },
     {
       texto: "Ele viajar ontem",
       rotulo: "Sujeito «ele»; tempo passado (marcador «ontem»); conjugação no pretérito.",
+      badges: [
+        { texto: "Sujeito «ele»", tipo: "subject" },
+        { texto: "Passado", tipo: "time" },
+        { texto: "Conjugação", tipo: "verb" },
+      ],
     },
     {
       texto: "Nós querer brincar",
       rotulo: "Sujeito «nós» explícito; presente; conjugação de «querer» na 1.ª do plural.",
+      badges: [
+        { texto: "Sujeito plural", tipo: "subject" },
+        { texto: "Presente", tipo: "time" },
+        { texto: "Conjugação", tipo: "verb" },
+      ],
     },
     {
       texto: "Tu fazer lição",
       rotulo: "Sujeito «tu»; 2.ª pessoa; presente; conjugação adequada a «tu».",
+      badges: [
+        { texto: "2.ª pessoa", tipo: "subject" },
+        { texto: "Presente", tipo: "time" },
+        { texto: "Conjugação", tipo: "verb" },
+      ],
     },
     {
       texto: "Ela fazer bolo amanhã",
       rotulo: "Sujeito «ela»; tempo futuro («amanhã»); conjugação no futuro do presente.",
+      badges: [
+        { texto: "Sujeito «ela»", tipo: "subject" },
+        { texto: "Futuro", tipo: "time" },
+        { texto: "Conjugação", tipo: "verb" },
+      ],
     },
     {
       texto: "Vou viajar amanhã",
       rotulo:
         "Forma já conjugada do verbo auxiliar («vou»); o motor reconhece a forma do léxico em vez de re-flexionar o infinitivo.",
+      badges: [
+        { texto: "Forma no léxico", tipo: "verb" },
+        { texto: "Presente", tipo: "time" },
+        { texto: "Perífrase", tipo: "other" },
+      ],
     },
     {
       texto: "Fazer jantar",
       rotulo:
         "Sujeito implícito (1.ª pessoa, «eu»); frase sem pronome na superfície; presente; antecede «Eu» na correção.",
+      badges: [
+        { texto: "Sujeito implícito", tipo: "subject" },
+        { texto: "Presente", tipo: "time" },
+        { texto: "Correção + pronome", tipo: "other" },
+      ],
     },
     {
       texto: "Eu e papai comer pizza",
       rotulo:
         "Padrão «eu + mamãe/papai» tratado como sujeito composto → «nós»; presente; conjugação na 1.ª do plural.",
+      badges: [
+        { texto: "Composto (eu+papai)", tipo: "subject" },
+        { texto: "Presente", tipo: "time" },
+        { texto: "Conjugação", tipo: "verb" },
+      ],
     },
     {
       texto: "Ana e Pedro viajar praia",
       rotulo:
         "Sujeito composto sem «eu» (dois núcleos) → rótulo «eles» e 3.ª do plural; tempo conforme marcadores.",
+      badges: [
+        { texto: "Composto → eles", tipo: "subject" },
+        { texto: "3.ª plural", tipo: "subject" },
+        { texto: "Conjugação", tipo: "verb" },
+      ],
     },
     {
       texto: "Ana e você viajar amanhã",
       rotulo:
         "Composto com «você» → rótulo «vocês» (forma verbal como 3.ª do plural); futuro.",
+      badges: [
+        { texto: "Composto + você", tipo: "subject" },
+        { texto: "Futuro", tipo: "time" },
+        { texto: "Conjugação", tipo: "verb" },
+      ],
     },
     {
       texto: "Você e eu comer pizza",
       rotulo: "Composto que inclui «eu» → «nós»; presente; conjugação na 1.ª do plural.",
+      badges: [
+        { texto: "Composto → nós", tipo: "subject" },
+        { texto: "Presente", tipo: "time" },
+        { texto: "Conjugação", tipo: "verb" },
+      ],
     },
     {
       texto: "Eles fazer trabalho ontem",
       rotulo: "Sujeito «eles» explícito; passado; concordância verbal na 3.ª do plural.",
+      badges: [
+        { texto: "Sujeito «eles»", tipo: "subject" },
+        { texto: "Passado", tipo: "time" },
+        { texto: "Conjugação", tipo: "verb" },
+      ],
     },
     {
       texto: "Nós ir escola amanhã",
       rotulo:
         "Regência de «ir» + lugar: insere «à» antes de substantivo feminino conhecido («à escola»); futuro.",
+      badges: [
+        { texto: "Regência (à escola)", tipo: "other" },
+        { texto: "Futuro", tipo: "time" },
+        { texto: "Normalização", tipo: "verb" },
+      ],
     },
   ];
 
@@ -78,9 +151,11 @@
 
   /** Última análise com `viz` para diagramas nos modais (passos 1–4). */
   var lastPipeline = null;
+  /** Índice do exemplo destacado na lista (sidebar). */
+  var selectedExampleIndex = 0;
 
   const el = {
-    select: document.getElementById("example-select"),
+    exampleList: document.getElementById("example-list"),
     input: document.getElementById("raw-input"),
     btnAnalyze: document.getElementById("btn-analyze"),
     btnReset: document.getElementById("btn-reset"),
@@ -105,24 +180,69 @@
     dialogConj: document.getElementById("dialog-conj-algo"),
     dialogProject: document.getElementById("dialog-project-context"),
     btnProjectContext: document.getElementById("btn-project-context"),
-    exampleIdent: document.getElementById("example-ident"),
   };
 
-  function updateExampleIdent(index) {
-    if (!el.exampleIdent) return;
-    var ex = EXAMPLES[index];
-    if (!ex) {
-      el.exampleIdent.textContent = "";
-      return;
+  function badgeClass(tipo) {
+    var m = {
+      subject: "example-badge--subject",
+      time: "example-badge--time",
+      verb: "example-badge--verb",
+      other: "example-badge--other",
+    };
+    return m[tipo] || m.other;
+  }
+
+  function selectExample(index, runAnalysisAfter) {
+    if (index < 0 || index >= EXAMPLES.length) return;
+    selectedExampleIndex = index;
+    el.input.value = exemploTexto(EXAMPLES[index]);
+    if (el.exampleList) {
+      EXAMPLES.forEach(function (_, idx) {
+        var li = document.getElementById("example-option-" + idx);
+        if (!li) return;
+        var on = idx === index;
+        li.classList.toggle("is-selected", on);
+        li.setAttribute("aria-selected", on ? "true" : "false");
+      });
+      el.exampleList.setAttribute("aria-activedescendant", "example-option-" + index);
     }
-    el.exampleIdent.innerHTML = "";
-    var strong = document.createElement("strong");
-    strong.textContent = "O que este exemplo mostra";
-    el.exampleIdent.appendChild(strong);
-    el.exampleIdent.appendChild(document.createElement("br"));
-    var span = document.createElement("span");
-    span.textContent = ex.rotulo;
-    el.exampleIdent.appendChild(span);
+    if (runAnalysisAfter) runAnalysis();
+  }
+
+  function buildExampleList() {
+    if (!el.exampleList) return;
+    el.exampleList.innerHTML = "";
+    EXAMPLES.forEach(function (ex, idx) {
+      var li = document.createElement("li");
+      li.id = "example-option-" + idx;
+      li.className = "example-item";
+      li.setAttribute("role", "option");
+      li.setAttribute("aria-selected", idx === 0 ? "true" : "false");
+      li.setAttribute("data-index", String(idx));
+      li.setAttribute("title", ex.rotulo);
+      if (idx === 0) li.classList.add("is-selected");
+
+      var badges = document.createElement("div");
+      badges.className = "example-item__badges";
+      ex.badges.forEach(function (b) {
+        var span = document.createElement("span");
+        span.className = "example-badge " + badgeClass(b.tipo);
+        span.textContent = b.texto;
+        badges.appendChild(span);
+      });
+
+      var phrase = document.createElement("span");
+      phrase.className = "example-item__phrase";
+      phrase.textContent = ex.texto;
+
+      li.appendChild(badges);
+      li.appendChild(phrase);
+      li.addEventListener("click", function () {
+        selectExample(idx, true);
+      });
+      el.exampleList.appendChild(li);
+    });
+    el.exampleList.setAttribute("aria-activedescendant", "example-option-0");
   }
 
   function getCore() {
@@ -330,14 +450,6 @@
       lastPipeline = result.analysis.viz;
     }
     runStepAnimation(result.analysis);
-  }
-
-  function syncSelectToInput() {
-    var i = parseInt(el.select.value, 10);
-    if (!Number.isNaN(i) && EXAMPLES[i] !== undefined) {
-      el.input.value = exemploTexto(EXAMPLES[i]);
-    }
-    updateExampleIdent(Number.isNaN(i) ? 0 : i);
   }
 
   var DEFAULT_PIPELINE = {
@@ -763,20 +875,27 @@
   function init() {
     bindAlgoDialogs();
 
-    el.select.innerHTML = "";
-    EXAMPLES.forEach(function (ex, idx) {
-      var opt = document.createElement("option");
-      opt.value = String(idx);
-      opt.textContent = exemploTexto(ex);
-      el.select.appendChild(opt);
-    });
+    buildExampleList();
+    selectedExampleIndex = 0;
     el.input.value = exemploTexto(EXAMPLES[0]);
-    updateExampleIdent(0);
 
-    el.select.addEventListener("change", function () {
-      syncSelectToInput();
-      runAnalysis();
-    });
+    if (el.exampleList) {
+      el.exampleList.addEventListener("keydown", function (e) {
+        if (e.key === "ArrowDown") {
+          e.preventDefault();
+          selectExample(Math.min(selectedExampleIndex + 1, EXAMPLES.length - 1), true);
+        } else if (e.key === "ArrowUp") {
+          e.preventDefault();
+          selectExample(Math.max(selectedExampleIndex - 1, 0), true);
+        } else if (e.key === "Home") {
+          e.preventDefault();
+          selectExample(0, true);
+        } else if (e.key === "End") {
+          e.preventDefault();
+          selectExample(EXAMPLES.length - 1, true);
+        }
+      });
+    }
 
     el.btnAnalyze.addEventListener("click", runAnalysis);
     el.btnReset.addEventListener("click", function () {
