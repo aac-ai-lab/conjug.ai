@@ -12,7 +12,9 @@ O objetivo é **acessibilidade linguística** em contexto de Tecnologia Assistiv
 
 Na **raiz** do repositório ConjugAI: `npm install`, depois `npm test` (ou `npm run test:watch`). Os ficheiros `*.test.ts` dentro de `vendors/conjugai-core/` cobrem **testes unitários** (`tokenizer`, `sujeito`, `tempo`, `conjugador`), **integração/regressão** do pipeline `analisarFrase` (`analisar-frase.regression.test.ts`) e devem ser atualizados quando o comportamento do motor mudar de forma intencional.
 
-**Limites e o que não está coberto** (regência **à**/**ao**, verbos `ir`/`viajar`, listas de lugares, sujeito, tempos, etc.): ver o documento na raiz do repositório em **`docs/limites-e-nao-cobertura.md`** (caminho relativo a esta pasta: `../docs/limites-e-nao-cobertura.md`).
+**Limites e o que não está coberto** (regência **à**/**ao**, verbos `ir`/`viajar`, listas de lugares, sujeito, tempos, etc.): **`../docs/limites-e-nao-cobertura.md`**.
+
+**MorphoBr vs WordNet / VerbNet** (por que o léxico de flexão é a base): **`../docs/morphobr-e-recursos-semanticos.md`**.
 
 ## 2. Estado atual da aplicação
 

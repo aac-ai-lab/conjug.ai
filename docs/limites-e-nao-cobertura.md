@@ -4,6 +4,8 @@ Este documento descreve o **âmbito intencional** do motor (`vendors/conjugai-co
 
 Para a arquitetura e o fluxo técnico, ver também `README.md` (raiz) e `vendors/conjugai-core/README.md`.
 
+**Ver também:** `morphobr-e-recursos-semanticos.md` — por que o núcleo assenta em **léxico de flexão** (MorphoBr) e não em recursos semânticos tipo WordNet/VerbNet como substituto.
+
 ---
 
 ## 1. Escopo geral

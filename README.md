@@ -66,6 +66,7 @@ Sem `build:core`, o ficheiro em `assets/js/` pode ficar **desatualizado** em rel
 | Documento | Conteúdo |
 |-----------|----------|
 | **`docs/limites-e-nao-cobertura.md`** | O que o motor e a demo CAA **não** cobrem (regência **à**/**ao**, sujeito, tempos, léxico, etc.) |
+| **`docs/morphobr-e-recursos-semanticos.md`** | Por que **MorphoBr** (flexão em PT) e não **WordNet**/**VerbNet** como base; papéis complementares |
 | **`vendors/conjugai-core/README.md`** | Fonte vs bundle, fluxo técnico, léxico MorphoBr |
 | **`docs/diagrama.md`** | Diagramas Mermaid (fluxo CAA + motor) |
 
@@ -87,6 +88,7 @@ Leitura visual no browser (GitHub Pages): `docs/readme-viewer.html?file=../READM
 | `demo/verbs/lexico-verbos.html` | Origem e atualização de `verbos.json` (MorphoBr, CSV, build) |
 | `diagrama.html` / `docs/diagrama.md` | Diagramas Mermaid da demo CAA + fluxo do motor |
 | `docs/limites-e-nao-cobertura.md` | Limites do motor e da demo CAA (o que não está coberto) |
+| `docs/morphobr-e-recursos-semanticos.md` | MorphoBr vs WordNet/VerbNet (escolha de léxico) |
 
 ## Regras (resumo)
 
@@ -112,6 +114,8 @@ Sujeito composto (*Eu* + *mamãe*/*papai*, ou *X e Y* antes do verbo) → **pess
 A **cobertura principal** de flexões verbais no cliente vem do **MorphoBr** → `verbos.json` (ver secção do motor e `vendors/conjugai-core/README.md`). Para **refinar ou corrigir** entradas pontuais, continuam válidos o **CSV** (`csv_to_verbos.py`) e fusão com `-m` / listas brancas.
 
 Para ir **além** do que o MorphoBr já traz (outras normas, etiquetas DELAF nativas, subconjuntos por domínio), o caminho alinhado com morfologia continua a ser **léxicos de flexão** — por exemplo no ecossistema **Unitex** (**DELAF** e recursos da **Linguateca**): lema + formas flexionadas + etiquetas.
+
+**Por que MorphoBr e não WordNet/VerbNet como base?** A discussão objetiva (flexão vs semântica de predicados, tabela comparativa, uso futuro como camada complementar) está em **`docs/morphobr-e-recursos-semanticos.md`**.
 
 **WordNet** e **VerbNet** resolvem sobretudo **relações semânticas** e classes de predicados; são **complementares**, não substitutos de um léxico de flexão para o núcleo atual do ConjugAI.
 
