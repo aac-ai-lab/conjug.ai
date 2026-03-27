@@ -4,22 +4,77 @@
 (function () {
   "use strict";
 
+  /** Cada exemplo: frase telegráfica + o que o caso ilustra no pipeline (CAA). */
   const EXAMPLES = [
-    "Eu comer maçã",
-    "Mamãe e eu ir shopping amanhã",
-    "Ele viajar ontem",
-    "Nós querer brincar",
-    "Tu fazer lição",
-    "Ela fazer bolo amanhã",
-    "Vou viajar amanhã",
-    "Fazer jantar",
-    "Eu e papai comer pizza",
-    "Ana e Pedro viajar praia",
-    "Ana e você viajar amanhã",
-    "Você e eu comer pizza",
-    "Eles fazer trabalho ontem",
-    "Nós ir escola amanhã",
+    {
+      texto: "Eu comer maçã",
+      rotulo:
+        "Tokenização; sujeito explícito «eu»; tempo presente; conjugação do infinitivo para a pessoa certa (léxico).",
+    },
+    {
+      texto: "Mamãe e eu ir shopping amanhã",
+      rotulo:
+        "Sujeito composto (contém «eu» → rótulo «nós»); futuro; verbo «ir»; regência «ao shopping» (a + o).",
+    },
+    {
+      texto: "Ele viajar ontem",
+      rotulo: "Sujeito «ele»; tempo passado (marcador «ontem»); conjugação no pretérito.",
+    },
+    {
+      texto: "Nós querer brincar",
+      rotulo: "Sujeito «nós» explícito; presente; conjugação de «querer» na 1.ª do plural.",
+    },
+    {
+      texto: "Tu fazer lição",
+      rotulo: "Sujeito «tu»; 2.ª pessoa; presente; conjugação adequada a «tu».",
+    },
+    {
+      texto: "Ela fazer bolo amanhã",
+      rotulo: "Sujeito «ela»; tempo futuro («amanhã»); conjugação no futuro do presente.",
+    },
+    {
+      texto: "Vou viajar amanhã",
+      rotulo:
+        "Forma já conjugada do verbo auxiliar («vou»); o motor reconhece a forma do léxico em vez de re-flexionar o infinitivo.",
+    },
+    {
+      texto: "Fazer jantar",
+      rotulo:
+        "Sujeito implícito (1.ª pessoa, «eu»); frase sem pronome na superfície; presente; antecede «Eu» na correção.",
+    },
+    {
+      texto: "Eu e papai comer pizza",
+      rotulo:
+        "Padrão «eu + mamãe/papai» tratado como sujeito composto → «nós»; presente; conjugação na 1.ª do plural.",
+    },
+    {
+      texto: "Ana e Pedro viajar praia",
+      rotulo:
+        "Sujeito composto sem «eu» (dois núcleos) → rótulo «eles» e 3.ª do plural; tempo conforme marcadores.",
+    },
+    {
+      texto: "Ana e você viajar amanhã",
+      rotulo:
+        "Composto com «você» → rótulo «vocês» (forma verbal como 3.ª do plural); futuro.",
+    },
+    {
+      texto: "Você e eu comer pizza",
+      rotulo: "Composto que inclui «eu» → «nós»; presente; conjugação na 1.ª do plural.",
+    },
+    {
+      texto: "Eles fazer trabalho ontem",
+      rotulo: "Sujeito «eles» explícito; passado; concordância verbal na 3.ª do plural.",
+    },
+    {
+      texto: "Nós ir escola amanhã",
+      rotulo:
+        "Regência de «ir» + lugar: insere «à» antes de substantivo feminino conhecido («à escola»); futuro.",
+    },
   ];
+
+  function exemploTexto(ex) {
+    return ex.texto;
+  }
 
   /** Última análise com `viz` para diagramas nos modais (passos 1–4). */
   var lastPipeline = null;
@@ -50,7 +105,25 @@
     dialogConj: document.getElementById("dialog-conj-algo"),
     dialogProject: document.getElementById("dialog-project-context"),
     btnProjectContext: document.getElementById("btn-project-context"),
+    exampleIdent: document.getElementById("example-ident"),
   };
+
+  function updateExampleIdent(index) {
+    if (!el.exampleIdent) return;
+    var ex = EXAMPLES[index];
+    if (!ex) {
+      el.exampleIdent.textContent = "";
+      return;
+    }
+    el.exampleIdent.innerHTML = "";
+    var strong = document.createElement("strong");
+    strong.textContent = "O que este exemplo mostra";
+    el.exampleIdent.appendChild(strong);
+    el.exampleIdent.appendChild(document.createElement("br"));
+    var span = document.createElement("span");
+    span.textContent = ex.rotulo;
+    el.exampleIdent.appendChild(span);
+  }
 
   function getCore() {
     var g = typeof globalThis !== "undefined" ? globalThis : window;
@@ -262,8 +335,9 @@
   function syncSelectToInput() {
     var i = parseInt(el.select.value, 10);
     if (!Number.isNaN(i) && EXAMPLES[i] !== undefined) {
-      el.input.value = EXAMPLES[i];
+      el.input.value = exemploTexto(EXAMPLES[i]);
     }
+    updateExampleIdent(Number.isNaN(i) ? 0 : i);
   }
 
   var DEFAULT_PIPELINE = {
@@ -689,10 +763,15 @@
   function init() {
     bindAlgoDialogs();
 
-    el.select.innerHTML = EXAMPLES.map(function (ex, idx) {
-      return '<option value="' + idx + '">' + ex + "</option>";
-    }).join("");
-    el.input.value = EXAMPLES[0];
+    el.select.innerHTML = "";
+    EXAMPLES.forEach(function (ex, idx) {
+      var opt = document.createElement("option");
+      opt.value = String(idx);
+      opt.textContent = exemploTexto(ex);
+      el.select.appendChild(opt);
+    });
+    el.input.value = exemploTexto(EXAMPLES[0]);
+    updateExampleIdent(0);
 
     el.select.addEventListener("change", function () {
       syncSelectToInput();

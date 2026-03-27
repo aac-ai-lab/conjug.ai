@@ -47,12 +47,13 @@
         <aside class="sidebar" aria-labelledby="examples-heading">
           <h2 id="examples-heading" class="sidebar-title">Exemplos</h2>
           <label class="sr-only" for="example-select">Selecionar frase de exemplo</label>
-          <select id="example-select" class="example-select" size="14">
+          <select id="example-select" class="example-select" size="14" aria-describedby="example-ident">
             <option value="0">Eu comer maçã</option>
             <option value="1">Mamãe e eu ir shopping amanhã</option>
             <option value="2">Ele viajar ontem</option>
             <option value="3">Nós querer brincar</option>
           </select>
+          <p id="example-ident" class="example-ident" role="note" aria-live="polite"></p>
           <p class="hint">Ou edite a frase no painel de entrada.</p>
         </aside>
 

@@ -218,6 +218,28 @@ button.brand-mark:focus-visible {
   padding: 0.35rem;
 }
 
+.example-ident {
+  margin: 0.65rem 0 0;
+  padding: 0.6rem 0.65rem;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--accent);
+}
+
+.example-ident strong {
+  display: block;
+  margin-bottom: 0.2rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text);
+}
+
 .hint {
   margin: 0.75rem 0 0;
   font-size: 0.8rem;

@@ -31,7 +31,7 @@ const CASOS = [
       tempo: "futuro" as const,
       infinitivo: "ir",
       conjugado: "iremos",
-      correcao: "Mamãe e eu iremos shopping amanhã",
+      correcao: "Mamãe e eu iremos ao shopping amanhã",
     },
   },
   {
@@ -49,6 +49,36 @@ const CASOS = [
       implicito: true,
       infinitivo: "fazer",
       tempo: "presente" as const,
+    },
+  },
+  {
+    frase: "Nós ir escola amanhã",
+    esperado: {
+      sujeito: "Nós",
+      tempo: "futuro" as const,
+      infinitivo: "ir",
+      conjugado: "iremos",
+      correcao: "Nós iremos à escola amanhã",
+    },
+  },
+  {
+    frase: "Nós ir trabalho amanhã",
+    esperado: {
+      sujeito: "Nós",
+      tempo: "futuro" as const,
+      infinitivo: "ir",
+      conjugado: "iremos",
+      correcao: "Nós iremos ao trabalho amanhã",
+    },
+  },
+  {
+    frase: "Eu ir praia",
+    esperado: {
+      sujeito: "Eu",
+      tempo: "presente" as const,
+      infinitivo: "ir",
+      conjugado: "vou",
+      correcao: "Eu vou à praia",
     },
   },
 ];
