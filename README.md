@@ -70,8 +70,9 @@ Sem `build:core`, o ficheiro em `assets/js/` pode ficar **desatualizado** em rel
 | **`vendors/conjugai-core/README.md`** | Fonte vs bundle, fluxo técnico, léxico MorphoBr |
 | **`docs/diagrama.md`** | Diagramas Mermaid (fluxo CAA + motor) |
 | **`docs/manutencao-documentacao.md`** | Regra de projeto: o que manter alinhado ao mudar código (docs, diagramas, demos, bundle) |
+| **`CHANGELOG.md`** | Registo de alterações ao longo do tempo (histórico Git/GitHub) |
 
-**Manutenção:** ao alterar o motor, a UI CAA ou fluxos documentados, atualizar também **testes**, **`npm run build:core`**, e os **diagramas** / **docs** afetados — ver `docs/manutencao-documentacao.md` e `.cursorrules`.
+**Manutenção:** ao alterar o motor, a UI CAA ou fluxos documentados, atualizar também **testes**, **`npm run build:core`**, os **diagramas** / **docs** afetados e, quando fizer sentido, uma entrada em **`CHANGELOG.md`** — ver `docs/manutencao-documentacao.md` e `.cursorrules`.
 
 Leitura visual no browser (GitHub Pages): `docs/readme-viewer.html?file=../README.md` e `docs/readme-viewer.html?file=../vendors/conjugai-core/README.md`.
 
@@ -93,6 +94,7 @@ Leitura visual no browser (GitHub Pages): `docs/readme-viewer.html?file=../READM
 | `docs/limites-e-nao-cobertura.md` | Limites do motor e da demo CAA (o que não está coberto) |
 | `docs/morphobr-e-recursos-semanticos.md` | MorphoBr vs WordNet/VerbNet (escolha de léxico) |
 | `docs/manutencao-documentacao.md` | Checklist: documentação e diagramas alinhados às alterações |
+| `CHANGELOG.md` | Histórico de alterações do projeto |
 
 ## Regras (resumo)
 

@@ -24,7 +24,7 @@
 
 ## Documentação e artefatos (manutenção obrigatória quando aplicável)
 - Sempre que uma alteração **mudar comportamento**, API pública do núcleo, fluxo do pipeline, limites de cobertura, UI da demo CAA ou geração de artefatos, **atualizar** os ficheiros afetados — não deixar documentação ou diagramas **desatualizados** face ao código.
-- **Documentação textual:** `README.md`, `docs/*.md` (ex.: `limites-e-nao-cobertura.md`, `morphobr-e-recursos-semanticos.md`), `vendors/conjugai-core/README.md`; secções do README que descrevem regras, estrutura ou fluxo.
+- **Documentação textual:** `README.md`, `CHANGELOG.md` (entradas quando fizer sentido), `docs/*.md` (ex.: `limites-e-nao-cobertura.md`, `morphobr-e-recursos-semanticos.md`), `vendors/conjugai-core/README.md`; secções do README que descrevem regras, estrutura ou fluxo.
 - **Diagramas e figuras:** `docs/diagrama.md` (Mermaid), `diagrama.html`, `demo/verbs/diagram.html`, e `docs/diagramas-conjugai.tex` / PDF se o fluxo ou os nomes de módulos mudarem.
 - **Demos e cópia de interface:** `demo/caa/index.html`, textos de ajuda/modais em HTML, exemplos em `assets/js/app.js` quando o comportamento exposto mudar.
 - **Build:** após alterar TS do núcleo, `npm run build:core` para regenerar `assets/js/conjugai-core.js` (bundle não é editado à mão).
