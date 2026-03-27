@@ -81,6 +81,16 @@ const CASOS = [
       correcao: "Eu vou à praia",
     },
   },
+  {
+    frase: "Ana e Pedro viajar praia",
+    esperado: {
+      sujeito: "Eles",
+      tempo: "presente" as const,
+      infinitivo: "viajar",
+      conjugado: "viajam",
+      correcao: "Ana e Pedro viajam à praia",
+    },
+  },
 ];
 
 describe("analisarFrase — regressão (integração)", () => {

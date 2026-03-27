@@ -8,8 +8,11 @@ function normalizar(s: string): string {
     .toLowerCase();
 }
 
+/** Verbos de movimento/deslocamento em que *a/o + lugar* (lista abaixo) admite «à»/«ao» em telegrafia. */
+const VERBOS_MOVIMENTO_REGENCIA_LOCAL = new Set(["ir", "viajar"]);
+
 /**
- * Substantivos de lugar frequentes em telegrafia (CAA), com género para regência de «ir».
+ * Substantivos de lugar frequentes em telegrafia (CAA), com género para regência *a/o + substantivo*.
  * Comparação sempre com `normalizar` (sem acento).
  * Fora desta lista não se insere artigo — evita erros em nomes próprios ou usos não locativos.
  */
@@ -57,13 +60,14 @@ function generoLocativoSubs(subs: string): "f" | "m" | null {
 }
 
 /**
- * Regência de «ir» + complemento de lugar (PT-BR): preposição «a» + artigo «a» ou «o» + substantivo → «à» ou «ao».
+ * Regência de **ir** / **viajar** (e similares na lista) + complemento de lugar (PT-BR):
+ * preposição «a» + artigo «a» ou «o» + substantivo → «à» ou «ao».
  * - Telegrafia sem artigo: insere «à» ou «ao» antes do substantivo conhecido.
  * - Com «a» ou «o» explícitos antes do substantivo: contração num único token («à» ou «ao»).
  * Artigo errado para o género do substantivo (ex.: «o» + escola) corrige-se para «à» ou «ao».
  */
-function aplicarRegenciaIrLocais(resultado: string[], vi: number, infinitivo: string): void {
-  if (vi < 0 || normalizar(infinitivo) !== "ir") return;
+function aplicarRegenciaMovimentoLocais(resultado: string[], vi: number, infinitivo: string): void {
+  if (vi < 0 || !VERBOS_MOVIMENTO_REGENCIA_LOCAL.has(normalizar(infinitivo))) return;
 
   for (let k = vi + 1; k < resultado.length - 1; k++) {
     const art = normalizar(resultado[k]);
@@ -113,7 +117,7 @@ export function corrigir(
     return fallback.charAt(0).toUpperCase() + fallback.slice(1);
   }
 
-  aplicarRegenciaIrLocais(resultado, vi, infinitivo);
+  aplicarRegenciaMovimentoLocais(resultado, vi, infinitivo);
 
   if (sujeito.implicito) {
     resultado.unshift(sujeito.texto);
