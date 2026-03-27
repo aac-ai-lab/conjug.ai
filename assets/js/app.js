@@ -15,6 +15,8 @@
     "Fazer jantar",
     "Eu e papai comer pizza",
     "Ana e Pedro viajar praia",
+    "Ana e você viajar amanhã",
+    "Você e eu comer pizza",
     "Eles fazer trabalho ontem",
     "Nós ir escola amanhã",
   ];
