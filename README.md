@@ -4,7 +4,7 @@ Biblioteca e demos de **conjugação verbal** em **português do Brasil**, para 
 
 **Motivação:** cenários de **tecnologia assistiva** e **CAA** (Comunicação Aumentativa e Alternativa), onde entradas **telegráficas** são comuns; o núcleo não está limitado a essa aplicação.
 
-Há **duas** páginas de demonstração na raiz do repositório: **`index.html`** — Demo infinitivo em português e tabelas geradas pelo `conjugai-core` (tempos simples e compostos, incluindo linha de `vós`), só `conjugai-core.js`; e **`demo/caa/index.html`** — frases telegráficas com passos e `analisarFrase`, com `app.js` + `conjugai-core.js`. A interface de **análise ao vivo** (quatro passos) é esta segunda; serve para **inspecionar** o pipeline do motor em contexto **CAA**.
+Há **duas** páginas de demonstração na raiz do repositório: **`index.html`** — Demo infinitivo em português e tabelas geradas pelo `conjugai-core` (tempos simples e compostos, incluindo linha de `vós`), só `conjugai-core.js`; e **`demo/caa/index.html`** — frases telegráficas com passos e `analisarFrase`, com `app.js` + `conjugai-core.js`. A interface de **análise ao vivo** (quatro passos) é esta segunda; serve para **inspecionar** o pipeline do motor em contexto **CAA**. Na barra lateral, cada exemplo mostra **badges** (sujeito, tempo, conjugação, etc.) como guia pedagógico — não fazem parte do motor.
 
 O **motor linguístico** (`conjugai-core`) vive em **`vendors/`** de propósito: núcleo reutilizável que **pode existir sem** estas páginas; as demos são interfaces de visualização.
 
@@ -61,7 +61,14 @@ npm test      # Vitest: testes unitários e de regressão do conjugai-core
 
 Sem `build:core`, o ficheiro em `assets/js/` pode ficar **desatualizado** em relação a `vendors/conjugai-core/`. O `build:lexicon` só é necessário quando atualizares os `.dict` MorphoBr ou o script de conversão.
 
-Documentação detalhada (fonte vs bundle, fluxo): **`vendors/conjugai-core/README.md`**.  
+### Documentação
+
+| Documento | Conteúdo |
+|-----------|----------|
+| **`docs/limites-e-nao-cobertura.md`** | O que o motor e a demo CAA **não** cobrem (regência **à**/**ao**, sujeito, tempos, léxico, etc.) |
+| **`vendors/conjugai-core/README.md`** | Fonte vs bundle, fluxo técnico, léxico MorphoBr |
+| **`docs/diagrama.md`** | Diagramas Mermaid (fluxo CAA + motor) |
+
 Leitura visual no browser (GitHub Pages): `docs/readme-viewer.html?file=../README.md` e `docs/readme-viewer.html?file=../vendors/conjugai-core/README.md`.
 
 ## Estrutura (principal)
@@ -79,6 +86,7 @@ Leitura visual no browser (GitHub Pages): `docs/readme-viewer.html?file=../READM
 | `demo/verbs/diagram.html` | Diagramas do núcleo (`conjugar`, `analisarFrase`, `corrigir`, pipeline visual) |
 | `demo/verbs/lexico-verbos.html` | Origem e atualização de `verbos.json` (MorphoBr, CSV, build) |
 | `diagrama.html` / `docs/diagrama.md` | Diagramas Mermaid da demo CAA + fluxo do motor |
+| `docs/limites-e-nao-cobertura.md` | Limites do motor e da demo CAA (o que não está coberto) |
 
 ## Regras (resumo)
 
@@ -109,13 +117,19 @@ Para ir **além** do que o MorphoBr já traz (outras normas, etiquetas DELAF nat
 
 Integrar DELAF/Unitex em profundidade implica tratar **formato**, **licença**, **norma** (ex. PT-BR) e **peso** em cliente móvel (subconjunto, lazy load ou índice compactado). O pipeline de sujeito, tempo e reconstrução da frase mantém-se; o recurso externo **alimenta** a camada **“qual forma verbal / lema”**.
 
-## Limitações conhecidas
+## Limitações e não cobertura
 
-- O pipeline de `analisarFrase` foi desenhado para texto telegráfico curto; frases longas, com várias orações ou vários verbos, podem produzir leituras simplificadas.
-- A correção atual foca sobretudo a flexão verbal; concordância nominal, pontuação e reordenação sintática não são tratadas de forma completa.
-- A deteção de sujeito composto e de tempo usa heurísticas por marcadores; casos ambíguos de linguagem natural podem sair com pessoa/tempo inesperados.
-- Com léxico MorphoBr completo, `verbos.json` e `assets/js/conjugai-core.js` ficam pesados (dezenas de MB), o que afeta arranque e consumo de memória em dispositivos limitados.
-- O bundle web é gerado a partir do TypeScript em `vendors/conjugai-core/`; se não correr `npm run build:core` após alterações, a demo pode divergir do código-fonte.
+Resumo: o núcleo não é um corretor gramatical completo nem um parser de português livre; foca **telegráfico**, **verbo** e heurísticas de **sujeito/tempo**.
+
+Lista detalhada (regência **ir**/**viajar** + lugares em lista, crase no recorte implementado, sujeito composto, tempos, léxico, tokenização, demo): **`docs/limites-e-nao-cobertura.md`**.
+
+Pontos que se mantêm sempre relevantes:
+
+- Frases **longas** ou com **vários verbos** → leituras simplificadas.
+- **Concordância nominal**, pontuação e reordenação sintática → fora do foco atual.
+- **Heurísticas** de sujeito/tempo → ambiguidade possível.
+- **Peso** do léxico MorphoBr completo (dezenas de MB) em dispositivos limitados.
+- Sem `npm run build:core` após alterar TS, o bundle em `assets/js/conjugai-core.js` pode **desatualizar**.
 
 ## Referências bibliográficas (artigos)
 
