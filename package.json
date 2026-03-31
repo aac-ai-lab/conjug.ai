@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "build:lexicon": "bash vendors/conjugai-core/scripts/build_verbos_from_morphobr.sh",
-    "build:nlp:data": "node scripts/migrate_to_alphabet.js && mkdir -p assets/nlp/data/legacy assets/nlp/data/wordnet assets/nlp/data/verbnet && cp -r vendors/nlp-pt-br-lite/src/data/legacy/*.json assets/nlp/data/legacy/ 2>/dev/null || true",
+    "build:nlp:data": "node scripts/migrate_to_alphabet.js && bash vendors/conjugai-core/scripts/fetch_morphobr_noun_adj_dicts.sh && python3 vendors/conjugai-core/scripts/morphobr_to_nlp_data.py -i vendors/conjugai-core/scripts/cache/nouns-*.dict vendors/conjugai-core/scripts/cache/adjectives-*.dict -o vendors/nlp-pt-br-lite/src/data/morphobr && mkdir -p assets/nlp/data/legacy assets/nlp/data/morphobr assets/nlp/data/wordnet && cp -r vendors/nlp-pt-br-lite/src/data/legacy/*.json assets/nlp/data/legacy/ 2>/dev/null || true && cp -r vendors/nlp-pt-br-lite/src/data/morphobr/*.json assets/nlp/data/morphobr/ 2>/dev/null || true",
     "build:core": "npx esbuild vendors/conjugai-core/index.ts --bundle --format=iife --global-name=ConjugaiCore --outfile=assets/js/conjugai-core.js --platform=neutral",
     "build:core:package": "npm --prefix vendors/conjugai-core run build",
     "build": "npm run build:nlp:data && npm run build:core",
