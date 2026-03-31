@@ -4,7 +4,7 @@
  */
 export class LexiconLoader {
   private cache: Map<string, Record<string, any>> = new Map();
-  private baseDir: string = "vendors/nlp-pt-br-lite/src/data";
+  private baseDir: string = "assets/nlp/data";
   private sources: string[] = ["legacy", "wordnet", "verbnet"];
 
   constructor(baseDir?: string, sources?: string[]) {
