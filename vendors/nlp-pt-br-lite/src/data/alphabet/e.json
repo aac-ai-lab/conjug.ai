@@ -1,0 +1,64 @@
+{
+  "eu": {
+    "cat": [
+      "PRONOME"
+    ],
+    "p": 0,
+    "w": "Eu"
+  },
+  "ele": {
+    "cat": [
+      "PRONOME"
+    ],
+    "p": 2,
+    "w": "Ele"
+  },
+  "ela": {
+    "cat": [
+      "PRONOME"
+    ],
+    "p": 2,
+    "w": "Ela"
+  },
+  "eles": {
+    "cat": [
+      "PRONOME"
+    ],
+    "p": 4,
+    "w": "Eles"
+  },
+  "elas": {
+    "cat": [
+      "PRONOME"
+    ],
+    "p": 4,
+    "w": "Eles"
+  },
+  "em": {
+    "cat": [
+      "STOPWORD"
+    ]
+  },
+  "e": {
+    "cat": [
+      "STOPWORD"
+    ]
+  },
+  "entretanto": {
+    "cat": [
+      "STOPWORD"
+    ]
+  },
+  "em_breve": {
+    "cat": [
+      "TEMPO",
+      "FUTURO"
+    ]
+  },
+  "escola": {
+    "cat": [
+      "LUGAR",
+      "LUGAR_FEM"
+    ]
+  }
+}

@@ -1,5 +1,5 @@
 import type { TempoVerbal } from "./types";
-import { normalize, DATA_TEMPO } from "../nlp-pt-br-lite/src/index";
+import { normalize, loader } from "../nlp-pt-br-lite/src/index";
 
 export type InfoTempo = {
   tipo: TempoVerbal;
@@ -51,7 +51,7 @@ function extrairTempoExplicito(tokens: string[]): TempoVerbal | null {
  * (ex.: «vou viajar amanhã»), caso em que o primeiro verbo permanece no presente.
  * Caso contrário → presente.
  */
-export function detectarTempo(tokens: string[]): InfoTempo {
+export async function detectarTempo(tokens: string[]): Promise<InfoTempo> {
   const lower = tokens.map(normalize);
   const explicito = extrairTempoExplicito(tokens);
   if (explicito) {
@@ -61,16 +61,18 @@ export function detectarTempo(tokens: string[]): InfoTempo {
     };
   }
   
-  const primeiro = lower[0] ?? "";
-  const temTalvez = lower.some(t => DATA_TEMPO.subjuntivo.includes(t));
+  const tokensInfo = await Promise.all(tokens.map(t => loader.getWordInfo(t)));
+  const firstToken = lower[0] ?? "";
+  
+  const temTalvez = tokensInfo.some(info => info?.cat?.includes("SUBJUNTIVO"));
   const temQuando = lower.includes("quando");
   const temSe = lower.includes("se");
   const temQue = lower.includes("que");
   const temNao = lower.includes("nao");
-  const temPassado = lower.some(t => DATA_TEMPO.passado.includes(t));
-  const temAmanha = lower.some(t => DATA_TEMPO.futuro.includes(t));
+  const temPassado = tokensInfo.some(info => info?.cat?.includes("PASSADO"));
+  const temAmanha = tokensInfo.some(info => info?.cat?.includes("FUTURO"));
   const temJa = lower.includes("ja");
-  const temImperfeito = lower.some(t => DATA_TEMPO.imperfeito.includes(t));
+  const temImperfeito = tokensInfo.some(info => info?.cat?.includes("IMPERFEITO"));
 
   if (temQuando && temJa) {
     return {
@@ -142,7 +144,7 @@ export function detectarTempo(tokens: string[]): InfoTempo {
     };
   }
 
-  if (temNao && (primeiro === "tu" || primeiro === "voce" || primeiro === "voces")) {
+  if (temNao && (firstToken === "tu" || firstToken === "voce" || firstToken === "voces")) {
     return {
       tipo: "imperativo",
       rotulo: 'Estrutura de comando com "não" → Imperativo.',
@@ -152,11 +154,11 @@ export function detectarTempo(tokens: string[]): InfoTempo {
   const amanha = lower.includes("amanha");
   const perifrasisIrPresente =
     amanha &&
-    (primeiro === "vou" ||
-      primeiro === "vais" ||
-      primeiro === "vai" ||
-      primeiro === "vamos" ||
-      primeiro === "vao");
+    (firstToken === "vou" ||
+      firstToken === "vais" ||
+      firstToken === "vai" ||
+      firstToken === "vamos" ||
+      firstToken === "vao");
 
   if (perifrasisIrPresente) {
     return {

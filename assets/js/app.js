@@ -283,7 +283,7 @@
    * @param {string} raw
    * @returns {{ ok: boolean, error?: string, analysis?: object }}
    */
-  function analyze(raw) {
+  async function analyze(raw) {
     var core = getCore();
     if (!core || typeof core.analisarFrase !== "function") {
       return {
@@ -292,7 +292,7 @@
       };
     }
 
-    var r = core.analisarFrase(String(raw).trim());
+    var r = await core.analisarFrase(String(raw).trim());
     if (r.erro) {
       return { ok: false, error: r.erro };
     }
@@ -351,6 +351,8 @@
       },
     };
   }
+  
+  window.ConjugaiAnalyzeAsync = analyze;
 
   function setStepsVisible(show) {
     if (show) {
@@ -436,9 +438,9 @@
     }, delays[3] + 500);
   }
 
-  function runAnalysis() {
+async function runAnalysis() {
     var raw = el.input.value;
-    var result = analyze(raw);
+    var result = await analyze(raw);
     if (!result.ok) {
       setStepsVisible(false);
       el.output.classList.remove("is-busy");

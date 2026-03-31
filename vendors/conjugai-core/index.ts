@@ -13,7 +13,7 @@ export type {
   TempoVerbal,
 } from "./types";
 export { tokenize } from "../nlp-pt-br-lite/src/index";
-export { detectarSujeito, detectarSujeitoComposto } from "./sujeito";
+export { detectarSujeito } from "./sujeito";
 export { detectarTempo } from "./tempo";
 export {
   conjugar,
@@ -32,7 +32,7 @@ export { corrigir } from "./corretor";
 /**
  * Pipeline principal: tokenização → sujeito → tempo → verbo → conjugação → correção.
  */
-export function analisarFrase(frase: string): ResultadoAnalise {
+export async function analisarFrase(frase: string): Promise<ResultadoAnalise> {
   const tokens = tokenize(frase);
 
   if (tokens.length === 0) {
@@ -52,8 +52,8 @@ export function analisarFrase(frase: string): ResultadoAnalise {
     };
   }
 
-  const sujeito = detectarSujeito(tokens);
-  const tempo = detectarTempo(tokens);
+  const sujeito = await detectarSujeito(tokens);
+  const tempo = await detectarTempo(tokens);
   const infinitivo = extrairVerbo(tokens);
 
   if (!infinitivo) {
@@ -109,7 +109,7 @@ export function analisarFrase(frase: string): ResultadoAnalise {
     };
   }
 
-  const correcao = corrigir(tokens, sujeito, infinitivo, conjugado, tempo.tipo);
+  const correcao = await corrigir(tokens, sujeito, infinitivo, conjugado, tempo.tipo);
 
   return {
     tokens,

@@ -257,7 +257,7 @@
           return "comer";
         }
 
-        function syncExplainDialog() {
+        async function syncExplainDialog() {
           if (!elDialogLema || !elDialogForma) return;
           var C = typeof ConjugaiCore !== "undefined" ? ConjugaiCore : null;
           var lemma = lemmaForExplain();
@@ -270,14 +270,14 @@
             typeof C.isVerbShape === "function" &&
             C.isVerbShape(lemma)
           ) {
-            forma = C.conjugarTempo(lemma, 0, "presente");
+            forma = await C.conjugarTempo(lemma, 0, "presente");
           } else if (
             C &&
             typeof C.conjugar === "function" &&
             typeof C.isVerbShape === "function" &&
             C.isVerbShape(lemma)
           ) {
-            forma = C.conjugar(lemma, 0, "presente");
+            forma = await C.conjugar(lemma, 0, "presente");
           }
           if (forma) {
             elDialogForma.textContent = "\u00AB" + forma + "\u00BB";
@@ -311,8 +311,8 @@
             if (e.target === elDialog) elDialog.close();
           });
           if (elExplainOpen) {
-            elExplainOpen.addEventListener("click", function () {
-              syncExplainDialog();
+            elExplainOpen.addEventListener("click", async function () {
+              await syncExplainDialog();
               if (typeof elDialog.showModal === "function") elDialog.showModal();
             });
           }
@@ -329,7 +329,7 @@
           elOut.hidden = true;
         }
 
-        function render() {
+        async function render() {
           var C = typeof ConjugaiCore !== "undefined" ? ConjugaiCore : null;
           if (
             !C ||
@@ -371,10 +371,10 @@
             for (var p = 0; p <= 5; p++) {
               var form =
                 typeof C.conjugarPessoaTabela === "function"
-                  ? C.conjugarPessoaTabela(lemma, p, T.key)
+                  ? await C.conjugarPessoaTabela(lemma, p, T.key)
                   : typeof C.conjugarTempo === "function"
-                  ? C.conjugarTempo(lemma, p, T.key)
-                  : C.conjugar(lemma, p, T.key);
+                  ? await C.conjugarTempo(lemma, p, T.key)
+                  : await C.conjugar(lemma, p, T.key);
               var tr = document.createElement("tr");
               var th = document.createElement("th");
               th.textContent = PERSONAS[p];

@@ -1,0 +1,81 @@
+{
+  "amigo": {
+    "cat": [
+      "PERSON",
+      "SUBST_HUMANO"
+    ]
+  },
+  "amiga": {
+    "cat": [
+      "PERSON",
+      "SUBST_HUMANO"
+    ]
+  },
+  "a": {
+    "cat": [
+      "STOPWORD"
+    ]
+  },
+  "as": {
+    "cat": [
+      "STOPWORD"
+    ]
+  },
+  "ao": {
+    "cat": [
+      "STOPWORD"
+    ]
+  },
+  "anteontem": {
+    "cat": [
+      "TEMPO",
+      "PASSADO"
+    ]
+  },
+  "ante_ontem": {
+    "cat": [
+      "TEMPO",
+      "PASSADO"
+    ]
+  },
+  "antes": {
+    "cat": [
+      "TEMPO",
+      "PASSADO"
+    ]
+  },
+  "atras": {
+    "cat": [
+      "TEMPO",
+      "PASSADO"
+    ]
+  },
+  "agora": {
+    "cat": [
+      "TEMPO",
+      "PRESENTE"
+    ]
+  },
+  "amanha": {
+    "cat": [
+      "TEMPO",
+      "FUTURO"
+    ]
+  },
+  "antigamente": {
+    "cat": [
+      "TEMPO",
+      "IMPERFEITO"
+    ]
+  },
+  "andar": {
+    "cat": [],
+    "reg": "local"
+  },
+  "academia": {
+    "cat": [
+      "LUGAR",
+      "LUGAR_FEM"
+    ]
+  }
+}

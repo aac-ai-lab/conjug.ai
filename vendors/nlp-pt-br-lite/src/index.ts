@@ -1,2 +1,19 @@
+import {
+  loader,
+  normalize,
+  isStopword,
+  getPronomeInfo,
+  isSubstantivoHumano,
+  isTempoMarker,
+  getRegenciaInfo,
+} from "./pos-tagger";
 export * from "./tokenizer";
-export * from "./pos-tagger";
+export {
+  loader,
+  normalize,
+  isStopword,
+  getPronomeInfo,
+  isSubstantivoHumano,
+  isTempoMarker,
+  getRegenciaInfo,
+};

@@ -1,6 +1,6 @@
 import { extrairVerbo, indiceDoVerboNaFrase } from "./conjugador";
 import type { PessoaIndice } from "./types";
-import { normalize, DATA_SUJEITO, DATA_FUNCIONAL, getPronomeInfo, isSubstantivoHumano } from "../nlp-pt-br-lite/src/index";
+import { normalize, getPronomeInfo, isSubstantivoHumano, isStopword } from "../nlp-pt-br-lite/src/index";
 
 export type InfoSujeito = {
   texto: string;
@@ -90,22 +90,18 @@ function isCompostoEuOutra(tokens: string[]): boolean {
   return false;
 }
 
-function isNounCandidate(token: string): boolean {
+async function isNounCandidate(token: string): Promise<boolean> {
   const n = normalize(token);
   if (n.length < 2) return false;
 
   // 1. Títulos de pessoas / Parentesco (comum em CAA)
-  if (isSubstantivoHumano(token)) return true;
+  if (await isSubstantivoHumano(token)) return true;
 
   // 2. Nomes Próprios (começam com maiúscula na frase original)
   const isUpper = token.charAt(0) !== token.charAt(0).toLowerCase();
   if (isUpper) {
-    const funcionais = [
-      ...DATA_FUNCIONAL.artigos,
-      ...DATA_FUNCIONAL.preposicoes,
-      ...DATA_FUNCIONAL.conclusoes
-    ];
-    if (funcionais.includes(n)) return false;
+    // Se for uma stopword conhecida, mesmo em maiúscula, não é sujeito
+    if (await isStopword(token)) return false;
     
     // Se for um verbo conhecido mesmo em maiúscula, não é sujeito
     if (extrairVerbo([token])) return false;
@@ -121,7 +117,7 @@ function isNounCandidate(token: string): boolean {
  * Tenta primeiro sujeito composto (**X e Y** antes do verbo); 
  * depois procura pronomes ou nomes em qualquer posição (bidirecional).
  */
-export function detectarSujeito(tokens: string[]): InfoSujeito {
+export async function detectarSujeito(tokens: string[]): Promise<InfoSujeito> {
   const inf = extrairVerbo(tokens);
   const verbIdx = inf ? indiceDoVerboNaFrase(tokens, inf) : -1;
 
@@ -131,17 +127,16 @@ export function detectarSujeito(tokens: string[]): InfoSujeito {
     if (comp) return { ...comp, posicaoOriginal: "antes" };
   }
 
-  // 2. Tentar Sujeito Explícito (Pronomes) - Busca Bidirecional
-  const pronomesMap = DATA_SUJEITO.pronomes as Record<string, { texto: string; pessoa: PessoaIndice }>;
+// 2. Tentar Sujeito Explícito (Pronomes) - Busca Bidirecional
 
   // Prioridade 1: Pronome antes do verbo
   if (verbIdx > 0) {
     for (let i = 0; i < verbIdx; i++) {
-      const n = normalize(tokens[i]);
-      if (pronomesMap[n]) {
+      const info = await getPronomeInfo(tokens[i]);
+      if (info) {
         return {
-          ...pronomesMap[n],
-          rotulo: `explícito: ${n}`,
+          ...info,
+          rotulo: `explícito: ${tokens[i]}`,
           tokenIndex: i,
           posicaoOriginal: "antes",
           implicito: false,
@@ -153,11 +148,11 @@ export function detectarSujeito(tokens: string[]): InfoSujeito {
   // Prioridade 2: Pronome depois do verbo (VSO/VOS)
   if (verbIdx >= 0) {
     for (let i = verbIdx + 1; i < tokens.length; i++) {
-      const n = normalize(tokens[i]);
-      if (pronomesMap[n]) {
+      const info = await getPronomeInfo(tokens[i]);
+      if (info) {
         return {
-          ...pronomesMap[n],
-          rotulo: `explícito (pós-verbo): ${n}`,
+          ...info,
+          rotulo: `explícito (pós-verbo): ${tokens[i]}`,
           tokenIndex: i,
           posicaoOriginal: "depois",
           implicito: false,
@@ -182,7 +177,7 @@ export function detectarSujeito(tokens: string[]): InfoSujeito {
   // Prioridade: Antes do verbo
   if (verbIdx > 0) {
     for (let i = 0; i < verbIdx; i++) {
-      if (isNounCandidate(tokens[i])) {
+      if (await isNounCandidate(tokens[i])) {
         return {
           texto: tokens[i],
           pessoa: 2, // 3ª pessoa para nomes
@@ -197,7 +192,7 @@ export function detectarSujeito(tokens: string[]): InfoSujeito {
   // Fallback: Depois do verbo
   if (verbIdx >= 0) {
     for (let i = verbIdx + 1; i < tokens.length; i++) {
-      if (isNounCandidate(tokens[i])) {
+      if (await isNounCandidate(tokens[i])) {
         return {
           texto: tokens[i],
           pessoa: 2,

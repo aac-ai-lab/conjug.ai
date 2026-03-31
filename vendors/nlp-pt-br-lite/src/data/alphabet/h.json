@@ -1,0 +1,14 @@
+{
+  "hoje": {
+    "cat": [
+      "TEMPO",
+      "PRESENTE"
+    ]
+  },
+  "hospital": {
+    "cat": [
+      "LUGAR",
+      "LUGAR_MASC"
+    ]
+  }
+}

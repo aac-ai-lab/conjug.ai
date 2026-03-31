@@ -1,25 +1,15 @@
 import { indiceDoVerboNaFrase } from "./conjugador";
 import type { TempoVerbal } from "./types";
-import { normalize, DATA_REGENCIA } from "../nlp-pt-br-lite/src/index";
+import { normalize, getRegenciaInfo, loader } from "../nlp-pt-br-lite/src/index";
 
 
 
-/** Verbos de movimento/deslocamento em que *a/o + lugar* admite «à»/«ao» em telegrafia. */
-const VERBOS_MOVIMENTO_REGENCIA_LOCAL = new Set(DATA_REGENCIA.verbos_movimento);
 
-/**
- * Substantivos de lugar frequentes em telegrafia (CAA), com género para regência *a/o + substantivo*.
- * Comparação sempre com `normalizar` (sem acento).
- * Fora desta lista não se insere artigo — evita erros em nomes próprios ou usos não locativos.
- */
-const SUBST_LOCATIVO_FEMININO = new Set(DATA_REGENCIA.lugares.femininos);
 
-const SUBST_LOCATIVO_MASCULINO = new Set(DATA_REGENCIA.lugares.masculinos);
-
-function generoLocativoSubs(subs: string): "f" | "m" | null {
-  const n = normalize(subs);
-  if (SUBST_LOCATIVO_FEMININO.has(n)) return "f";
-  if (SUBST_LOCATIVO_MASCULINO.has(n)) return "m";
+async function generoLocativoSubs(subs: string): Promise<"f" | "m" | null> {
+  const info = await loader.getWordInfo(subs);
+  if (info?.cat?.includes("LUGAR_FEM")) return "f";
+  if (info?.cat?.includes("LUGAR_MASC")) return "m";
   return null;
 }
 
@@ -30,12 +20,13 @@ function generoLocativoSubs(subs: string): "f" | "m" | null {
  * - Com «a» ou «o» explícitos antes do substantivo: contração num único token («à» ou «ao»).
  * Artigo errado para o género do substantivo (ex.: «o» + escola) corrige-se para «à» ou «ao».
  */
-function aplicarRegenciaMovimentoLocais(resultado: string[], vi: number, infinitivo: string): void {
-  if (vi < 0 || !VERBOS_MOVIMENTO_REGENCIA_LOCAL.has(normalize(infinitivo))) return;
+async function aplicarRegenciaMovimentoLocais(resultado: string[], vi: number, infinitivo: string): Promise<void> {
+  const regValue = await getRegenciaInfo(infinitivo);
+  if (vi < 0 || regValue !== "local") return;
 
   for (let k = vi + 1; k < resultado.length - 1; k++) {
     const art = normalize(resultado[k]);
-    const gen = generoLocativoSubs(resultado[k + 1]);
+    const gen = await generoLocativoSubs(resultado[k + 1]);
     if (!gen) continue;
     if (gen === "f") {
       if (art === "a" || art === "o") resultado[k] = "à";
@@ -46,7 +37,7 @@ function aplicarRegenciaMovimentoLocais(resultado: string[], vi: number, infinit
 
   const j = vi + 1;
   if (j >= resultado.length) return;
-  const gen = generoLocativoSubs(resultado[j]);
+  const gen = await generoLocativoSubs(resultado[j]);
   if (gen === "f") resultado.splice(j, 0, "à");
   else if (gen === "m") resultado.splice(j, 0, "ao");
 }
@@ -57,7 +48,7 @@ function aplicarRegenciaMovimentoLocais(resultado: string[], vi: number, infinit
  * Sujeito composto (ex.: «Mamãe e eu …») mantém-se na superfície — só o verbo é flexionado.
  * Não descarta complementos.
  */
-export function corrigir(
+export async function corrigir(
   tokens: string[],
   sujeito: {
     texto: string;
@@ -70,7 +61,7 @@ export function corrigir(
   infinitivo: string,
   conjugado: string,
   _tempoTipo: TempoVerbal
-): string {
+): Promise<string> {
   const verbLower = conjugado.charAt(0).toLowerCase() + conjugado.slice(1);
   const vi = indiceDoVerboNaFrase(tokens, infinitivo);
 
@@ -110,12 +101,12 @@ export function corrigir(
   // Se vi não foi encontrado, mas temos tokens (ex: erro no índice), garantir que não perdemos o verbo
   const viFinal = vi >= 0 ? (normalizeSVO ? (sujeito.tokenIndex! < vi ? vi - 1 : vi) + 1 : vi) : -1;
 
-  aplicarRegenciaMovimentoLocais(resultado, viFinal + (normalizeSVO || sujeito.implicito ? 0 : 0), infinitivo);
+  await aplicarRegenciaMovimentoLocais(resultado, viFinal + (normalizeSVO || sujeito.implicito ? 0 : 0), infinitivo);
   
   // Re-calculando o índice do verbo no array 'resultado' para a regência
   const viNoResultado = resultado.findIndex(t => normalize(t) === normalize(verbLower));
   if (viNoResultado >= 0) {
-    aplicarRegenciaMovimentoLocais(resultado, viNoResultado, infinitivo);
+    await aplicarRegenciaMovimentoLocais(resultado, viNoResultado, infinitivo);
   }
 
   const out = resultado.join(" ").replace(/\s+/g, " ").trim();

@@ -1,0 +1,83 @@
+{
+  "pai": {
+    "cat": [
+      "PERSON",
+      "SUBST_HUMANO"
+    ]
+  },
+  "papai": {
+    "cat": [
+      "PERSON",
+      "SUBST_HUMANO"
+    ]
+  },
+  "professor": {
+    "cat": [
+      "PERSON",
+      "SUBST_HUMANO"
+    ]
+  },
+  "professora": {
+    "cat": [
+      "PERSON",
+      "SUBST_HUMANO"
+    ]
+  },
+  "por": {
+    "cat": [
+      "STOPWORD"
+    ]
+  },
+  "para": {
+    "cat": [
+      "STOPWORD"
+    ]
+  },
+  "porem": {
+    "cat": [
+      "STOPWORD"
+    ]
+  },
+  "passado": {
+    "cat": [
+      "TEMPO",
+      "PASSADO"
+    ]
+  },
+  "proximo": {
+    "cat": [
+      "TEMPO",
+      "FUTURO"
+    ]
+  },
+  "praia": {
+    "cat": [
+      "LUGAR",
+      "LUGAR_FEM"
+    ]
+  },
+  "padaria": {
+    "cat": [
+      "LUGAR",
+      "LUGAR_FEM"
+    ]
+  },
+  "praca": {
+    "cat": [
+      "LUGAR",
+      "LUGAR_FEM"
+    ]
+  },
+  "piscina": {
+    "cat": [
+      "LUGAR",
+      "LUGAR_FEM"
+    ]
+  },
+  "parque": {
+    "cat": [
+      "LUGAR",
+      "LUGAR_MASC"
+    ]
+  }
+}

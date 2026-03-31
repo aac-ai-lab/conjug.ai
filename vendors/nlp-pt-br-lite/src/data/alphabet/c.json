@@ -1,0 +1,56 @@
+{
+  "com": {
+    "cat": [
+      "STOPWORD"
+    ]
+  },
+  "como": {
+    "cat": [
+      "STOPWORD"
+    ]
+  },
+  "constantemente": {
+    "cat": [
+      "TEMPO",
+      "PRESENTE"
+    ]
+  },
+  "costumava": {
+    "cat": [
+      "TEMPO",
+      "IMPERFEITO"
+    ]
+  },
+  "chegar": {
+    "cat": [],
+    "reg": "local"
+  },
+  "correr": {
+    "cat": [],
+    "reg": "local"
+  },
+  "casa": {
+    "cat": [
+      "LUGAR",
+      "LUGAR_FEM"
+    ]
+  },
+  "clinica": {
+    "cat": [
+      "LUGAR",
+      "LUGAR_FEM"
+    ]
+  },
+  "cinema": {
+    "cat": [
+      "LUGAR",
+      "LUGAR_MASC"
+    ]
+  },
+  "colegio": {
+    "cat": [
+      "LUGAR",
+      "LUGAR_MASC"
+    ]
+  }
+}
