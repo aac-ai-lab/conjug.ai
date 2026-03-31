@@ -1,44 +1,71 @@
 /**
- * Motor de busca léxica assíncrona com divisão alfabética.
- * Carrega arquivos JSON sob demanda (lazy-loading) e mantém cache em memória.
+ * Motor de busca léxica assíncrona com suporte a múltiplas fontes (ferramentas) 
+ * e divisão alfabética.
  */
 export class LexiconLoader {
   private cache: Map<string, Record<string, any>> = new Map();
-  private basePath: string = "vendors/nlp-pt-br-lite/src/data/alphabet"; // Padrão para local node/build
+  private baseDir: string = "vendors/nlp-pt-br-lite/src/data";
+  private sources: string[] = ["legacy", "wordnet", "verbnet"];
 
-  constructor(basePath?: string) {
-    if (basePath) this.basePath = basePath;
+  constructor(baseDir?: string, sources?: string[]) {
+    if (baseDir) this.baseDir = baseDir;
+    if (sources) this.sources = sources;
   }
 
-  setBasePath(path: string) {
-    this.basePath = path;
+  setSources(sources: string[]) {
+    this.sources = sources;
   }
 
   private getAlphabetKey(token: string): string {
     const firstChar = token.charAt(0).toLowerCase();
-    // Normalizar para a-z simples
     const normalized = firstChar.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     return /^[a-z]$/.test(normalized) ? normalized : "others";
   }
 
+  /**
+   * Carrega e mescla dados de uma letra de todas as fontes disponíveis.
+   */
   async loadLetter(letter: string): Promise<Record<string, any>> {
     const cacheKey = letter.toLowerCase();
     if (this.cache.has(cacheKey)) {
       return this.cache.get(cacheKey)!;
     }
 
-    try {
-      const url = `${this.basePath}/${cacheKey}.json`;
-      const response = await fetch(url);
-      if (!response.ok) throw new Error(`Lexicon file ${url} not found`);
-      const data = await response.json();
-      this.cache.set(cacheKey, data);
-      return data;
-    } catch (e) {
-      console.warn(`Could not load lexicon for letter ${cacheKey}:`, e);
-      this.cache.set(cacheKey, {}); // Cache vazio para evitar retentativas infinitas
-      return {};
+    const mergedData: Record<string, any> = {};
+
+    // Tenta carregar de cada fonte (ferramenta)
+    for (const source of this.sources) {
+      try {
+        const url = `${this.baseDir}/${source}/${cacheKey}.json`;
+        const response = await fetch(url);
+        if (response.ok) {
+          const sourceData = await response.json();
+          // Mescla dados (prioridade para a primeira fonte se houver conflito, 
+          // mas idealmente as fontes são complementares)
+          for (const [word, info] of Object.entries(sourceData)) {
+            if (!mergedData[word]) {
+              mergedData[word] = info;
+            } else {
+              // Se a palavra já existe, mescla as categorias (cat)
+              const existing = mergedData[word];
+              const newData = info as any;
+              if (newData.cat && existing.cat) {
+                existing.cat = Array.from(new Set([...existing.cat, ...newData.cat]));
+              }
+              // Atualiza regência ou pessoa se a nova fonte trouxer algo novo
+              if (newData.reg && !existing.reg) existing.reg = newData.reg;
+              if (newData.p !== undefined && existing.p === undefined) existing.p = newData.p;
+            }
+          }
+        }
+      } catch (e) {
+        // Ignora erros de rede para fontes específicas que podem não existir (ex: z.json em verbnet)
+        // console.debug(`Source ${source} not found for letter ${cacheKey}`);
+      }
     }
+
+    this.cache.set(cacheKey, mergedData);
+    return mergedData;
   }
 
   async getWordInfo(token: string): Promise<any | null> {

@@ -1,0 +1,39 @@
+{
+  "tu": {
+    "cat": [
+      "PRONOME"
+    ],
+    "p": 1,
+    "w": "Tu"
+  },
+  "tio": {
+    "cat": [
+      "PERSON",
+      "SUBST_HUMANO"
+    ]
+  },
+  "tia": {
+    "cat": [
+      "PERSON",
+      "SUBST_HUMANO"
+    ]
+  },
+  "talvez": {
+    "cat": [
+      "TEMPO",
+      "SUBJUNTIVO"
+    ]
+  },
+  "trabalho": {
+    "cat": [
+      "LUGAR",
+      "LUGAR_MASC"
+    ]
+  },
+  "teatro": {
+    "cat": [
+      "LUGAR",
+      "LUGAR_MASC"
+    ]
+  }
+}

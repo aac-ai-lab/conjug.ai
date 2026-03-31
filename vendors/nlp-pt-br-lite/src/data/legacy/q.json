@@ -1,0 +1,16 @@
+{
+  "que": {
+    "cat": [
+      "STOPWORD",
+      "TEMPO",
+      "SUBJUNTIVO"
+    ]
+  },
+  "quando": {
+    "cat": [
+      "STOPWORD",
+      "TEMPO",
+      "SUBJUNTIVO"
+    ]
+  }
+}

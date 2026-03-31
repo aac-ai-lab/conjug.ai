@@ -1,0 +1,36 @@
+{
+  "voce": {
+    "cat": [
+      "PRONOME"
+    ],
+    "p": 2,
+    "w": "Você"
+  },
+  "voces": {
+    "cat": [
+      "PRONOME"
+    ],
+    "p": 4,
+    "w": "Vocês"
+  },
+  "vo": {
+    "cat": [
+      "PERSON",
+      "SUBST_HUMANO"
+    ]
+  },
+  "vovo": {
+    "cat": [
+      "PERSON",
+      "SUBST_HUMANO"
+    ]
+  },
+  "viajar": {
+    "cat": [],
+    "reg": "local"
+  },
+  "voltar": {
+    "cat": [],
+    "reg": "local"
+  }
+}

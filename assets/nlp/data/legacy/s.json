@@ -1,0 +1,27 @@
+{
+  "sem": {
+    "cat": [
+      "STOPWORD"
+    ]
+  },
+  "se": {
+    "cat": [
+      "STOPWORD",
+      "TEMPO",
+      "SUBJUNTIVO"
+    ]
+  },
+  "sempre": {
+    "cat": [
+      "TEMPO",
+      "PRESENTE",
+      "IMPERFEITO"
+    ]
+  },
+  "shopping": {
+    "cat": [
+      "LUGAR",
+      "LUGAR_MASC"
+    ]
+  }
+}

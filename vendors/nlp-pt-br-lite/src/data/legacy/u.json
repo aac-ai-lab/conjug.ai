@@ -1,0 +1,18 @@
+{
+  "um": {
+    "cat": [
+      "STOPWORD"
+    ]
+  },
+  "uma": {
+    "cat": [
+      "STOPWORD"
+    ]
+  },
+  "universidade": {
+    "cat": [
+      "LUGAR",
+      "LUGAR_FEM"
+    ]
+  }
+}

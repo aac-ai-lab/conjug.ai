@@ -1,0 +1,45 @@
+{
+  "mae": {
+    "cat": [
+      "PERSON",
+      "SUBST_HUMANO"
+    ]
+  },
+  "mamae": {
+    "cat": [
+      "PERSON",
+      "SUBST_HUMANO"
+    ]
+  },
+  "medico": {
+    "cat": [
+      "PERSON",
+      "SUBST_HUMANO",
+      "LUGAR",
+      "LUGAR_MASC"
+    ]
+  },
+  "medica": {
+    "cat": [
+      "PERSON",
+      "SUBST_HUMANO"
+    ]
+  },
+  "mas": {
+    "cat": [
+      "STOPWORD"
+    ]
+  },
+  "mar": {
+    "cat": [
+      "LUGAR",
+      "LUGAR_MASC"
+    ]
+  },
+  "mercado": {
+    "cat": [
+      "LUGAR",
+      "LUGAR_MASC"
+    ]
+  }
+}

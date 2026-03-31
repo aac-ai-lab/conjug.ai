@@ -1,0 +1,24 @@
+{
+  "nos": {
+    "cat": [
+      "PRONOME"
+    ],
+    "p": 3,
+    "w": "Nós"
+  },
+  "no": {
+    "cat": [
+      "STOPWORD"
+    ]
+  },
+  "na": {
+    "cat": [
+      "STOPWORD"
+    ]
+  },
+  "nem": {
+    "cat": [
+      "STOPWORD"
+    ]
+  }
+}

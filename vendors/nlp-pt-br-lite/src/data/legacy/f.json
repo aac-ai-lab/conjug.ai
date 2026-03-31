@@ -1,0 +1,26 @@
+{
+  "farmacia": {
+    "cat": [
+      "LUGAR",
+      "LUGAR_FEM"
+    ]
+  },
+  "faculdade": {
+    "cat": [
+      "LUGAR",
+      "LUGAR_FEM"
+    ]
+  },
+  "feira": {
+    "cat": [
+      "LUGAR",
+      "LUGAR_FEM"
+    ]
+  },
+  "festa": {
+    "cat": [
+      "LUGAR",
+      "LUGAR_FEM"
+    ]
+  }
+}

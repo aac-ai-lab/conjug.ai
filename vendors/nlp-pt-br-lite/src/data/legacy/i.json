@@ -1,0 +1,24 @@
+{
+  "irmao": {
+    "cat": [
+      "PERSON",
+      "SUBST_HUMANO"
+    ]
+  },
+  "irma": {
+    "cat": [
+      "PERSON",
+      "SUBST_HUMANO"
+    ]
+  },
+  "ir": {
+    "cat": [],
+    "reg": "local"
+  },
+  "igreja": {
+    "cat": [
+      "LUGAR",
+      "LUGAR_FEM"
+    ]
+  }
+}

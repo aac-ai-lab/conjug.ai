@@ -1,0 +1,23 @@
+{
+  "o": {
+    "cat": [
+      "STOPWORD"
+    ]
+  },
+  "os": {
+    "cat": [
+      "STOPWORD"
+    ]
+  },
+  "ou": {
+    "cat": [
+      "STOPWORD"
+    ]
+  },
+  "ontem": {
+    "cat": [
+      "TEMPO",
+      "PASSADO"
+    ]
+  }
+}

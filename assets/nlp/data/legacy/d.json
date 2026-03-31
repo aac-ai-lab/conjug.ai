@@ -1,0 +1,29 @@
+{
+  "de": {
+    "cat": [
+      "STOPWORD"
+    ]
+  },
+  "do": {
+    "cat": [
+      "STOPWORD"
+    ]
+  },
+  "da": {
+    "cat": [
+      "STOPWORD"
+    ]
+  },
+  "depois": {
+    "cat": [
+      "TEMPO",
+      "FUTURO"
+    ]
+  },
+  "dentista": {
+    "cat": [
+      "LUGAR",
+      "LUGAR_MASC"
+    ]
+  }
+}

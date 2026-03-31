@@ -4,10 +4,11 @@ import path from "node:path";
 /**
  * Script para converter as listas manuais legadas para o novo formato alfabético do nlp-pt-br-lite.
  * Versão JavaScript pura (CommonJS/ESM compatível).
+ * ALVO: data/legacy/
  */
 
 const DATA_DIR = "vendors/nlp-pt-br-lite/src/data";
-const OUTPUT_DIR = path.join(DATA_DIR, "alphabet");
+const OUTPUT_DIR = path.join(DATA_DIR, "legacy");
 
 if (!fs.existsSync(OUTPUT_DIR)) {
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });
@@ -93,4 +94,4 @@ for (const [letter, data] of Object.entries(alphabet)) {
   fs.writeFileSync(path.join(OUTPUT_DIR, `${letter}.json`), JSON.stringify(data, null, 2));
 }
 
-console.log(`Léxico distribuído em ${Object.keys(alphabet).length} arquivos.`);
+console.log(`Léxico LEGACY distribuído em ${Object.keys(alphabet).length} arquivos.`);
