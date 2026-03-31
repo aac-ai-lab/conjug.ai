@@ -359,7 +359,7 @@
           elLemma.textContent = lemma;
           elTables.innerHTML = "";
 
-          TEMPOS.forEach(function (T) {
+          for (const T of TEMPOS) {
             var wrap = document.createElement("div");
             wrap.className = "demo-table-wrap";
             var h2 = document.createElement("h2");
@@ -393,7 +393,7 @@
             wrap.appendChild(h2);
             wrap.appendChild(table);
             elTables.appendChild(wrap);
-          });
+          }
 
           elOut.hidden = false;
         }
