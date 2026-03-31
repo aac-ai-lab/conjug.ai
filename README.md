@@ -4,7 +4,7 @@ Biblioteca e demos de **conjugação verbal** em **português do Brasil**, para 
 
 **Motivação:** cenários de **tecnologia assistiva** e **CAA** (Comunicação Aumentativa e Alternativa), onde entradas **telegráficas** são comuns; o núcleo não está limitado a essa aplicação.
 
-Há **duas** páginas de demonstração na raiz do repositório: **`index.html`** — Demo infinitivo em português e tabelas geradas pelo `conjugai-core` (tempos simples e compostos, incluindo linha de `vós`), só `conjugai-core.js`; e **`demo/caa/index.html`** — frases telegráficas com passos e `analisarFrase`, com `app.js` + `conjugai-core.js`. A interface de **análise ao vivo** (quatro passos) é esta segunda; serve para **inspecionar** o pipeline do motor em contexto **CAA**. Na barra lateral, cada exemplo mostra **badges** (sujeito, tempo, conjugação, etc.) como guia pedagógico — não fazem parte do motor.
+Há **duas** páginas de demonstração na raiz do repositório: **`index.html`** — Demo infinitivo em português e tabelas geradas pelo `conjugai-core` (tempos simples e compostos, incluindo linha de `vós`), só `conjugai-core.js`; e **`demo/caa/index.html`** — frases telegráficas com passos e `analisarFrase`, com `app.js` + `conjugai-core.js`. A interface de **análise ao vivo** (quatro passos) é esta segunda; permite **validar** a correção e o pipeline do motor em contexto **CAA**. Na barra lateral, cada exemplo mostra **badges** (sujeito, tempo, conjugação, etc.) como guia explicativo — mostram o que o motor identificou internamente.
 
 O **motor linguístico** (`conjugai-core`) vive em **`vendors/`** de propósito: núcleo reutilizável que **pode existir sem** estas páginas; as demos são interfaces de visualização.
 

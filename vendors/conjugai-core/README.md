@@ -192,7 +192,7 @@ UI (HTML + CSS + app.js)
 | `tempo.ts` | `detectarTempo` (marcadores + seleção explícita de tempo) |
 | `conjugador.ts` | `conjugar`, `conjugarTempo`, `conjugarPessoaTabela`, `extrairVerbo`, `detectarVerboPorDicionario`, `indiceDoVerboNaFrase`, `gerundio`, `participio`, `infinitivoLexico`, léxico + presente regular |
 | `corretor.ts` | `corrigir` — substitui só o token verbal (e antecede pronome se sujeito implícito) |
-| `types.ts` | `ResultadoAnalise`, `TempoVerbal`, `GeneroParticipio`, `NumeroParticipio`, … |
+| `types.ts` | `ResultadoAnalise`, `TempoVerbal`, `GeneroParticipio`, `NumeroParticipio`, … (inclui `posicaoOriginal` e `tokenIndex` no sujeito) |
 | `data/verbos.json` | Léxico (importado em `verbos-data.ts`); tipicamente minificado; ver §4.1 |
 | `data/verbos-data.ts` | Tipos `EntradaVerbo`, constante `CHAVES_PARADIGMA_CINCO`, export `VERBOS` |
 | `scripts/morphobr_dict_to_verbos.py` | MorphoBr `.dict` → `verbos.json` (tempos alargados, minify por omissão) |
@@ -293,6 +293,25 @@ Frases telegráficas podem ter **vários núcleos** no sujeito (*eu e João*, *J
 - Importação ou reconciliação com **DELAF/Unitex** nativos além do pipeline MorphoBr.  
 - Deteção de erros mais complexos (concordância além do verbo).  
 - Camada de **IA local** (modelos pequenos on-device) como sugestão, mantendo o núcleo simbólico para explicabilidade.
+
+## 13. Sujeito e Normalização SVO
+
+### 13.1 Identificação de Sujeito (Evolução)
+
+O motor evoluiu de uma busca puramente por prefixo para uma **busca bidirecional** e baseada em **categorias de palavras**:
+
+1.  **Busca Bidirecional**: Procura por pronomes explícitos (`eu, tu, ele...`) antes **e** depois do verbo. Isto permite lidar com ordens inversas (VSO/VOS), comuns em telegrafia assistiva.
+2.  **Deteção de Nomes e Títulos**: Casos como `Ana comer` ou `papai viajar` agora são identificados corretamente (3.ª pessoa) através de uma lógica de **`isNounCandidate`**, que valida:
+    *   **Nomes Próprios**: Palavras com inicial maiúscula (que não sejam verbos conhecidos ou partículas).
+    *   **Títulos de Parentesco/Profissões**: Lista controlada de termos como `mamãe, vovô, médico, professor`.
+    *   **Filtro de Objetos**: Substantivos comuns em minúsculas (ex: `pizza`) são ignorados para evitar falsos positivos de sujeito.
+
+### 13.2 Normalização SVO
+
+Sempre que um sujeito é identificado **após** o verbo, a função `corrigir` realiza a **reordenação sintática**:
+- O token do sujeito é removido da sua posição original.
+- O sujeito (flexionado ou original) é movido para o **início** da frase (Ordem Direta).
+- Exemplo: `comer eu maçã` → `Eu como maçã`.
 
 ---
 

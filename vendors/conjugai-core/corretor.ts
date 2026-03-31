@@ -95,7 +95,14 @@ function aplicarRegenciaMovimentoLocais(resultado: string[], vi: number, infinit
  */
 export function corrigir(
   tokens: string[],
-  sujeito: { texto: string; pessoa: number; implicito?: boolean; composto?: boolean },
+  sujeito: {
+    texto: string;
+    pessoa: number;
+    implicito?: boolean;
+    composto?: boolean;
+    posicaoOriginal?: "antes" | "depois";
+    tokenIndex?: number;
+  },
   infinitivo: string,
   conjugado: string,
   _tempoTipo: TempoVerbal
@@ -103,8 +110,24 @@ export function corrigir(
   const verbLower = conjugado.charAt(0).toLowerCase() + conjugado.slice(1);
   const vi = indiceDoVerboNaFrase(tokens, infinitivo);
 
+  // 1. Filtrar tokens para reconstrução
+  // Se o sujeito for explícito e estiver depois do verbo, vamos movê-lo para o início (SVO)
+  const normalizeSVO = sujeito.posicaoOriginal === "depois" && typeof sujeito.tokenIndex === "number";
+  
   const resultado: string[] = [];
+  
+  // Se normalizando SVO, o sujeito vem primeiro
+  if (normalizeSVO) {
+    resultado.push(sujeito.texto);
+  } else if (sujeito.implicito) {
+    // Se implícito, também garantimos o pronome no início
+    resultado.push(sujeito.texto);
+  }
+
   for (let i = 0; i < tokens.length; i++) {
+    // Pula o token do sujeito se estivermos normalizando SVO (pois já o adicionamos no início)
+    if (normalizeSVO && i === sujeito.tokenIndex) continue;
+
     if (i === vi) {
       resultado.push(verbLower);
     } else {
@@ -112,15 +135,23 @@ export function corrigir(
     }
   }
 
-  if (vi < 0) {
+  if (vi < 0 && resultado.length === 0) {
     const fallback = `${sujeito.texto} ${verbLower}`.replace(/\s+/g, " ").trim();
     return fallback.charAt(0).toUpperCase() + fallback.slice(1);
   }
 
-  aplicarRegenciaMovimentoLocais(resultado, vi, infinitivo);
+  // Se o sujeito era explícito e estava ANTES do verbo, ele já está nos 'tokens[i]' 
+  // e foi adicionado naturalmente no loop acima. Não precisamos unshift.
+  
+  // Se vi não foi encontrado, mas temos tokens (ex: erro no índice), garantir que não perdemos o verbo
+  const viFinal = vi >= 0 ? (normalizeSVO ? (sujeito.tokenIndex! < vi ? vi - 1 : vi) + 1 : vi) : -1;
 
-  if (sujeito.implicito) {
-    resultado.unshift(sujeito.texto);
+  aplicarRegenciaMovimentoLocais(resultado, viFinal + (normalizeSVO || sujeito.implicito ? 0 : 0), infinitivo);
+  
+  // Re-calculando o índice do verbo no array 'resultado' para a regência
+  const viNoResultado = resultado.findIndex(t => normalizar(t) === normalizar(verbLower));
+  if (viNoResultado >= 0) {
+    aplicarRegenciaMovimentoLocais(resultado, viNoResultado, infinitivo);
   }
 
   const out = resultado.join(" ").replace(/\s+/g, " ").trim();

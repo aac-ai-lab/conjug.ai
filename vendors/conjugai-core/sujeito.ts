@@ -9,6 +9,10 @@ export type InfoSujeito = {
   implicito?: boolean;
   /** Sujeito composto: `texto` é rótulo (ex.: Nós) para UI; a pessoa serve à conjugação. A frase corrigida mantém os tokens do sujeito. */
   composto?: boolean;
+  /** 'antes' ou 'depois' do verbo. */
+  posicaoOriginal?: "antes" | "depois";
+  /** Índice do token na frase original (se não for implícito). */
+  tokenIndex?: number;
 };
 
 function normalize(s: string): string {
@@ -91,9 +95,103 @@ function isCompostoEuOutra(tokens: string[]): boolean {
   return false;
 }
 
-function detectarSujeitoSimples(tokens: string[]): InfoSujeito {
-  const lower = tokens.map(normalize);
+function isNounCandidate(token: string): boolean {
+  const n = normalize(token);
+  if (n.length < 2) return false;
 
+  // 1. Títulos de pessoas / Parentesco (comum em CAA)
+  const pessoas = [
+    "mae", "mamae", "mamãe", "pai", "papai",
+    "vo", "vovo", "vovô", "vovó",
+    "tio", "tia", "irmao", "irma", "irmão", "irmã",
+    "medico", "medica", "médico", "médica",
+    "professor", "professora", "amigo", "amiga"
+  ];
+  if (pessoas.includes(n)) return true;
+
+  // 2. Nomes Próprios (começam com maiúscula na frase original)
+  // Nota: tokens[i] é a forma original.
+  const isUpper = token.charAt(0) !== token.charAt(0).toLowerCase();
+  if (isUpper) {
+    // Verificar se não é apenas o início da frase (primeira posição)
+    // Mas em telegrafia, o primeiro token costuma ser o sujeito.
+    // Para ser seguro, evitamos palavras funcionais mesmo se em maiúscula.
+    const funcionais = ["o", "a", "os", "as", "um", "uma", "de", "em", "por", "com", "e"];
+    if (funcionais.includes(n)) return false;
+    
+    // Se for um verbo conhecido mesmo em maiúscula, não é sujeito
+    if (extrairVerbo([token])) return false;
+    
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Identifica sujeito e pessoa (0–4).
+ * Tenta primeiro sujeito composto (**X e Y** antes do verbo); 
+ * depois procura pronomes ou nomes em qualquer posição (bidirecional).
+ */
+export function detectarSujeito(tokens: string[]): InfoSujeito {
+  const inf = extrairVerbo(tokens);
+  const verbIdx = inf ? indiceDoVerboNaFrase(tokens, inf) : -1;
+
+  // 1. Tentar Sujeito Composto (apenas antes do verbo por agora)
+  if (verbIdx > 0) {
+    const comp = detectarSujeitoComposto(tokens);
+    if (comp) return { ...comp, posicaoOriginal: "antes" };
+  }
+
+  // 2. Tentar Sujeito Explícito (Pronomes) - Busca Bidirecional
+  const pronomesMap: Record<string, { texto: string; pessoa: PessoaIndice }> = {
+    eu: { texto: "Eu", pessoa: 0 },
+    tu: { texto: "Tu", pessoa: 1 },
+    ele: { texto: "Ele", pessoa: 2 },
+    ela: { texto: "Ela", pessoa: 2 },
+    nos: { texto: "Nós", pessoa: 3 },
+    "nós": { texto: "Nós", pessoa: 3 },
+    eles: { texto: "Eles", pessoa: 4 },
+    elas: { texto: "Eles", pessoa: 4 }, // Simplificado para Eles no motor
+    voce: { texto: "Você", pessoa: 2 }, // Em PT-BR você = 3ª pessoa verbal
+    "você": { texto: "Você", pessoa: 2 },
+    voces: { texto: "Vocês", pessoa: 4 },
+    "vocês": { texto: "Vocês", pessoa: 4 },
+  };
+
+  // Prioridade 1: Pronome antes do verbo
+  if (verbIdx > 0) {
+    for (let i = 0; i < verbIdx; i++) {
+      const n = normalize(tokens[i]);
+      if (pronomesMap[n]) {
+        return {
+          ...pronomesMap[n],
+          rotulo: `explícito: ${n}`,
+          tokenIndex: i,
+          posicaoOriginal: "antes",
+          implicito: false,
+        };
+      }
+    }
+  }
+
+  // Prioridade 2: Pronome depois do verbo (VSO/VOS)
+  if (verbIdx >= 0) {
+    for (let i = verbIdx + 1; i < tokens.length; i++) {
+      const n = normalize(tokens[i]);
+      if (pronomesMap[n]) {
+        return {
+          ...pronomesMap[n],
+          rotulo: `explícito (pós-verbo): ${n}`,
+          tokenIndex: i,
+          posicaoOriginal: "depois",
+          implicito: false,
+        };
+      }
+    }
+  }
+
+  // 3. Tentar "Casos Familiares" (Eu + mamãe/papai)
   if (isCompostoEuOutra(tokens)) {
     return {
       texto: "Nós",
@@ -101,42 +199,48 @@ function detectarSujeitoSimples(tokens: string[]): InfoSujeito {
       rotulo: "composto (Eu + mamãe/papai) → 1ª plural",
       implicito: false,
       composto: true,
+      posicaoOriginal: "antes" // Geralmente antes
     };
   }
 
-  if (lower.includes("nos")) {
-    return { texto: "Nós", pessoa: 3, rotulo: "explícito: nós", implicito: false };
+  // 4. Tentar Substantivo/Nome Próprio (Busca Bidirecional)
+  // Prioridade: Antes do verbo
+  if (verbIdx > 0) {
+    for (let i = 0; i < verbIdx; i++) {
+      if (isNounCandidate(tokens[i])) {
+        return {
+          texto: tokens[i],
+          pessoa: 2, // 3ª pessoa para nomes
+          rotulo: `nome identificado: ${tokens[i]}`,
+          tokenIndex: i,
+          posicaoOriginal: "antes",
+          implicito: false,
+        };
+      }
+    }
   }
-  if (lower.includes("eles")) {
-    return { texto: "Eles", pessoa: 4, rotulo: "explícito: eles", implicito: false };
-  }
-  if (lower.includes("ela")) {
-    return { texto: "Ela", pessoa: 2, rotulo: "explícito: ela", implicito: false };
-  }
-  if (lower.includes("ele")) {
-    return { texto: "Ele", pessoa: 2, rotulo: "explícito: ele", implicito: false };
-  }
-  if (lower.includes("eu")) {
-    return { texto: "Eu", pessoa: 0, rotulo: "explícito: eu", implicito: false };
-  }
-  if (lower.includes("tu")) {
-    return { texto: "Tu", pessoa: 1, rotulo: "explícito: tu", implicito: false };
+  // Fallback: Depois do verbo
+  if (verbIdx >= 0) {
+    for (let i = verbIdx + 1; i < tokens.length; i++) {
+      if (isNounCandidate(tokens[i])) {
+        return {
+          texto: tokens[i],
+          pessoa: 2,
+          rotulo: `nome identificado (pós-verbo): ${tokens[i]}`,
+          tokenIndex: i,
+          posicaoOriginal: "depois",
+          implicito: false,
+        };
+      }
+    }
   }
 
+  // 5. Fallback Final: Implícito Eu
   return {
     texto: "Eu",
     pessoa: 0,
-    rotulo: "implícito: 1ª pessoa do singular (frase sem pronome explícito)",
+    rotulo: "implícito: 1ª pessoa do singular (frase sem sujeito identificado)",
     implicito: true,
+    posicaoOriginal: "antes"
   };
-}
-
-/**
- * Identifica sujeito e pessoa (0–4).
- * Tenta primeiro sujeito composto (**X e Y** antes do verbo); depois regras simples e *Eu + mamãe/papai*.
- */
-export function detectarSujeito(tokens: string[]): InfoSujeito {
-  const comp = detectarSujeitoComposto(tokens);
-  if (comp) return comp;
-  return detectarSujeitoSimples(tokens);
 }

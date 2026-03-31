@@ -21,7 +21,7 @@ flowchart TD
   G -->|sim| H[conjugarTempo]
   H --> I{Forma no tempo?}
   I -->|não| ERR3[Erro: não foi possível conjugar neste tempo]
-  I -->|sim| J[corrigir]
+  I -->|sim| J[corrigir + normalizar SVO]
   J --> K[Frase corrigida]
 ```
 
@@ -51,10 +51,16 @@ Diagrama interativo e restantes fluxos do núcleo: `demo/verbs/diagram.html`.
 
 ```mermaid
 flowchart TD
-  SC{Prefixo X e Y antes do verbo?} -->|sim| SC1[Nós / Vocês / Eles conforme regras]
-  SC -->|não| S0[Eu + mamãe ou papai?]
-  S0 -->|sim| SN[Nós — 1ª plural]
-  S0 -->|não| S1[Ordem: nós → eles → ela → ele → eu → padrão eu]
+  SC{Sujeito Composto<br/>X e Y antes do verbo?} -->|sim| SC1[Nós / Vocês / Eles]
+  SC -->|não| SPres{Pronome antes do verbo?}
+  SPres -->|sim| S1[Pessoa conforme pronome]
+  SPres -->|não| SPost{Pronome depois do verbo?}
+  SPost -->|sim| S2[Pessoa conforme pronome<br/>Normaliza SVO]
+  SPost -->|não| SFam{Eu + mamãe/papai?}
+  SFam -->|sim| SN[Nós — 1ª plural]
+  SFam -->|não| SNome{Nome Próprio / Título?}
+  SNome -->|sim| S3[3ª pessoa (ele/ela)<br/>Normaliza se pós-verbo]
+  SNome -->|não| SDef[Padrão: Eu implícito]
 ```
 
 **Tempo verbal** (`tempo.ts`: marcadores + override explícito por tag)

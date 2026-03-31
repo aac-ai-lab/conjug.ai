@@ -6,6 +6,22 @@ O formato inspira-se em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ---
 
+## [2026-03-31]
+
+### Adicionado
+
+- **Busca Bidirecional de Sujeito**: O motor agora identifica sujeitos (pronomes e nomes) tanto antes quanto depois do verbo (ordens SVO e VSO).
+- **Deteção de Nomes e Títulos**: Reconhecimento de nomes próprios (Maiúsculas) e títulos (mamãe, médico, etc.) como sujeitos em textos telegráficos.
+- **Normalização SVO**: Reordenação automática da frase corrigida para a ordem direta (Sujeito-Verbo-Objeto) quando o sujeito é detectado após o verbo.
+- Expansão de metadados em `ResultAnalysis`: campos `posicaoOriginal` e `tokenIndex` no objeto `sujeito`.
+
+### Alterado
+
+- **Documentação**: Atualização de `docs/limites-e-nao-cobertura.md`, `docs/diagrama.md` (diagrama de sujeito) e `README.md` (root e core) para refletir as novas capacidades e tom de produto para terceiros.
+- **Ajuste de Tom**: Remoção de referências acadêmicas ("orientador", "projeto de investigação") para melhor adequação a utilizadores e parceiros externos.
+
+---
+
 ## [Unreleased]
 
 Alterações em desenvolvimento que ainda não foram consolidadas num período datado abaixo.

@@ -44,6 +44,10 @@ export type ResultadoAnalise = {
     rotulo?: string;
     implicito?: boolean;
     composto?: boolean;
+    /** 'antes' ou 'depois' do verbo. */
+    posicaoOriginal?: "antes" | "depois";
+    /** Índice do token na frase original (se não for implícito). */
+    tokenIndex?: number;
   };
   tempo: {
     tipo: string;

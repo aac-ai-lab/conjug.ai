@@ -11,7 +11,8 @@ Para a arquitetura e o fluxo técnico, ver também `README.md` (raiz) e `vendors
 ## 1. Escopo geral
 
 - O pipeline (`tokenize` → sujeito → tempo → verbo → `corrigir`) foi pensado para **frases telegráficas curtas**, típicas de **CAA**, não para texto corrido, múltiplas orações ou estilo literário.
-- A **correção** em `corretor.ts` altera sobretudo a **forma verbal** (e antecede pronome em sujeito **implícito**); **não** reescreve a frase como um revisor humano faria.
+- A **correção** em `corretor.ts` altera sobretudo a **forma verbal** e realiza a **normalização para ordem direta (SVO)** quando o sujeito é identificado após o verbo; também antecede pronome em sujeito **implícito**.
+- **Não** reescreve a frase como um revisor humano faria para além destes recortes.
 
 ---
 
@@ -20,8 +21,9 @@ Para a arquitetura e o fluxo técnico, ver também `README.md` (raiz) e `vendors
 | Coberto (heurísticas) | Não coberto ou frágil |
 |------------------------|------------------------|
 | Padrão **X e Y** antes do verbo (sujeito composto) | Coordenação com **ou**, **nem**, vírgulas, mais de dois núcleos sem padrão fixo |
-| **Eu + mamãe/papai** (e variantes próximas) | Ordens de palavras livres, sujeito **depois** do verbo, clíticos |
-| Pronomes explícitos simples (eu, tu, ele, ela, nós, eles…) | Resolução de **correferência**, sujeito em oração relativa |
+| **Eu + mamãe/papai** (e variantes próximas) | Ordens de palavras muito livres ou com muitos constituintes entre o sujeito e o verbo |
+| Pronomes explícitos (eu, tu, ele, ela...) em **qualquer posição** (SVO, VSO) | Resolução de **correferência**, sujeito em oração relativa |
+| **Nomes próprios** (Maiúsculas) e **títulos** (médico, papai...) como sujeito | Substantivos comuns minúsculos que possam ser interpretados como objeto (ex: "comer pizza") |
 
 ---
 
@@ -61,8 +63,9 @@ Implementação em `corretor.ts` (`aplicarRegenciaMovimentoLocais`):
 
 ## 7. Outras lacunas gramaticais superficiais
 
-- **Concordância nominal** (adjetivo, participo com objeto, etc.), **pontuação** e **reordenação** sintática **não** são objetivo central da correção atual.
-- **Ambiguidade**, **polissemia**, **nomes próprios** vs comum, **registo** (formal/coloquial) **não** são tratados.
+- **Concordância nominal** (adjetivo, participo com objeto, etc.) e **pontuação** **não** são objetivo central da correção atual.
+- **Normalização sintática**: coberta apenas para a ordem **SVO** quando o sujeito é detectado após o verbo. Outras reordenações não são tratadas.
+- **Ambiguidade**, **polissemia**, **nomes próprios** vs comum (em minúsculas), **registo** (formal/coloquial) **não** são tratados.
 
 ---
 
