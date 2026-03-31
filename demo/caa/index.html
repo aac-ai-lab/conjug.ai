@@ -396,9 +396,10 @@
           </p>
           <h3 class="algo-dialog__h3">Regras (resumo)</h3>
           <ul class="algo-dialog__list">
+            <li><strong>Seleção Manual (UI)</strong>: Botões de tempo na interface têm <strong>prioridade máxima</strong> sobre os marcadores da frase.</li>
             <li><strong>«ontem»</strong> em qualquer posição → <strong>Pretérito Perfeito</strong> (<code>passado</code>).</li>
             <li><strong>«amanhã»</strong> → por defeito <strong>Futuro do Presente</strong> (<code>futuro</code>), <em>exceto</em> se a frase começar com perífrase de <strong>ir</strong> no presente (<em>vou/vai/vamos…</em>) e ainda houver «amanhã» — aí o verbo suporte fica no <strong>presente</strong> (caso típico <em>vou viajar amanhã</em>).</li>
-            <li>Sem esses marcadores → <strong>Presente</strong> (<code>presente</code>).</li>
+            <li>Sem marcadores ou seleção → <strong>Presente</strong> (<code>presente</code>).</li>
           </ul>
         </div>
       </div>
@@ -412,7 +413,7 @@
         </header>
         <div class="algo-dialog__body">
           <p class="algo-dialog__lead">
-            Dados o <strong>infinitivo</strong> (ou forma reconhecida no léxico), a <strong>pessoa</strong> (0–4) e o <strong>tempo</strong>, o pipeline chama <code>conjugarTempo</code>. Primeiro tenta o <strong>léxico</strong> <code>verbos.json</code>; se o verbo não estiver no léxico, no <strong>presente</strong> usa-se ainda <strong>regra regular</strong> de sufixos (-ar / -er / -ir), e tempos compostos usam auxiliar + particípio.
+            Dados o <strong>infinitivo</strong> (ou forma reconhecida no léxico), a <strong>pessoa</strong> (0–4) e o <strong>tempo</strong>, o pipeline chama <code>conjugarTempo</code>. Primeiro tenta o <strong>léxico</strong> <code>verbos.json</code>; se o verbo não estiver no léxico, o motor aplica <strong>regras regulares</strong> de sufixos (-ar / -er / -ir) para <strong>presente</strong>, <strong>passado</strong> e <strong>futuro</strong>. Tempos compostos utilizam o auxiliar mais o particípio.
           </p>
           <div id="conj-viz-mount" class="algo-viz-mount" aria-live="polite"></div>
           <p class="algo-dialog__legend" aria-hidden="true">
@@ -420,9 +421,9 @@
             <span class="algo-legend"><span class="conj-pipe__box conj-pipe__box--lex">léxico</span> forma vinda de <code>verbos.json</code></span>
             <span class="algo-legend"><span class="conj-pipe__box conj-pipe__box--reg">regra</span> presente regular (-ar/-er/-ir)</span>
           </p>
-          <h3 class="algo-dialog__h3">Limitações</h3>
+          <h3 class="algo-dialog__h3">Fallbacks</h3>
           <p>
-            <strong>Futuro</strong> e <strong>passado</strong> de verbos <em>fora</em> do léxico não são gerados por sufixação neste núcleo — só há cobertura completa via dicionário ou, no presente, via regras regulares.
+            Verbos regulares em <strong>-ar / -er / -ir</strong> possuem cobertura automática para presente, passado (perfeito) e futuro mesmo fora do léxico. Verbos <strong>irregulares</strong> ou formas compostas complexas dependem de dados em <code>verbos.json</code>.
           </p>
         </div>
       </div>

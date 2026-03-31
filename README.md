@@ -101,6 +101,7 @@ Leitura visual no browser (GitHub Pages): `docs/readme-viewer.html?file=../READM
 | Marcador | Tempo |
 |----------|--------|
 | `tempo:<chave>` / `[tempo=<chave>]` | Tempo explícito (qualquer `TempoVerbal`) |
+| Seleção Manual (UI) | **Prioridade Máxima** (Ontem, Hoje, Amanhã) |
 | *talvez* / *que* | Subjuntivo presente |
 | *se* | Subjuntivo imperfeito |
 | *quando* | Subjuntivo futuro |
@@ -112,8 +113,11 @@ Leitura visual no browser (GitHub Pages): `docs/readme-viewer.html?file=../READM
 | *ontem* | Pretérito Perfeito |
 | (outros) | Presente |
 
+**Nota sobre fallbacks:** O motor agora suporta conjugação regular para verbos em **-ar, -er, -ir** no **passado** (pretérito perfeito) e **futuro**, além do presente. Isso garante correção mesmo para verbos não listados no léxico MorphoBr.
+
 Sujeito composto (*Eu* + *mamãe*/*papai*, ou *X e Y* antes do verbo) → **pessoa** para conjugação é **1.ª plural** (rótulo interno «Nós»); na **frase corrigida** só o verbo é flexionado — os **tokens do sujeito mantêm-se** (ex.: «Mamãe e eu iremos…»).
 
+**Resiliência de Identidade:** Adicionada lista estática de **pronomes básicos** (Eu, Nós, Ele, etc.) para garantir a identificação correta da pessoa gramatical mesmo em ambientes sem carregamento imediato do léxico.
 
 ## Evolução
 

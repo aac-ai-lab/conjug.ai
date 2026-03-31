@@ -41,7 +41,7 @@ A lógica que antes estava acoplada ao `app.js` ou a dependências externas foi 
 
 Em **NLP** e lexicografia, recursos como **DELAF** (e ecosistemas **Unitex**/Linguateca) oferecem **cobertura lexical** fina (lemas, flexões, classes). Integrações completas exigem pipelines e formatos específicos.
 
-O léxico verbal (`data/verbos.json`, importado em `data/verbos-data.ts`) pode ser **gerado a partir do MorphoBr** (cobertura alargada) ou mantido **subconjunto**; o motor complementa com **regras de sufixação** (-AR, -ER, -IR) no **presente** quando o lema não tem entrada.
+O léxico verbal (`data/verbos.json`, importado em `data/verbos-data.ts`) pode ser **gerado a partir do MorphoBr** (cobertura alargada) ou mantido **subconjunto**; o motor complementa com **regras de sufixação** (-AR, -ER, -IR) para **Presente**, **Passado** (Perfeito) e **Futuro** quando o lema não tem entrada no léxico.
 
 ### 4.1 MorphoBr (`.dict`) → `verbos.json` (minificado, todos os tempos do .dict)
 
@@ -103,11 +103,11 @@ Recursos DELAF em formato nativo exigem um passo prévio (conversão para este C
 ### 4.3 Tempos verbais na API e no pipeline CAA
 
 - **`TempoVerbal` (TypeScript):** inclui tempos simples e compostos (ex.: `preterito_perfeito_composto`, `futuro_composto`, `subjuntivo_futuro_composto`) além de não-finitos (`infinitivo`, `gerundio`, `participio`).
-- **`conjugar(verbo, pessoa, tempo)`:** base de conjugação em 5 pessoas (pipeline CAA).
+- **`conjugar(verbo, pessoa, tempo)`:** base de conjugação em 5 pessoas (pipeline CAA). **Agora com fallbacks regulares para presente, passado e futuro.**
 - **`conjugarTempo(verbo, pessoa, tempo)`:** camada ampliada para tempos simples + compostos e não-finitos.
 - **`conjugarPessoaTabela(verbo, pessoa, tempo)`:** API para paradigma de **6 pessoas** (`eu, tu, ele/ela, nós, vós, eles/elas/vocês`) usada na demo da raiz.
 - **`gerundio(verbo)`**, **`participio(verbo, 'm'|'f', 'sg'|'pl')`**, **`infinitivoLexico(verbo)`:** leitura de campos não paradigmáticos no JSON.
-- **`detectarTempo` / `analisarFrase`:** usam marcadores adicionais (incluindo subjuntivo/imperfeito/compostos) e aceitam **tempo explícito** no texto por `tempo:<chave>` ou `[tempo=<chave>]`.
+- **`detectarTempo` / `analisarFrase`:** usam marcadores adicionais (incluindo subjuntivo/imperfeito/compostos), aceitam **tempo explícito** no texto e **seleção manual via UI** (com prioridade máxima).
 
 ## 5. Decisão arquitetural
 
@@ -120,7 +120,7 @@ Recursos DELAF em formato nativo exigem um passo prévio (conversão para este C
 **Por que abordagem híbrida (dicionário + regras)**
 
 - **Dicionário** para verbos irregulares ou de uso frequente nos exemplos.  
-- **Regras** para verbos regulares no presente quando o infinitivo não está no léxico.  
+- **Regras** para verbos regulares (AR/ER/IR) em três tempos (Presente, Passado Perfeito, Futuro) quando o infinitivo não está no léxico.  
 - Extensível: novos verbos entram no JSON/TS sem alterar o restante motor.
 
 **Restrições respeitadas:** sem backend dedicado, sem Python em runtime, sem APIs externas — tudo corre no cliente.
@@ -164,7 +164,7 @@ A API pública **`analisarFrase`** mantém a mesma assinatura.
 ### 6.5 Benefícios da abordagem em camadas
 
 - Maior **precisão** para verbos presentes no léxico, incluindo **formas conjugadas** na frase (e, com MorphoBr completo, muitos tempos por lema).  
-- O índice é um `Map` em memória, construído **uma vez** (lazy); com léxico muito grande, o **tempo de arranque** e o **uso de RAM** aumentam — daí a opção de whitelist ou léxico parcial.  
+- O índice é um `Map` em memória, construído **uma vez** (lazy); com léxico muito grande, o **tempo de arranque** e o **uso de RAM** aumentam — daí a option de whitelist ou léxico parcial.  
 - **Escalável** em dados: novas flexões entram via `verbos.json`; o índice reflete-as.  
 - Compatível com o objetivo de **NLP offline** assistivo — motor inicial de análise e interpretação de linguagem imperfeita, não só “um conjugador” isolado.
 
@@ -300,8 +300,9 @@ Frases telegráficas podem ter **vários núcleos** no sujeito (*eu e João*, *J
 
 O motor evoluiu de uma busca puramente por prefixo para uma **busca bidirecional** e baseada em **categorias de palavras**:
 
-1.  **Busca Bidirecional**: Procura por pronomes explícitos (`eu, tu, ele...`) antes **e** depois do verbo. Isto permite lidar com ordens inversas (VSO/VOS), comuns em telegrafia assistiva.
-2.  **Deteção de Nomes e Títulos**: Casos como `Ana comer` ou `papai viajar` agora são identificados corretamente (3.ª pessoa) através de uma lógica de **`isNounCandidate`**, que valida:
+1. **Busca Bidirecional**: Procura por pronomes explícitos (`eu, tu, ele...`) antes **e** depois do verbo. Isto permite lidar com ordens inversas (VSO/VOS), comuns em telegrafia assistiva.
+2. **Resiliência de Identidade**: Utiliza uma lista estática de **pronomes básicos** (Eu, Nós, Ele, etc.) como fallback imediato. Isso evita que pronomes comuns sejam classificados como nomes próprios caso o léxico não esteja carregado.
+3.  **Deteção de Nomes e Títulos**: Casos como `Ana comer` ou `papai viajar` agora são identificados corretamente (3.ª pessoa) através de uma lógica de **`isNounCandidate`**, que valida:
     *   **Nomes Próprios**: Palavras com inicial maiúscula (que não sejam verbos conhecidos ou partículas).
     *   **Títulos de Parentesco/Profissões**: Lista controlada de termos como `mamãe, vovô, médico, professor`.
     *   **Filtro de Objetos**: Substantivos comuns em minúsculas (ex: `pizza`) são ignorados para evitar falsos positivos de sujeito.

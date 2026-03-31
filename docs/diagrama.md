@@ -58,7 +58,9 @@ flowchart TD
   SPost -->|sim| S2[Pessoa conforme pronome<br/>Normaliza SVO]
   SPost -->|não| SFam{Eu + mamãe/papai?}
   SFam -->|sim| SN[Nós — 1ª plural]
-  SFam -->|não| SNome{Nome Próprio / Título?}
+  SFam -->|não| Basic{Pronome Básico Estático?}
+  Basic -->|sim| S1
+  Basic -->|não| SNome{Nome Próprio / Título?}
   SNome -->|sim| S3[3ª pessoa (ele/ela)<br/>Normaliza se pós-verbo]
   SNome -->|não| SDef[Padrão: Eu implícito]
 ```
@@ -67,7 +69,9 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-  OVR{tempo:<chave> / [tempo=<chave>] ?} -->|sim| TEXP[Usa tempo explícito]
+  MAN{Tempo Manual (UI)?} -->|sim| TMAN[Prioridade Máxima]
+  MAN -->|não| OVR{tempo:<chave> / [tempo=<chave>] ?}
+  OVR -->|sim| TEXP[Usa tempo explícito]
   OVR -->|não| J1{Tem "ontem" + "já"?}
   J1 -->|sim| PPC[Pretérito perfeito composto]
   J1 -->|não| J2{Tem "amanhã" + "já"?}

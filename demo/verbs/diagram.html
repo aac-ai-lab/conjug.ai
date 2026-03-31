@@ -170,8 +170,8 @@ flowchart TD
   E --> F{"forma na pessoa?"}
   F -->|sim| R["string"]
   F -->|não| N1["null"]
-  D -->|não| G{"tempo e presente?"}
-  G -->|sim| H["conjugarRegularPresente"]
+  D -->|não| G{"Tempo regular?"}
+  G -->|sim| H["conjugarRegular (Pres/Pass/Fut)"]
   H --> I{"sufixo ok?"}
   I -->|sim| R
   I -->|não| N2["null"]
@@ -266,14 +266,13 @@ flowchart TD
                 <div class="demo-conj-branch__path demo-conj-branch__path--reg">
                   <span class="demo-conj-branch__tag">Regra</span>
                   <p>
-                    Fora do léxico, só <strong>presente</strong> em verbos regulares
-                    <strong>-ar / -er / -ir</strong> → desinências por sufixo.
+                    Fora do léxico, verbos regulares <strong>-ar / -er / -ir</strong> → desinências por sufixo em <strong>presente</strong>, <strong>passado</strong> e <strong>futuro</strong>.
                   </p>
                 </div>
                 <div class="demo-conj-branch__path demo-conj-branch__path--na">
                   <span class="demo-conj-branch__tag">—</span>
                   <p>
-                    Caso contrário (ex.: futuro/passado sem léxico) → <strong>—</strong> na tabela ou
+                    Caso contrário (ex.: formas irregulares fora do léxico) → <strong>—</strong> na tabela ou
                     <code>null</code> em <code>conjugar</code>.
                   </p>
                 </div>

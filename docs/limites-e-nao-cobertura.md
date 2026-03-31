@@ -24,21 +24,24 @@ Para a arquitetura e o fluxo técnico, ver também `README.md` (raiz) e `vendors
 | **Eu + mamãe/papai** (e variantes próximas) | Ordens de palavras muito livres ou com muitos constituintes entre o sujeito e o verbo |
 | Pronomes explícitos (eu, tu, ele, ela...) em **qualquer posição** (SVO, VSO) | Resolução de **correferência**, sujeito em oração relativa |
 | **Nomes próprios** (Maiúsculas) e **títulos** (médico, papai...) como sujeito | Substantivos comuns minúsculos que possam ser interpretados como objeto (ex: "comer pizza") |
+| **Pronomes básicos estáticos** (Eu, Nós...) | Detecção de sujeito oculto a partir de contexto visual de pranchas (o sistema só lê o texto linear) |
 
 ---
 
 ## 3. Tempo verbal (pipeline CAA)
 
 - O fluxo de `analisarFrase` usa **três macro-tempos** orientados por marcadores: **presente**, **futuro**, **passado** (ver `tempo.ts`).
+- **Prioridade Manual**: Seleções feitas na interface (Ontem, Hoje, Amanhã) têm prioridade absoluta sobre os marcadores de texto. Isso é intencional para apoiar pranchas de CAA com botões de tempo.
 - **Não** há desambiguação semântica fina entre, por exemplo, pretérito perfeito vs imperfeito em todos os contextos; há **heurísticas** por palavras-chave e regras documentadas no README.
-- Tempos **alargados** existem no tipo `TempoVerbal` e no léxico quando a forma está em `verbos.json`; o utilizador pode forçar tempo com `tempo:<chave>` / `[tempo=<chave>]` — isso **não** substitui análise pragmática automática.
+- Tempos **alargados** existem no tipo `TempoVerbal` e no léxico quando a forma está em `verbos.json`; o utilizador pode forçar tempo com `tempo:<chave>` / `[tempo=<chave>]`.
 
 ---
 
 ## 4. Conjugação e léxico
 
-- A cobertura de formas vem sobretudo de **`verbos.json`** (MorphoBr). **Fora do léxico**, a conjugação de **presente** por sufixos regulares é **limitada** (ver `conjugador.ts` e regras do projeto).
-- Verbos **irregulares** ou raros podem falhar se o lema/forma não estiver representado como o pipeline espera.
+- **Fallbacks Regulares**: O motor suporta conjugação por sufixação regular (-ar/-er/-ir) para **Presente**, **Passado** (Perfeito) e **Futuro**. Isso fornece cobertura imediata para verbos regulares mesmo sem dados no léxico.
+- A cobertura de formas ricas (irregulares) vem sobretudo de **`verbos.json`** (MorphoBr).
+- Verbos **irregulares** fora do léxico ainda podem falhar ou ser conjugados de forma errada pelas regras regulares.
 
 ---
 
