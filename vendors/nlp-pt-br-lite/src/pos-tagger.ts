@@ -51,8 +51,6 @@ export class LexiconLoader {
           // @ts-ignore
           const path = await import("path");
           
-          // Tenta localizar o diretório de dados em relação ao CWD ou caminhos conhecidos
-          // Em Vitest, o CWD costuma ser a raiz do projeto ou do workspace.
           const pathsToTry = [
             path.resolve(process.cwd(), "assets/nlp/data", relativePath),
             path.resolve(process.cwd(), "../../assets/nlp/data", relativePath),
@@ -116,6 +114,30 @@ export function normalize(s: string): string {
     .replace(/[\u0300-\u036f]/g, "");
 }
 
+/**
+ * Pronomes básicos para fallback garantido (independente de léxico externo).
+ */
+const BASIC_PRONOUNS: Record<string, { p: number, w: string }> = {
+  "eu": { p: 0, w: "Eu" },
+  "tu": { p: 1, w: "Tu" },
+  "ele": { p: 2, w: "Ele" },
+  "ela": { p: 2, w: "Ela" },
+  "você": { p: 2, w: "Você" },
+  "voce": { p: 2, w: "Você" },
+  "nós": { p: 3, w: "Nós" },
+  "nos": { p: 3, w: "Nós" },
+  "vós": { p: 4, w: "Vós" },
+  "vos": { p: 4, w: "Vós" },
+  "eles": { p: 4, w: "Eles" },
+  "elas": { p: 4, w: "Elas" },
+  "vocês": { p: 4, w: "Vocês" },
+  "voces": { p: 4, w: "Vocês" }
+};
+
+export function isBasicPronoun(token: string): boolean {
+  return !!BASIC_PRONOUNS[normalize(token)];
+}
+
 /** 
  * Versão assíncrona das validações de POS 
  */
@@ -126,6 +148,14 @@ export async function isStopword(token: string): Promise<boolean> {
 }
 
 export async function getPronomeInfo(token: string): Promise<any | null> {
+  const n = normalize(token);
+  // Prioridade 1: Fallback estático (mais rápido e seguro no browser)
+  if (BASIC_PRONOUNS[n]) {
+    const p = BASIC_PRONOUNS[n];
+    return { texto: p.w, pessoa: p.p };
+  }
+
+  // Prioridade 2: Léxico dinâmico
   const info = await loader.getWordInfo(token);
   if (info?.cat?.includes("PRONOME")) {
     return { texto: info.w || token, pessoa: info.p };

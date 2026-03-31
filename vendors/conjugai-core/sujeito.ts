@@ -1,6 +1,6 @@
 import { extrairVerbo, indiceDoVerboNaFrase } from "./conjugador";
 import type { PessoaIndice } from "./types";
-import { normalize, getPronomeInfo, isSubstantivoHumano, isStopword } from "../nlp-pt-br-lite/src/index";
+import { normalize, getPronomeInfo, isSubstantivoHumano, isStopword, isBasicPronoun } from "../nlp-pt-br-lite/src/index";
 
 export type InfoSujeito = {
   texto: string;
@@ -100,6 +100,9 @@ async function isNounCandidate(token: string): Promise<boolean> {
   // 2. Nomes Próprios (começam com maiúscula na frase original)
   const isUpper = token.charAt(0) !== token.charAt(0).toLowerCase();
   if (isUpper) {
+    // 2.1 Se for um pronome básico (Eu, Tu...), não é sujeito (já foi capturado no step 2)
+    if (isBasicPronoun(token)) return false;
+
     // Se for uma stopword conhecida, mesmo em maiúscula, não é sujeito
     if (await isStopword(token)) return false;
     

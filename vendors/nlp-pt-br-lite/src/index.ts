@@ -6,6 +6,7 @@ import {
   isSubstantivoHumano,
   isTempoMarker,
   getRegenciaInfo,
+  isBasicPronoun,
 } from "./pos-tagger";
 export * from "./tokenizer";
 export {
@@ -16,4 +17,5 @@ export {
   isSubstantivoHumano,
   isTempoMarker,
   getRegenciaInfo,
+  isBasicPronoun,
 };

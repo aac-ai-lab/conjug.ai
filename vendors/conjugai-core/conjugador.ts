@@ -182,6 +182,38 @@ function conjugarRegularPresente(infinitivo: string, pessoa: number): string | n
 }
 
 /**
+ * Passado regular (Pretérito Perfeito): -AR / -ER / -IR.
+ */
+function conjugarRegularPassado(infinitivo: string, pessoa: number): string | null {
+  const v = infinitivo.toLowerCase().trim();
+  if (v.endsWith("ar")) {
+    const p = v.slice(0, -2);
+    const suf = ["ei", "aste", "ou", "amos", "aram"];
+    return p + suf[pessoa];
+  }
+  if (v.endsWith("er")) {
+    const p = v.slice(0, -2);
+    const suf = ["i", "este", "eu", "emos", "eram"];
+    return p + suf[pessoa];
+  }
+  if (v.endsWith("ir")) {
+    const p = v.slice(0, -2);
+    const suf = ["i", "iste", "iu", "imos", "iram"];
+    return p + suf[pessoa];
+  }
+  return null;
+}
+
+/**
+ * Futuro do Presente regular: infinitivo + sufixos.
+ */
+function conjugarRegularFuturo(infinitivo: string, pessoa: number): string | null {
+  const v = infinitivo.toLowerCase().trim();
+  const sufAcentuados = ["ei", "ás", "á", "emos", "ão"];
+  return v + sufAcentuados[pessoa];
+}
+
+/**
  * @param verbo infinitivo (minúsculas)
  * @param pessoa 0–4 (pipeline CAA). Para paradigma completo com `vós`, usar `conjugarPessoaTabela` (0–5).
  * @param tempo ver verbo-data / MorphoBr
@@ -199,6 +231,12 @@ export function conjugar(verbo: string, pessoa: number, tempo: TempoVerbal): str
 
   if (tempo === "presente") {
     return conjugarRegularPresente(v, pessoa);
+  }
+  if (tempo === "passado") {
+    return conjugarRegularPassado(v, pessoa);
+  }
+  if (tempo === "futuro") {
+    return conjugarRegularFuturo(v, pessoa);
   }
 
   return null;
