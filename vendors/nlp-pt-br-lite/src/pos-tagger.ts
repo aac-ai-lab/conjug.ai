@@ -33,34 +33,64 @@ export class LexiconLoader {
 
     const mergedData: Record<string, any> = {};
 
-    // Tenta carregar de cada fonte (ferramenta)
+    // Detetar ambiente Node para usar fs (útil em testes unitários)
+    // @ts-ignore
+    const isNode = typeof process !== "undefined" && process.versions && process.versions.node;
+
     for (const source of this.sources) {
       try {
-        const url = `${this.baseDir}/${source}/${cacheKey}.json`;
-        const response = await fetch(url);
-        if (response.ok) {
-          const sourceData = await response.json();
-          // Mescla dados (prioridade para a primeira fonte se houver conflito, 
-          // mas idealmente as fontes são complementares)
-          for (const [word, info] of Object.entries(sourceData)) {
-            if (!mergedData[word]) {
-              mergedData[word] = info;
-            } else {
-              // Se a palavra já existe, mescla as categorias (cat)
-              const existing = mergedData[word];
-              const newData = info as any;
-              if (newData.cat && existing.cat) {
-                existing.cat = Array.from(new Set([...existing.cat, ...newData.cat]));
-              }
-              // Atualiza regência ou pessoa se a nova fonte trouxer algo novo
-              if (newData.reg && !existing.reg) existing.reg = newData.reg;
-              if (newData.p !== undefined && existing.p === undefined) existing.p = newData.p;
+        const fileName = `${cacheKey}.json`;
+        const relativePath = `${source}/${fileName}`;
+        
+        let sourceData: Record<string, any> = {};
+
+        if (isNode) {
+          // Em Node (testes), tenta ler do sistema de arquivos
+          // @ts-ignore
+          const fs = await import("fs");
+          // @ts-ignore
+          const path = await import("path");
+          
+          // Tenta localizar o diretório de dados em relação ao CWD ou caminhos conhecidos
+          // Em Vitest, o CWD costuma ser a raiz do projeto ou do workspace.
+          const pathsToTry = [
+            path.resolve(process.cwd(), "assets/nlp/data", relativePath),
+            path.resolve(process.cwd(), "../../assets/nlp/data", relativePath),
+            path.resolve(process.cwd(), "../assets/nlp/data", relativePath)
+          ];
+
+          for (const p of pathsToTry) {
+            if (fs.existsSync(p)) {
+              const content = fs.readFileSync(p, "utf-8");
+              sourceData = JSON.parse(content);
+              break;
             }
+          }
+        } else {
+          // No Browser (produção/demo)
+          const url = `${this.baseDir}/${relativePath}`;
+          const response = await fetch(url);
+          if (response.ok) {
+            sourceData = await response.json();
+          }
+        }
+
+        // Mescla dados
+        for (const [word, info] of Object.entries(sourceData)) {
+          if (!mergedData[word]) {
+            mergedData[word] = info;
+          } else {
+            const existing = mergedData[word];
+            const newData = info as any;
+            if (newData.cat && existing.cat) {
+              existing.cat = Array.from(new Set([...existing.cat, ...newData.cat]));
+            }
+            if (newData.reg && !existing.reg) existing.reg = newData.reg;
+            if (newData.p !== undefined && existing.p === undefined) existing.p = newData.p;
           }
         }
       } catch (e) {
-        // Ignora erros de rede para fontes específicas que podem não existir (ex: z.json em verbnet)
-        // console.debug(`Source ${source} not found for letter ${cacheKey}`);
+        // Ignora erros de arquivo/rede não encontrado
       }
     }
 

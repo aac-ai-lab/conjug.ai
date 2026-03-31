@@ -38,7 +38,7 @@ export async function analisarFrase(
   frase: string,
   contexto?: { tempo?: TempoVerbal }
 ): Promise<ResultadoAnalise> {
-  const tokens = tokenize(frase);
+  const tokens = tokenize(frase); console.log("TOKENS:", tokens);
 
   if (tokens.length === 0) {
     return {
@@ -57,9 +57,9 @@ export async function analisarFrase(
     };
   }
 
-  const sujeito = await detectarSujeito(tokens);
+  const sujeito = await detectarSujeito(tokens); console.log("SUBJECT:", sujeito);
   // Passa o tempo manual se existir no contexto
-  const tempo = await detectarTempo(tokens, contexto?.tempo);
+  const tempo = await detectarTempo(tokens, contexto?.tempo); console.log("TEMPO:", tempo);
   const infinitivo = extrairVerbo(tokens);
 
   if (!infinitivo) {

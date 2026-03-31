@@ -23,7 +23,9 @@
     "build:esm": "npx esbuild index.ts --bundle --platform=neutral --format=esm --outfile=dist/index.js",
     "build:cjs": "npx esbuild index.ts --bundle --platform=neutral --format=cjs --outfile=dist/index.cjs",
     "build:types": "npx tsc -p tsconfig.build.json",
-    "build": "npm run clean && npm run build:esm && npm run build:cjs && npm run build:types"
+    "build": "npm run clean && npm run build:esm && npm run build:cjs && npm run build:types",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "keywords": [
     "portugues",
