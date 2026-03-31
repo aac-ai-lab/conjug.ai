@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { detectarTempo } from "./tempo";
+import { detectarTempo } from "../tempo";
 
 describe("detectarTempo", () => {
   it("tag explícita seleciona tempo", () => {

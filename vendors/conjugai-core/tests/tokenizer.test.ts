@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { tokenize } from "./tokenizer";
+import { tokenize } from "../tokenizer";
 
 describe("tokenize", () => {
   it("divide por um ou mais espaços", () => {

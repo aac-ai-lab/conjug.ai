@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { detectarSujeito, detectarSujeitoComposto } from "./sujeito";
+import { detectarSujeito, detectarSujeitoComposto } from "../sujeito";
 
 describe("detectarSujeitoComposto", () => {
   it("«Mamãe e eu ir» → Nós, pessoa 3", () => {

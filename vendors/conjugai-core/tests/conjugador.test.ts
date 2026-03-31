@@ -9,7 +9,7 @@ import {
   indiceDoVerboNaFrase,
   isVerbShape,
   participio,
-} from "./conjugador";
+} from "../conjugador";
 
 describe("isVerbShape", () => {
   it("reconhece infinitivos -ar/-er/-ir", () => {

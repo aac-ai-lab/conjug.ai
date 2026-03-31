@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { analisarFrase } from "./index";
+import { analisarFrase } from "../index";
 
 /** Frases usadas na UI e casos críticos do pipeline — alterações no motor devem atualizar expectativas com critério. */
 const CASOS = [
