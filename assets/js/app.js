@@ -180,6 +180,7 @@
     dialogConj: document.getElementById("dialog-conj-algo"),
     dialogProject: document.getElementById("dialog-project-context"),
     btnProjectContext: document.getElementById("btn-project-context"),
+    timeBtns: document.querySelectorAll(".time-btn"),
   };
 
   function badgeClass(tipo) {
@@ -196,6 +197,11 @@
     if (index < 0 || index >= EXAMPLES.length) return;
     selectedExampleIndex = index;
     el.input.value = exemploTexto(EXAMPLES[index]);
+    
+    // Ao selecionar um exemplo, resetamos o tempo para Auto para deixar a heurística trabalhar,
+    // a menos que o usuário queira testar manualmente.
+    updateTimeSelection("auto");
+
     if (el.exampleList) {
       EXAMPLES.forEach(function (_, idx) {
         var li = document.getElementById("example-option-" + idx);
@@ -207,6 +213,20 @@
       el.exampleList.setAttribute("aria-activedescendant", "example-option-" + index);
     }
     if (runAnalysisAfter) runAnalysis();
+  }
+
+  function updateTimeSelection(timeValue) {
+    el.timeBtns.forEach(btn => {
+      const active = btn.getAttribute("data-time") === timeValue;
+      btn.classList.toggle("is-active", active);
+      btn.setAttribute("aria-checked", active ? "true" : "false");
+    });
+  }
+
+  function getSelectedTime() {
+    const activeBtn = Array.from(el.timeBtns).find(btn => btn.classList.contains("is-active"));
+    const val = activeBtn ? activeBtn.getAttribute("data-time") : "auto";
+    return val === "auto" ? null : val;
   }
 
   function buildExampleList() {
@@ -281,9 +301,10 @@
 
   /**
    * @param {string} raw
+   * @param {string|null} manualTime
    * @returns {{ ok: boolean, error?: string, analysis?: object }}
    */
-  async function analyze(raw) {
+  async function analyze(raw, manualTime) {
     var core = getCore();
     if (!core || typeof core.analisarFrase !== "function") {
       return {
@@ -292,13 +313,15 @@
       };
     }
 
-    var r = await core.analisarFrase(String(raw).trim());
+    // Passamos o contexto manual para o motor
+    var contexto = manualTime ? { tempo: manualTime } : {};
+    var r = await core.analisarFrase(String(raw).trim(), contexto);
+    
     if (r.erro) {
       return { ok: false, error: r.erro };
     }
 
     var nomeTempo = labelTempo(r.tempo.tipo);
-
     var ruleLine = "Aplicar " + nomeTempo + " de «" + r.verbo.infinitivo + "» para " + r.sujeito.texto + ".";
 
     var verbIndex =
@@ -327,6 +350,7 @@
         },
         temporal: {
           label: r.debug.etapa3.replace(/^Tempo:\s*/, ""),
+          isManual: !!manualTime
         },
         verb: r.verbo.infinitivo,
         form: r.verbo.conjugado,
@@ -416,7 +440,7 @@
     window.setTimeout(function () {
       stepEls[1].classList.remove("is-active");
       stepEls[1].classList.add("is-done");
-      el.timeDesc.textContent = "Ler marcadores temporais na frase.";
+      el.timeDesc.textContent = analysis.temporal.isManual ? "Prioridade de tempo manual ativada." : "Ler marcadores temporais na frase.";
       el.timeOut.textContent = analysis.temporal.label;
       stepEls[2].classList.add("is-active");
     }, delays[2]);
@@ -438,9 +462,10 @@
     }, delays[3] + 500);
   }
 
-async function runAnalysis() {
+  async function runAnalysis() {
     var raw = el.input.value;
-    var result = await analyze(raw);
+    var manualTime = getSelectedTime();
+    var result = await analyze(raw, manualTime);
     if (!result.ok) {
       setStepsVisible(false);
       el.output.classList.remove("is-busy");
@@ -454,308 +479,52 @@ async function runAnalysis() {
     runStepAnimation(result.analysis);
   }
 
-  var DEFAULT_PIPELINE = {
-    rawInput: "Eu comer maçã",
-    tokens: ["Eu", "comer", "maçã"],
-    verbIndex: 1,
-    infinitivo: "comer",
-    conjugado: "como",
-    sujeitoTexto: "Eu",
-    sujeitoPessoa: 0,
-    implicito: false,
-    composto: false,
-    tempoTipo: "presente",
-    tempoRotulo: "Sem marcador de passado/futuro → Presente do indicativo.",
-    nomeTempo: "Presente do indicativo",
-    viaLexico: true,
-  };
+  // --- Inicialização ---
 
-  function normalizeTok(s) {
-    return String(s)
-      .trim()
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "");
-  }
+  buildExampleList();
 
-  function tagForToken(tok, i, verbIdx) {
-    var n = normalizeTok(tok);
-    if (verbIdx >= 0) {
-      if (i < verbIdx) {
-        if (n === "e") return { short: "conj", cls: "sv-tag--conj", hint: "Conector" };
-        if (
-          n === "eu" ||
-          n === "tu" ||
-          n === "ele" ||
-          n === "ela" ||
-          n === "eles" ||
-          n === "nos" ||
-          n === "voce"
-        ) {
-          return { short: "pron", cls: "sv-tag--pron", hint: "Pronome" };
-        }
-        return { short: "pre", cls: "sv-tag--pre", hint: "Prefixo (zona sujeito)" };
-      }
-      if (i === verbIdx) return { short: "V", cls: "sv-tag--verb", hint: "Verbo (alvo da conjugação)" };
-    }
-    if (n === "amanha" || n === "ontem" || n === "hoje") {
-      return { short: "t", cls: "sv-tag--time", hint: "Marcador temporal" };
-    }
-    return { short: "·", cls: "sv-tag--rest", hint: "Resto da frase" };
-  }
+  el.btnAnalyze.addEventListener("click", runAnalysis);
+  el.btnReset.addEventListener("click", function () {
+    el.input.value = "";
+    updateTimeSelection("auto");
+    setStepsVisible(false);
+    el.output.textContent = "O resultado aparecerá aqui após a análise.";
+  });
 
-  function renderSubjectViz() {
-    var host = el.subjectVizMount || document.getElementById("subject-viz-mount");
-    if (!host) return;
-
-    var data = lastPipeline && lastPipeline.tokens && lastPipeline.tokens.length ? lastPipeline : DEFAULT_PIPELINE;
-    var tokens = data.tokens;
-    var verbIdx = typeof data.verbIndex === "number" ? data.verbIndex : -1;
-    var nCols = tokens.length + (verbIdx === 0 && data.implicito ? 1 : 0);
-
-    var parts = [];
-    parts.push('<div class="subject-viz" role="img" aria-label="Diagrama da frase token a token">');
-
-    parts.push('<p class="subject-viz__caption">');
-    parts.push(
-      "<strong>Resultado:</strong> sujeito verbal «" +
-        data.sujeitoTexto +
-        "» · pessoa " +
-        data.sujeitoPessoa +
-        (data.implicito ? " · <em>implícito</em>" : "") +
-        (data.composto ? " · <em>composto</em>" : "") +
-        "</p>"
-    );
-
-    parts.push('<div class="subject-viz__diagram" style="--sv-cols:' + nCols + '">');
-    parts.push('<div class="subject-viz__tags" aria-hidden="true">');
-
-    var i;
-    if (verbIdx === 0 && data.implicito) {
-      parts.push(
-        '<span class="subject-viz__cell subject-viz__cell--implicit"><span class="sv-tag sv-tag--implicit">∅</span><span class="sv-hint">implícito</span></span>'
-      );
-    }
-
-    for (i = 0; i < tokens.length; i++) {
-      var tag = tagForToken(tokens[i], i, verbIdx);
-      parts.push(
-        '<span class="subject-viz__cell"><span class="sv-tag ' +
-          tag.cls +
-          '" title="' +
-          tag.hint +
-          '">' +
-          tag.short +
-          "</span></span>"
-      );
-    }
-
-    parts.push("</div>");
-
-    parts.push('<div class="subject-viz__arc" aria-hidden="true">');
-    parts.push(
-      '<svg class="subject-viz__svg" viewBox="0 0 100 24" preserveAspectRatio="none"><path class="subject-viz__path" d="" /></svg>'
-    );
-    parts.push(
-      '<span class="subject-viz__dep-label">arco: verbo ↔ zona do sujeito (prefixo)</span>'
-    );
-    parts.push("</div>");
-
-    parts.push('<div class="subject-viz__words">');
-
-    if (verbIdx === 0 && data.implicito) {
-      parts.push(
-        '<span class="subject-viz__wcell subject-viz__wcell--implicit"><span class="sv-word">—</span></span>'
-      );
-    }
-
-    for (i = 0; i < tokens.length; i++) {
-      var isVerb = verbIdx >= 0 && i === verbIdx;
-      var wc = "subject-viz__wcell" + (isVerb ? " subject-viz__wcell--verb" : "");
-      if (verbIdx >= 0 && i < verbIdx) wc += " subject-viz__wcell--prefix";
-      parts.push(
-        '<span class="' +
-          wc +
-          '" data-viz-i="' +
-          i +
-          '"' +
-          (isVerb ? ' data-viz-role="verb"' : "") +
-          "><span class=\"sv-word\">" +
-          escapeHtml(tokens[i]) +
-          "</span></span>"
-      );
-    }
-
-    parts.push("</div>");
-    parts.push("</div>");
-
-    parts.push('<p class="subject-viz__micro">');
-    parts.push(
-      "O motor corta a frase no <strong>primeiro verbo</strong> reconhecido («" +
-        (data.infinitivo || "…") +
-        "»); à esquerda fica o <strong>prefixo</strong> onde se leem pronomes e «e»; daí a pessoa usada na conjugação."
-    );
-    parts.push("</p>");
-
-    parts.push("</div>");
-
-    host.innerHTML = parts.join("");
-
-    window.requestAnimationFrame(function () {
-      layoutSubjectVizArc(host);
-      window.requestAnimationFrame(function () {
-        layoutSubjectVizArc(host);
-      });
+  el.timeBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      updateTimeSelection(btn.getAttribute("data-time"));
     });
-  }
+  });
 
-  function escapeHtml(s) {
-    return String(s)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
-  }
+  // Modal handlers
+  [el.tokenStepTrigger, el.subjectStepTrigger, el.tempoStepTrigger, el.ruleStepTrigger].forEach(function (trigger) {
+    if (!trigger) return;
+    trigger.addEventListener("click", function () {
+      var dialogId = trigger.getAttribute("aria-controls");
+      var dialog = document.getElementById(dialogId);
+      if (dialog) {
+        if (dialogId === "dialog-token-algo") renderTokenViz();
+        if (dialogId === "dialog-subject-algo") renderSubjectViz();
+        if (dialogId === "dialog-tempo-algo") renderTempoViz();
+        if (dialogId === "dialog-conj-algo") renderConjViz();
+        dialog.showModal();
+      }
+    });
+  });
 
-  function isPerifrasisIr(tokens) {
-    var lower = tokens.map(normalizeTok);
-    var primeiro = lower[0] || "";
-    if (lower.indexOf("amanha") < 0) return false;
-    return ["vou", "vais", "vai", "vamos", "vao"].indexOf(primeiro) >= 0;
-  }
+  el.btnProjectContext.addEventListener("click", function () {
+    if (el.dialogProject) el.dialogProject.showModal();
+  });
 
-  function renderTokenViz() {
-    var host = document.getElementById("token-viz-mount");
-    if (!host) return;
-    var data = lastPipeline && lastPipeline.tokens && lastPipeline.tokens.length ? lastPipeline : DEFAULT_PIPELINE;
-    var raw = data.rawInput || (data.tokens && data.tokens.join(" "));
-    var tokens = data.tokens || [];
-    var parts = [];
-    parts.push('<div class="token-viz" role="img" aria-label="Tokenização da frase">');
-    parts.push('<div class="token-viz__row">');
-    parts.push('<span class="token-viz__label">Entrada</span>');
-    parts.push('<div class="token-viz__raw"><code>' + escapeHtml(raw) + "</code></div>");
-    parts.push("</div>");
-    parts.push('<div class="token-viz__split" aria-hidden="true">⇣</div>');
-    parts.push('<div class="token-viz__row">');
-    parts.push('<span class="token-viz__label">Tokens</span>');
-    parts.push('<div class="token-viz__chips">');
-    for (var i = 0; i < tokens.length; i++) {
-      parts.push('<span class="token-viz__chip">');
-      parts.push('<span class="tv-chip tv-chip--idx">t' + i + "</span>");
-      parts.push('<span class="token-viz__word">' + escapeHtml(tokens[i]) + "</span>");
-      parts.push("</span>");
-    }
-    parts.push("</div></div>");
-    parts.push(
-      '<p class="subject-viz__micro">Cada espaço em branco separa tokens; pontuação final (.,…,…,…) é removida de cada pedaço.</p>'
-    );
-    parts.push("</div>");
-    host.innerHTML = parts.join("");
-  }
+  document.querySelectorAll("[data-close-dialog]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var d = btn.closest("dialog");
+      if (d) d.close();
+    });
+  });
 
-  function renderTempoViz() {
-    var host = document.getElementById("tempo-viz-mount");
-    if (!host) return;
-    var data = lastPipeline && lastPipeline.tokens && lastPipeline.tokens.length ? lastPipeline : DEFAULT_PIPELINE;
-    var tokens = data.tokens || [];
-    var tipo = data.tempoTipo || "presente";
-    var rotulo = data.tempoRotulo || "";
-    var nome = data.nomeTempo || "Presente do indicativo";
-    var badgeClass = "tempo-badge--pres";
-    if (tipo === "futuro" || tipo === "futuro_composto" || tipo === "subjuntivo_futuro" || tipo === "subjuntivo_futuro_composto") {
-      badgeClass = "tempo-badge--fut";
-    }
-    if (
-      tipo === "passado" ||
-      tipo === "preterito_imperfeito" ||
-      tipo === "preterito_mais_que_perfeito" ||
-      tipo === "preterito_perfeito_composto" ||
-      tipo === "preterito_mais_que_perfeito_composto" ||
-      tipo === "preterito_mais_que_perfeito_anterior"
-    ) {
-      badgeClass = "tempo-badge--past";
-    }
-
-    var parts = [];
-    parts.push('<div class="tempo-viz" role="img" aria-label="Marcadores de tempo na frase">');
-    parts.push('<p class="subject-viz__caption"><strong>Decisão:</strong> ');
-    parts.push('<span class="tempo-badge ' + badgeClass + '">' + escapeHtml(nome) + "</span></p>");
-    parts.push('<div class="tempo-viz__tokens" style="--sv-cols:' + tokens.length + '">');
-    for (var i = 0; i < tokens.length; i++) {
-      var n = normalizeTok(tokens[i]);
-      var isMark = n === "amanha" || n === "ontem" || n === "hoje";
-      var cls = "tempo-viz__tok" + (isMark ? " tempo-viz__tok--mark" : "");
-      parts.push('<div class="' + cls + '">');
-      if (isMark) parts.push('<span class="sv-tag sv-tag--time">t</span>');
-      parts.push('<span class="tempo-viz__w">' + escapeHtml(tokens[i]) + "</span>");
-      parts.push("</div>");
-    }
-    parts.push("</div>");
-    parts.push('<p class="tempo-viz__rotulo">' + escapeHtml(rotulo) + "</p>");
-    if (isPerifrasisIr(tokens)) {
-      parts.push(
-        '<p class="algo-dialog__note">Perífrase «vou/vai/…» + «amanhã» detectada: o verbo suporte permanece no <strong>presente</strong> (ex.: <em>vou viajar amanhã</em>).</p>'
-      );
-    }
-    parts.push("</div>");
-    host.innerHTML = parts.join("");
-  }
-
-  function renderConjViz() {
-    var host = document.getElementById("conj-viz-mount");
-    if (!host) return;
-    var data = lastPipeline && lastPipeline.tokens && lastPipeline.tokens.length ? lastPipeline : DEFAULT_PIPELINE;
-    var inf = data.infinitivo || "…";
-    var p = typeof data.sujeitoPessoa === "number" ? data.sujeitoPessoa : 0;
-    var pessoaLabels = ["eu", "tu", "ele/ela", "nós", "eles/vocês"];
-    var tipo = data.tempoTipo || "presente";
-    var form = data.conjugado || "…";
-    var viaLexico = data.viaLexico !== false;
-    var fonteLabel = viaLexico ? "verbos.json (léxico)" : "regra regular (presente · -ar/-er/-ir)";
-    if (tipo !== "presente" && viaLexico) fonteLabel = "verbos.json (léxico)";
-    if (tipo !== "presente" && !viaLexico) fonteLabel = "verbos.json ou —";
-
-    var parts = [];
-    parts.push('<div class="conj-viz" role="img" aria-label="Pipeline de conjugação">');
-    parts.push('<div class="conj-pipe">');
-    parts.push(
-      '<div class="conj-pipe__col"><span class="conj-pipe__cap">Lema</span><span class="conj-pipe__box">' +
-        escapeHtml(inf) +
-        "</span></div>"
-    );
-    parts.push('<span class="conj-pipe__plus">+</span>');
-    parts.push(
-      '<div class="conj-pipe__col"><span class="conj-pipe__cap">Pessoa</span><span class="conj-pipe__box">' +
-        p +
-        " · " +
-        (pessoaLabels[p] || "—") +
-        "</span></div>"
-    );
-    parts.push('<span class="conj-pipe__plus">+</span>');
-    parts.push(
-      '<div class="conj-pipe__col"><span class="conj-pipe__cap">Tempo</span><span class="conj-pipe__box">' +
-        escapeHtml(tipo) +
-        "</span></div>"
-    );
-    parts.push('<span class="conj-pipe__arrow">→</span>');
-    parts.push(
-      '<div class="conj-pipe__col conj-pipe__col--out"><span class="conj-pipe__cap">Forma</span><span class="conj-pipe__box conj-pipe__box--out">«' +
-        escapeHtml(form) +
-        '»</span></div>'
-    );
-    parts.push("</div>");
-    parts.push(
-      '<p class="conj-viz__fonte">Fonte da forma: <strong class="' +
-        (viaLexico ? "conj-src--lex" : "conj-src--reg") +
-        '">' +
-        fonteLabel +
-        "</strong></p>"
-    );
-    parts.push("</div>");
-    host.innerHTML = parts.join("");
-  }
-
+  // Helpers auxiliares (copiados ou adaptados do diagram-logic.js para manter self-contained na demo)
   function layoutSubjectVizArc(host) {
     var svg = host.querySelector(".subject-viz__svg");
     var path = host.querySelector(".subject-viz__path");
@@ -765,9 +534,6 @@ async function runAnalysis() {
     var verbEl = host.querySelector('[data-viz-role="verb"]');
     var prefixEls = host.querySelectorAll(".subject-viz__wcell--prefix");
     var implicitEl = host.querySelector(".subject-viz__wcell--implicit");
-
-    var arcLayer = host.querySelector(".subject-viz__arc");
-    if (!verbEl || !arcLayer) return;
 
     var dRect = diagram.getBoundingClientRect();
     var w = dRect.width;
@@ -796,131 +562,6 @@ async function runAnalysis() {
     var bump = Math.min(22, Math.abs(x2 - x1) * 0.35 + 8);
     var dPath = "M " + x1 + " " + y + " Q " + cx + " " + (y - bump) + " " + x2 + " " + y;
     path.setAttribute("d", dPath);
-    path.setAttribute("stroke-linecap", "round");
-
-    var show = prefixEls.length > 0 || implicitEl;
-    path.style.opacity = show && Math.abs(x2 - x1) > 1 ? "1" : "0.35";
-    var label = host.querySelector(".subject-viz__dep-label");
-    if (label) {
-      label.style.opacity = show ? "1" : "0.5";
-    }
   }
 
-  function openDialogWithRender(dialog, renderFn, focusEl) {
-    if (!dialog || typeof dialog.showModal !== "function") return;
-    dialog.showModal();
-    window.requestAnimationFrame(function () {
-      renderFn();
-    });
-    dialog.addEventListener(
-      "close",
-      function () {
-        if (focusEl) focusEl.focus();
-      },
-      { once: true }
-    );
-  }
-
-  function bindOneDialog(dialog, trigger, renderFn) {
-    if (!dialog) return;
-    var closeBtn = dialog.querySelector("[data-close-dialog]");
-    if (closeBtn) {
-      closeBtn.addEventListener("click", function () {
-        dialog.close();
-      });
-    }
-    dialog.addEventListener("click", function (e) {
-      if (e.target === dialog) dialog.close();
-    });
-    if (trigger) {
-      trigger.addEventListener("click", function () {
-        openDialogWithRender(dialog, renderFn, trigger);
-      });
-    }
-  }
-
-  function bindStaticDialog(dialog, openBtn) {
-    if (!dialog) return;
-    var closeBtn = dialog.querySelector("[data-close-dialog]");
-    if (closeBtn) {
-      closeBtn.addEventListener("click", function () {
-        dialog.close();
-      });
-    }
-    dialog.addEventListener("click", function (e) {
-      if (e.target === dialog) dialog.close();
-    });
-    if (openBtn) {
-      openBtn.addEventListener("click", function () {
-        if (typeof dialog.showModal === "function") dialog.showModal();
-      });
-    }
-    dialog.addEventListener("close", function () {
-      if (openBtn) openBtn.focus();
-    });
-  }
-
-  function bindAlgoDialogs() {
-    bindOneDialog(el.dialogToken, el.tokenStepTrigger, renderTokenViz);
-    bindOneDialog(el.dialogSubject, el.subjectStepTrigger, renderSubjectViz);
-    bindOneDialog(el.dialogTempo, el.tempoStepTrigger, renderTempoViz);
-    bindOneDialog(el.dialogConj, el.ruleStepTrigger, renderConjViz);
-    bindStaticDialog(el.dialogProject, el.btnProjectContext);
-
-    window.addEventListener("resize", function () {
-      if (el.dialogSubject && el.dialogSubject.open && el.subjectVizMount) {
-        layoutSubjectVizArc(el.subjectVizMount);
-      }
-    });
-  }
-
-  function init() {
-    bindAlgoDialogs();
-
-    buildExampleList();
-    selectedExampleIndex = 0;
-    el.input.value = exemploTexto(EXAMPLES[0]);
-
-    if (el.exampleList) {
-      el.exampleList.addEventListener("keydown", function (e) {
-        if (e.key === "ArrowDown") {
-          e.preventDefault();
-          selectExample(Math.min(selectedExampleIndex + 1, EXAMPLES.length - 1), true);
-        } else if (e.key === "ArrowUp") {
-          e.preventDefault();
-          selectExample(Math.max(selectedExampleIndex - 1, 0), true);
-        } else if (e.key === "Home") {
-          e.preventDefault();
-          selectExample(0, true);
-        } else if (e.key === "End") {
-          e.preventDefault();
-          selectExample(EXAMPLES.length - 1, true);
-        }
-      });
-    }
-
-    el.btnAnalyze.addEventListener("click", runAnalysis);
-    el.btnReset.addEventListener("click", function () {
-      lastPipeline = null;
-      el.input.value = "";
-      el.output.textContent = "O resultado aparecerá aqui após a análise.";
-      el.output.classList.remove("is-busy");
-      el.output.removeAttribute("aria-busy");
-      setStepsVisible(false);
-      resetStepsUi();
-      el.placeholder.innerHTML =
-        "<p>Selecione um exemplo ou digite uma frase e clique em <strong>Analisar</strong>.</p>";
-    });
-
-    el.input.addEventListener("keydown", function (e) {
-      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
-        e.preventDefault();
-        runAnalysis();
-      }
-    });
-
-    runAnalysis();
-  }
-
-  init();
 })();
