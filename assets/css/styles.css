@@ -437,6 +437,76 @@ button.brand-mark:focus-visible {
   border-color: var(--text-muted);
 }
 
+/* Time Selector Segmented Control */
+.time-selector-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.time-selector {
+  display: flex;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+  gap: 2px;
+  margin-bottom: 1rem;
+}
+
+.time-btn {
+  flex: 1;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.time-btn:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.time-btn.is-active {
+  color: var(--bg);
+  background: var(--accent);
+}
+
+.time-btn.is-active[data-time="passado"] {
+  background: var(--warning);
+}
+
+.time-btn.is-active[data-time="presente"] {
+  background: var(--accent);
+}
+
+.time-btn.is-active[data-time="futuro"] {
+  background: var(--success);
+}
+
+.time-btn.is-active[data-time="auto"] {
+  background: var(--text-muted);
+  color: var(--bg);
+}
+
+.time-btn i {
+  font-style: normal;
+  font-size: 1rem;
+}
+
 .flow {
   display: flex;
   flex-direction: column;

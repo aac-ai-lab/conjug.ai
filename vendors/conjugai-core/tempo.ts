@@ -43,16 +43,23 @@ function extrairTempoExplicito(tokens: string[]): TempoVerbal | null {
   return null;
 }
 
-
-
 /**
- * *ontem* → passado.
- * *amanhã* → futuro, exceto quando a frase já tem perífrase **ir + infinitivo** no presente
- * (ex.: «vou viajar amanhã»), caso em que o primeiro verbo permanece no presente.
- * Caso contrário → presente.
+ * Deteta o tempo verbal baseado em tokens, marcadores e contexto opcional.
+ * @param tokens Lista de palavras da frase.
+ * @param tempoManual Tempo verbal fornecido manualmente (prioridade).
  */
-export async function detectarTempo(tokens: string[]): Promise<InfoTempo> {
+export async function detectarTempo(tokens: string[], tempoManual?: TempoVerbal): Promise<InfoTempo> {
   const lower = tokens.map(normalize);
+
+  // 1. Prioridade: Tempo manual (ex: selecionado na UI)
+  if (tempoManual && TEMPOS_EXPLICITOS.has(tempoManual)) {
+    return {
+      tipo: tempoManual,
+      rotulo: `Tempo definido manualmente pelo usuário (${tempoManual}).`,
+    };
+  }
+
+  // 2. Tempo explícito via tag na frase (ex: tempo:passado)
   const explicito = extrairTempoExplicito(tokens);
   if (explicito) {
     return {
@@ -61,99 +68,20 @@ export async function detectarTempo(tokens: string[]): Promise<InfoTempo> {
     };
   }
   
-  const tokensInfo = await Promise.all(tokens.map(t => loader.getWordInfo(t)));
+  // Detecção robusta de marcadores básicos (fallback se o léxico falhar)
+  const temOntem = lower.includes("ontem");
+  const temAmanha = lower.includes("amanha");
+
+  if (temOntem) {
+    return {
+      tipo: "passado",
+      rotulo: 'Marcador "ontem" identificado diretamente → Passado.',
+    };
+  }
+
   const firstToken = lower[0] ?? "";
-  
-  const temTalvez = tokensInfo.some(info => info?.cat?.includes("SUBJUNTIVO"));
-  const temQuando = lower.includes("quando");
-  const temSe = lower.includes("se");
-  const temQue = lower.includes("que");
-  const temNao = lower.includes("nao");
-  const temPassado = tokensInfo.some(info => info?.cat?.includes("PASSADO"));
-  const temAmanha = tokensInfo.some(info => info?.cat?.includes("FUTURO"));
-  const temJa = lower.includes("ja");
-  const temImperfeito = tokensInfo.some(info => info?.cat?.includes("IMPERFEITO"));
-
-  if (temQuando && temJa) {
-    return {
-      tipo: "subjuntivo_futuro_composto",
-      rotulo: 'Marcadores "quando" + "já" → Subjuntivo Futuro composto.',
-    };
-  }
-
-  if (temSe && temJa) {
-    return {
-      tipo: "subjuntivo_preterito_mais_que_perfeito",
-      rotulo: 'Marcadores "se" + "já" → Subjuntivo Pretérito Mais-que-perfeito composto.',
-    };
-  }
-
-  if (temQue && temJa) {
-    return {
-      tipo: "subjuntivo_preterito_perfeito",
-      rotulo: 'Marcadores "que" + "já" → Subjuntivo Pretérito Perfeito composto.',
-    };
-  }
-
-  if (temAmanha && temJa) {
-    return {
-      tipo: "futuro_composto",
-      rotulo: 'Marcadores "amanhã" + "já" → Futuro do presente composto.',
-    };
-  }
-
-  if (temPassado && temJa) {
-    return {
-      tipo: "preterito_perfeito_composto",
-      rotulo: 'Marcadores de passado + "já" → Pretérito Perfeito composto.',
-    };
-  }
-
-  if (temPassado && lower.includes("antes")) {
-    return {
-      tipo: "preterito_mais_que_perfeito",
-      rotulo: 'Marcador "antes" em contexto de passado → Pretérito Mais-que-perfeito.',
-    };
-  }
-
-  if (temImperfeito) {
-    return {
-      tipo: "preterito_imperfeito",
-      rotulo: 'Marcador aspectual (hábito/passado contínuo) → Pretérito Imperfeito.',
-    };
-  }
-
-  if (temTalvez || temQue) {
-    return {
-      tipo: "subjuntivo_presente",
-      rotulo: 'Marcador "talvez"/"que" → Subjuntivo Presente.',
-    };
-  }
-
-  if (temSe) {
-    return {
-      tipo: "subjuntivo_imperfeito",
-      rotulo: 'Marcador "se" → Subjuntivo Imperfeito.',
-    };
-  }
-
-  if (temQuando) {
-    return {
-      tipo: "subjuntivo_futuro",
-      rotulo: 'Marcador "quando" → Subjuntivo Futuro.',
-    };
-  }
-
-  if (temNao && (firstToken === "tu" || firstToken === "voce" || firstToken === "voces")) {
-    return {
-      tipo: "imperativo",
-      rotulo: 'Estrutura de comando com "não" → Imperativo.',
-    };
-  }
-
-  const amanha = lower.includes("amanha");
   const perifrasisIrPresente =
-    amanha &&
+    temAmanha &&
     (firstToken === "vou" ||
       firstToken === "vais" ||
       firstToken === "vai" ||
@@ -163,23 +91,82 @@ export async function detectarTempo(tokens: string[]): Promise<InfoTempo> {
   if (perifrasisIrPresente) {
     return {
       tipo: "presente",
-      rotulo:
-        'Marcador "amanhã" com «vou/vai/… viajar» (perífrase) → presente no verbo suporte.',
+      rotulo: 'Marcador "amanhã" com perífrase de "ir" no presente.',
     };
   }
 
   if (temAmanha) {
     return {
       tipo: "futuro",
-      rotulo: 'Marcador de futuro → Futuro do Presente do indicativo.',
+      rotulo: 'Marcador "amanhã" identificado diretamente → Futuro.',
     };
   }
-  if (temPassado) {
-    return {
-      tipo: "passado",
-      rotulo: 'Marcador de passado → Pretérito Perfeito do indicativo.',
-    };
+
+  // 3. Detecção via Léxico (MorphoBr, etc.)
+  const tokensInfo = await Promise.all(tokens.map(t => loader.getWordInfo(t)));
+  
+  const temTalvez = tokensInfo.some(info => info?.cat?.includes("SUBJUNTIVO"));
+  const temQuando = lower.includes("quando");
+  const temSe = lower.includes("se");
+  const temQue = lower.includes("que");
+  const temNao = lower.includes("nao");
+  const temPassadoLexico = tokensInfo.some(info => info?.cat?.includes("PASSADO"));
+  const temAmanhaLexico = tokensInfo.some(info => info?.cat?.includes("FUTURO"));
+  const temJa = lower.includes("ja");
+  const temImperfeito = tokensInfo.some(info => info?.cat?.includes("IMPERFEITO"));
+
+  if (temQuando && temJa) {
+    return { tipo: "subjuntivo_futuro_composto", rotulo: 'Marcadores "quando" + "já" → Subjuntivo Futuro composto.' };
   }
+
+  if (temSe && temJa) {
+    return { tipo: "subjuntivo_preterito_mais_que_perfeito", rotulo: 'Marcadores "se" + "já" → Subjuntivo Pretérito Mais-que-perfeito composto.' };
+  }
+
+  if (temQue && temJa) {
+    return { tipo: "subjuntivo_preterito_perfeito", rotulo: 'Marcadores "que" + "já" → Subjuntivo Pretérito Perfeito composto.' };
+  }
+
+  if (temAmanhaLexico && temJa) {
+    return { tipo: "futuro_composto", rotulo: 'Marcadores de futuro + "já" → Futuro do presente composto.' };
+  }
+
+  if (temPassadoLexico && temJa) {
+    return { tipo: "preterito_perfeito_composto", rotulo: 'Marcadores de passado + "já" → Pretérito Perfeito composto.' };
+  }
+
+  if (temPassadoLexico && lower.includes("antes")) {
+    return { tipo: "preterito_mais_que_perfeito", rotulo: 'Marcador "antes" em contexto de passado → Pretérito Mais-que-perfeito.' };
+  }
+
+  if (temImperfeito) {
+    return { tipo: "preterito_imperfeito", rotulo: 'Marcador aspectual (hábito/passado) → Pretérito Imperfeito.' };
+  }
+
+  if (temTalvez || temQue) {
+    return { tipo: "subjuntivo_presente", rotulo: 'Marcador "talvez"/"que" → Subjuntivo Presente.' };
+  }
+
+  if (temSe) {
+    return { tipo: "subjuntivo_imperfeito", rotulo: 'Marcador "se" → Subjuntivo Imperfeito.' };
+  }
+
+  if (temQuando) {
+    return { tipo: "subjuntivo_futuro", rotulo: 'Marcador "quando" → Subjuntivo Futuro.' };
+  }
+
+  if (temNao && (firstToken === "tu" || firstToken === "voce" || firstToken === "voces")) {
+    return { tipo: "imperativo", rotulo: 'Comando com "não" → Imperativo.' };
+  }
+
+  if (temAmanhaLexico) {
+    return { tipo: "futuro", rotulo: "Marcador de léxico → Futuro." };
+  }
+  
+  if (temPassadoLexico) {
+    return { tipo: "passado", rotulo: "Marcador de léxico → Passado." };
+  }
+
   return {
     tipo: "presente",
     rotulo: "Sem marcador de passado/futuro → Presente do indicativo.",

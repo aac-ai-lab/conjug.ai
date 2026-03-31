@@ -2,7 +2,7 @@ import { conjugar, conjugarPessoaTabela, conjugarTempo, extrairVerbo } from "./c
 import { corrigir } from "./corretor";
 import { detectarSujeito } from "./sujeito";
 import { detectarTempo } from "./tempo";
-import type { ResultadoAnalise } from "./types";
+import type { ResultadoAnalise, TempoVerbal } from "./types";
 import { tokenize } from "../nlp-pt-br-lite/src/index";
 
 export type {
@@ -31,8 +31,13 @@ export { corrigir } from "./corretor";
 
 /**
  * Pipeline principal: tokenização → sujeito → tempo → verbo → conjugação → correção.
+ * @param frase Texto bruto para processar.
+ * @param contexto Opções manuais para guiar a análise (ex: tempo verbal).
  */
-export async function analisarFrase(frase: string): Promise<ResultadoAnalise> {
+export async function analisarFrase(
+  frase: string,
+  contexto?: { tempo?: TempoVerbal }
+): Promise<ResultadoAnalise> {
   const tokens = tokenize(frase);
 
   if (tokens.length === 0) {
@@ -53,7 +58,8 @@ export async function analisarFrase(frase: string): Promise<ResultadoAnalise> {
   }
 
   const sujeito = await detectarSujeito(tokens);
-  const tempo = await detectarTempo(tokens);
+  // Passa o tempo manual se existir no contexto
+  const tempo = await detectarTempo(tokens, contexto?.tempo);
   const infinitivo = extrairVerbo(tokens);
 
   if (!infinitivo) {
@@ -82,7 +88,7 @@ export async function analisarFrase(frase: string): Promise<ResultadoAnalise> {
     };
   }
 
-  const conjugado = conjugarTempo(infinitivo, sujeito.pessoa, tempo.tipo);
+  const conjugado = conjugarTempo(infinitivo, sujeito.pessoa, tempo.tipo as TempoVerbal);
 
   if (!conjugado) {
     return {
@@ -109,7 +115,7 @@ export async function analisarFrase(frase: string): Promise<ResultadoAnalise> {
     };
   }
 
-  const correcao = await corrigir(tokens, sujeito, infinitivo, conjugado, tempo.tipo);
+  const correcao = await corrigir(tokens, sujeito, infinitivo, conjugado, tempo.tipo as TempoVerbal);
 
   return {
     tokens,

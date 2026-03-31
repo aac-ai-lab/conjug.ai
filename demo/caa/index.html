@@ -64,6 +64,23 @@
               <h2 id="input-heading" class="panel-title">Entrada</h2>
               <span class="badge">Texto bruto</span>
             </div>
+
+            <span class="time-selector-label">Tempo Verbal (Opcional)</span>
+            <div id="time-selector" class="time-selector" role="radiogroup" aria-labelledby="time-selector-label">
+              <button type="button" class="time-btn is-active" data-time="auto" aria-checked="true" role="radio">
+                <i>A</i> Auto
+              </button>
+              <button type="button" class="time-btn" data-time="passado" aria-checked="false" role="radio">
+                <i>⟲</i> Ontem
+              </button>
+              <button type="button" class="time-btn" data-time="presente" aria-checked="false" role="radio">
+                <i>•</i> Hoje
+              </button>
+              <button type="button" class="time-btn" data-time="futuro" aria-checked="false" role="radio">
+                <i>⟳</i> Amanhã
+              </button>
+            </div>
+
             <label class="sr-only" for="raw-input">Frase telegráfica</label>
             <textarea
               id="raw-input"
@@ -226,6 +243,8 @@
       </footer>
     </div>
 
+    <!-- Dialogs omitted for brevity in write_to_file but I will include them in the final update -->
+    <!-- Actually I should include everything to not lose dialogs -->
     <dialog class="algo-dialog" id="dialog-project-context" aria-labelledby="dialog-project-context-title">
       <div class="algo-dialog__inner">
         <header class="algo-dialog__head">
