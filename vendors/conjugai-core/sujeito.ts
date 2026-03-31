@@ -1,6 +1,12 @@
 import { extrairVerbo, indiceDoVerboNaFrase } from "./conjugador";
 import type { PessoaIndice } from "./types";
-import { normalize, getPronomeInfo, isSubstantivoHumano, isStopword, isBasicPronoun } from "../nlp-pt-br-lite/src/index";
+import {
+  normalize,
+  getPronomeInfo,
+  isSubstantivoHumano,
+  isStopword,
+  isBasicPronoun,
+} from "../nlp-pt-br-lite/src/index";
 
 export type InfoSujeito = {
   texto: string;
@@ -15,8 +21,6 @@ export type InfoSujeito = {
   /** Índice do token na frase original (se não for implícito). */
   tokenIndex?: number;
 };
-
-
 
 function isToken(t: string, forms: string[]): boolean {
   const n = normalize(t);
@@ -83,7 +87,8 @@ function isCompostoEuOutra(tokens: string[]): boolean {
   const lower = tokens.map(normalize);
   const hasEu = lower.includes("eu");
   if (!hasEu) return false;
-  if (lower.includes("mamae") || lower.some((t) => t.startsWith("mamae"))) return true;
+  if (lower.includes("mamae") || lower.some((t) => t.startsWith("mamae")))
+    return true;
   if (lower.includes("papai")) return true;
   const joined = lower.join(" ");
   if (/(mamae|papai)\s+e\s+eu|eu\s+e\s+(mamae|papai)/.test(joined)) return true;
@@ -105,10 +110,10 @@ async function isNounCandidate(token: string): Promise<boolean> {
 
     // Se for uma stopword conhecida, mesmo em maiúscula, não é sujeito
     if (await isStopword(token)) return false;
-    
+
     // Se for um verbo conhecido mesmo em maiúscula, não é sujeito
     if (extrairVerbo([token])) return false;
-    
+
     return true;
   }
 
@@ -117,7 +122,7 @@ async function isNounCandidate(token: string): Promise<boolean> {
 
 /**
  * Identifica sujeito e pessoa (0–4).
- * Tenta primeiro sujeito composto (**X e Y** antes do verbo); 
+ * Tenta primeiro sujeito composto (**X e Y** antes do verbo);
  * depois procura pronomes ou nomes em qualquer posição (bidirecional).
  */
 export async function detectarSujeito(tokens: string[]): Promise<InfoSujeito> {
@@ -130,7 +135,7 @@ export async function detectarSujeito(tokens: string[]): Promise<InfoSujeito> {
     if (comp) return { ...comp, posicaoOriginal: "antes" };
   }
 
-// 2. Tentar Sujeito Explícito (Pronomes) - Busca Bidirecional
+  // 2. Tentar Sujeito Explícito (Pronomes) - Busca Bidirecional
 
   // Prioridade 1: Pronome antes do verbo
   if (verbIdx > 0) {
@@ -172,7 +177,7 @@ export async function detectarSujeito(tokens: string[]): Promise<InfoSujeito> {
       rotulo: "composto (Eu + mamãe/papai) → 1ª plural",
       implicito: false,
       composto: true,
-      posicaoOriginal: "antes" // Geralmente antes
+      posicaoOriginal: "antes", // Geralmente antes
     };
   }
 
@@ -192,6 +197,7 @@ export async function detectarSujeito(tokens: string[]): Promise<InfoSujeito> {
       }
     }
   }
+
   // Fallback: Depois do verbo
   if (verbIdx >= 0) {
     for (let i = verbIdx + 1; i < tokens.length; i++) {
@@ -214,6 +220,6 @@ export async function detectarSujeito(tokens: string[]): Promise<InfoSujeito> {
     pessoa: 0,
     rotulo: "implícito: 1ª pessoa do singular (frase sem sujeito identificado)",
     implicito: true,
-    posicaoOriginal: "antes"
+    posicaoOriginal: "antes",
   };
 }
