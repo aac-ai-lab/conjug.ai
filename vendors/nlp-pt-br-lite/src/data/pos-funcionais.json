@@ -1,0 +1,6 @@
+{
+  "conclusoes": ["e", "ou", "nem", "mas", "porem", "entretanto"],
+  "artigos": ["o", "a", "os", "as", "um", "uma"],
+  "preposicoes": ["de", "em", "por", "com", "sem", "para", "a", "ao", "do", "da", "no", "na"],
+  "outras_funcionais": ["que", "se", "quando", "como"]
+}

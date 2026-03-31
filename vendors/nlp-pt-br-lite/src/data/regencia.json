@@ -1,0 +1,13 @@
+{
+  "verbos_movimento": ["ir", "viajar", "voltar", "chegar", "correr", "andar"],
+  "lugares": {
+    "femininos": [
+      "escola", "praia", "casa", "igreja", "farmacia", "padaria", "academia", "universidade", "faculdade",
+      "praca", "feira", "loja", "piscina", "biblioteca", "clinica", "festa"
+    ],
+    "masculinos": [
+      "trabalho", "cinema", "hospital", "banco", "parque", "medico", "dentista", "colegio", "shopping",
+      "teatro", "zoologico", "ginasio", "mar", "mercado"
+    ]
+  }
+}

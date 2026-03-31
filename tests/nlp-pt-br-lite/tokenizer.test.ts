@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { tokenize } from "../tokenizer";
+import { tokenize } from "../../vendors/nlp-pt-br-lite/src/index";
 
 describe("tokenize", () => {
   it("divide por um ou mais espaços", () => {

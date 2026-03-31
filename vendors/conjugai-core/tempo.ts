@@ -1,4 +1,5 @@
 import type { TempoVerbal } from "./types";
+import { normalize, DATA_TEMPO } from "../nlp-pt-br-lite/src/index";
 
 export type InfoTempo = {
   tipo: TempoVerbal;
@@ -42,13 +43,7 @@ function extrairTempoExplicito(tokens: string[]): TempoVerbal | null {
   return null;
 }
 
-function normalize(s: string): string {
-  return s
-    .trim()
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
-}
+
 
 /**
  * *ontem* → passado.
@@ -65,18 +60,17 @@ export function detectarTempo(tokens: string[]): InfoTempo {
       rotulo: `Tempo explícito na frase via tag (${explicito}).`,
     };
   }
+  
   const primeiro = lower[0] ?? "";
-  const temTalvez = lower.includes("talvez");
+  const temTalvez = lower.some(t => DATA_TEMPO.subjuntivo.includes(t));
   const temQuando = lower.includes("quando");
   const temSe = lower.includes("se");
   const temQue = lower.includes("que");
   const temNao = lower.includes("nao");
-  const temOntem = lower.includes("ontem");
-  const temAmanha = lower.includes("amanha");
+  const temPassado = lower.some(t => DATA_TEMPO.passado.includes(t));
+  const temAmanha = lower.some(t => DATA_TEMPO.futuro.includes(t));
   const temJa = lower.includes("ja");
-  const temAntes = lower.includes("antes");
-  const temSempre = lower.includes("sempre");
-  const temAntigamente = lower.includes("antigamente");
+  const temImperfeito = lower.some(t => DATA_TEMPO.imperfeito.includes(t));
 
   if (temQuando && temJa) {
     return {
@@ -106,24 +100,24 @@ export function detectarTempo(tokens: string[]): InfoTempo {
     };
   }
 
-  if (temOntem && temJa) {
+  if (temPassado && temJa) {
     return {
       tipo: "preterito_perfeito_composto",
-      rotulo: 'Marcadores "ontem" + "já" → Pretérito Perfeito composto.',
+      rotulo: 'Marcadores de passado + "já" → Pretérito Perfeito composto.',
     };
   }
 
-  if (temAntes) {
+  if (temPassado && lower.includes("antes")) {
     return {
       tipo: "preterito_mais_que_perfeito",
-      rotulo: 'Marcador "antes" → Pretérito Mais-que-perfeito.',
+      rotulo: 'Marcador "antes" em contexto de passado → Pretérito Mais-que-perfeito.',
     };
   }
 
-  if (temAntigamente || temSempre) {
+  if (temImperfeito) {
     return {
       tipo: "preterito_imperfeito",
-      rotulo: 'Marcador aspectual ("antigamente"/"sempre") → Pretérito Imperfeito.',
+      rotulo: 'Marcador aspectual (hábito/passado contínuo) → Pretérito Imperfeito.',
     };
   }
 
@@ -172,16 +166,16 @@ export function detectarTempo(tokens: string[]): InfoTempo {
     };
   }
 
-  if (amanha) {
+  if (temAmanha) {
     return {
       tipo: "futuro",
-      rotulo: 'Marcador "amanhã" → Futuro do Presente do indicativo.',
+      rotulo: 'Marcador de futuro → Futuro do Presente do indicativo.',
     };
   }
-  if (lower.includes("ontem")) {
+  if (temPassado) {
     return {
       tipo: "passado",
-      rotulo: 'Marcador "ontem" → Pretérito Perfeito do indicativo.',
+      rotulo: 'Marcador de passado → Pretérito Perfeito do indicativo.',
     };
   }
   return {

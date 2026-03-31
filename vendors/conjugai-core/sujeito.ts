@@ -1,5 +1,6 @@
 import { extrairVerbo, indiceDoVerboNaFrase } from "./conjugador";
 import type { PessoaIndice } from "./types";
+import { normalize, DATA_SUJEITO, DATA_FUNCIONAL, getPronomeInfo, isSubstantivoHumano } from "../nlp-pt-br-lite/src/index";
 
 export type InfoSujeito = {
   texto: string;
@@ -15,13 +16,7 @@ export type InfoSujeito = {
   tokenIndex?: number;
 };
 
-function normalize(s: string): string {
-  return s
-    .trim()
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
-}
+
 
 function isToken(t: string, forms: string[]): boolean {
   const n = normalize(t);
@@ -100,23 +95,16 @@ function isNounCandidate(token: string): boolean {
   if (n.length < 2) return false;
 
   // 1. Títulos de pessoas / Parentesco (comum em CAA)
-  const pessoas = [
-    "mae", "mamae", "mamãe", "pai", "papai",
-    "vo", "vovo", "vovô", "vovó",
-    "tio", "tia", "irmao", "irma", "irmão", "irmã",
-    "medico", "medica", "médico", "médica",
-    "professor", "professora", "amigo", "amiga"
-  ];
-  if (pessoas.includes(n)) return true;
+  if (isSubstantivoHumano(token)) return true;
 
   // 2. Nomes Próprios (começam com maiúscula na frase original)
-  // Nota: tokens[i] é a forma original.
   const isUpper = token.charAt(0) !== token.charAt(0).toLowerCase();
   if (isUpper) {
-    // Verificar se não é apenas o início da frase (primeira posição)
-    // Mas em telegrafia, o primeiro token costuma ser o sujeito.
-    // Para ser seguro, evitamos palavras funcionais mesmo se em maiúscula.
-    const funcionais = ["o", "a", "os", "as", "um", "uma", "de", "em", "por", "com", "e"];
+    const funcionais = [
+      ...DATA_FUNCIONAL.artigos,
+      ...DATA_FUNCIONAL.preposicoes,
+      ...DATA_FUNCIONAL.conclusoes
+    ];
     if (funcionais.includes(n)) return false;
     
     // Se for um verbo conhecido mesmo em maiúscula, não é sujeito
@@ -144,20 +132,7 @@ export function detectarSujeito(tokens: string[]): InfoSujeito {
   }
 
   // 2. Tentar Sujeito Explícito (Pronomes) - Busca Bidirecional
-  const pronomesMap: Record<string, { texto: string; pessoa: PessoaIndice }> = {
-    eu: { texto: "Eu", pessoa: 0 },
-    tu: { texto: "Tu", pessoa: 1 },
-    ele: { texto: "Ele", pessoa: 2 },
-    ela: { texto: "Ela", pessoa: 2 },
-    nos: { texto: "Nós", pessoa: 3 },
-    "nós": { texto: "Nós", pessoa: 3 },
-    eles: { texto: "Eles", pessoa: 4 },
-    elas: { texto: "Eles", pessoa: 4 }, // Simplificado para Eles no motor
-    voce: { texto: "Você", pessoa: 2 }, // Em PT-BR você = 3ª pessoa verbal
-    "você": { texto: "Você", pessoa: 2 },
-    voces: { texto: "Vocês", pessoa: 4 },
-    "vocês": { texto: "Vocês", pessoa: 4 },
-  };
+  const pronomesMap = DATA_SUJEITO.pronomes as Record<string, { texto: string; pessoa: PessoaIndice }>;
 
   // Prioridade 1: Pronome antes do verbo
   if (verbIdx > 0) {

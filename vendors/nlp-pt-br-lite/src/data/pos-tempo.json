@@ -1,0 +1,7 @@
+{
+  "passado": ["ontem", "anteontem", "ante_ontem", "passado", "antes", "atras"],
+  "presente": ["hoje", "agora", "ja", "sempre", "constantemente"],
+  "futuro": ["amanha", "depois", "breve", "em_breve", "proximo"],
+  "imperfeito": ["sempre", "antigamente", "costumava"],
+  "subjuntivo": ["se", "quando", "talvez", "que"]
+}

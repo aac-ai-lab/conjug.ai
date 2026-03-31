@@ -3,7 +3,7 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   test: {
     environment: "node",
-    include: ["vendors/conjugai-core/**/*.test.ts"],
+    include: ["vendors/conjugai-core/**/*.test.ts", "tests/**/*.test.ts"],
     globals: false,
   },
 });

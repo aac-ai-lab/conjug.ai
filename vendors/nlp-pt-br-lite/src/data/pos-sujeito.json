@@ -1,0 +1,23 @@
+{
+  "pronomes": {
+    "eu": { "texto": "Eu", "pessoa": 0 },
+    "tu": { "texto": "Tu", "pessoa": 1 },
+    "ele": { "texto": "Ele", "pessoa": 2 },
+    "ela": { "texto": "Ela", "pessoa": 2 },
+    "nos": { "texto": "Nós", "pessoa": 3 },
+    "nós": { "texto": "Nós", "pessoa": 3 },
+    "eles": { "texto": "Eles", "pessoa": 4 },
+    "elas": { "texto": "Eles", "pessoa": 4 },
+    "voce": { "texto": "Você", "pessoa": 2 },
+    "você": { "texto": "Você", "pessoa": 2 },
+    "voces": { "texto": "Vocês", "pessoa": 4 },
+    "vocês": { "texto": "Vocês", "pessoa": 4 }
+  },
+  "titulos": [
+    "mae", "mamae", "mamãe", "pai", "papai",
+    "vo", "vovo", "vovô", "vovó",
+    "tio", "tia", "irmao", "irma", "irmão", "irmã",
+    "medico", "medica", "médico", "médica",
+    "professor", "professora", "amigo", "amiga"
+  ]
+}

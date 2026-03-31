@@ -1,59 +1,23 @@
 import { indiceDoVerboNaFrase } from "./conjugador";
 import type { TempoVerbal } from "./types";
+import { normalize, DATA_REGENCIA } from "../nlp-pt-br-lite/src/index";
 
-function normalizar(s: string): string {
-  return s
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
-}
 
-/** Verbos de movimento/deslocamento em que *a/o + lugar* (lista abaixo) admite «à»/«ao» em telegrafia. */
-const VERBOS_MOVIMENTO_REGENCIA_LOCAL = new Set(["ir", "viajar"]);
+
+/** Verbos de movimento/deslocamento em que *a/o + lugar* admite «à»/«ao» em telegrafia. */
+const VERBOS_MOVIMENTO_REGENCIA_LOCAL = new Set(DATA_REGENCIA.verbos_movimento);
 
 /**
  * Substantivos de lugar frequentes em telegrafia (CAA), com género para regência *a/o + substantivo*.
  * Comparação sempre com `normalizar` (sem acento).
  * Fora desta lista não se insere artigo — evita erros em nomes próprios ou usos não locativos.
  */
-const SUBST_LOCATIVO_FEMININO = new Set([
-  "escola",
-  "praia",
-  "casa",
-  "igreja",
-  "farmacia",
-  "padaria",
-  "academia",
-  "universidade",
-  "faculdade",
-  "praca",
-  "feira",
-  "loja",
-  "piscina",
-  "biblioteca",
-  "clinica",
-  "festa",
-]);
+const SUBST_LOCATIVO_FEMININO = new Set(DATA_REGENCIA.lugares.femininos);
 
-const SUBST_LOCATIVO_MASCULINO = new Set([
-  "trabalho",
-  "cinema",
-  "hospital",
-  "banco",
-  "parque",
-  "medico",
-  "dentista",
-  "colegio",
-  "shopping",
-  "teatro",
-  "zoologico",
-  "ginasio",
-  "mar",
-  "mercado",
-]);
+const SUBST_LOCATIVO_MASCULINO = new Set(DATA_REGENCIA.lugares.masculinos);
 
 function generoLocativoSubs(subs: string): "f" | "m" | null {
-  const n = normalizar(subs);
+  const n = normalize(subs);
   if (SUBST_LOCATIVO_FEMININO.has(n)) return "f";
   if (SUBST_LOCATIVO_MASCULINO.has(n)) return "m";
   return null;
@@ -67,10 +31,10 @@ function generoLocativoSubs(subs: string): "f" | "m" | null {
  * Artigo errado para o género do substantivo (ex.: «o» + escola) corrige-se para «à» ou «ao».
  */
 function aplicarRegenciaMovimentoLocais(resultado: string[], vi: number, infinitivo: string): void {
-  if (vi < 0 || !VERBOS_MOVIMENTO_REGENCIA_LOCAL.has(normalizar(infinitivo))) return;
+  if (vi < 0 || !VERBOS_MOVIMENTO_REGENCIA_LOCAL.has(normalize(infinitivo))) return;
 
   for (let k = vi + 1; k < resultado.length - 1; k++) {
-    const art = normalizar(resultado[k]);
+    const art = normalize(resultado[k]);
     const gen = generoLocativoSubs(resultado[k + 1]);
     if (!gen) continue;
     if (gen === "f") {
@@ -149,7 +113,7 @@ export function corrigir(
   aplicarRegenciaMovimentoLocais(resultado, viFinal + (normalizeSVO || sujeito.implicito ? 0 : 0), infinitivo);
   
   // Re-calculando o índice do verbo no array 'resultado' para a regência
-  const viNoResultado = resultado.findIndex(t => normalizar(t) === normalizar(verbLower));
+  const viNoResultado = resultado.findIndex(t => normalize(t) === normalize(verbLower));
   if (viNoResultado >= 0) {
     aplicarRegenciaMovimentoLocais(resultado, viNoResultado, infinitivo);
   }

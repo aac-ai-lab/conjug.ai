@@ -3,7 +3,7 @@ import { corrigir } from "./corretor";
 import { detectarSujeito } from "./sujeito";
 import { detectarTempo } from "./tempo";
 import type { ResultadoAnalise } from "./types";
-import { tokenize } from "./tokenizer";
+import { tokenize } from "../nlp-pt-br-lite/src/index";
 
 export type {
   GeneroParticipio,
@@ -12,7 +12,7 @@ export type {
   ResultadoAnalise,
   TempoVerbal,
 } from "./types";
-export { tokenize } from "./tokenizer";
+export { tokenize } from "../nlp-pt-br-lite/src/index";
 export { detectarSujeito, detectarSujeitoComposto } from "./sujeito";
 export { detectarTempo } from "./tempo";
 export {

@@ -10,12 +10,13 @@ describe("detectarTempo", () => {
   it("«ontem» + «já» → pretérito perfeito composto", () => {
     const r = detectarTempo(["Eu", "comer", "ontem", "já"]);
     expect(r.tipo).toBe("preterito_perfeito_composto");
+    expect(r.rotulo.toLowerCase()).toContain("passado");
   });
 
   it("«ontem» → passado", () => {
     const r = detectarTempo(["Ele", "viajar", "ontem"]);
     expect(r.tipo).toBe("passado");
-    expect(r.rotulo.toLowerCase()).toContain("ontem");
+    expect(r.rotulo.toLowerCase()).toContain("passado");
   });
 
   it("«amanhã» sem perífrase de ir → futuro", () => {
