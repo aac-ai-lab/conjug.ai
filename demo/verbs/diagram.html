@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Diagramas do motor conjugai-core: conjugar, analisarFrase, léxico e correção da frase."
+      content="Diagramas do motor conjugai-core: analisarFrase, sujeito, tempo, lema, conjugar e correção."
     />
     <title>ConjugAI — Diagrama conjugai-core</title>
     <link rel="stylesheet" href="../../assets/css/styles.css" />
@@ -86,8 +86,9 @@
           </div>
         </div>
         <p class="tagline">
-          Fluxos em <strong>Mermaid</strong>, pipeline de
-          <code>conjugar</code> e ligação ao bundle <code>assets/js/conjugai-core.js</code>.
+          Fluxos em <strong>Mermaid</strong>: pipeline <code>analisarFrase</code>, deteção de <strong>sujeito</strong> e
+          <strong>tempo</strong>, lema verbal, <code>conjugar</code> e <code>corrigir</code>
+          (<code>assets/js/conjugai-core.js</code>).
         </p>
         <p class="diagram-doc__nav">
           <a href="../../index.html">Demo paradigma verbal</a>
@@ -123,6 +124,76 @@ flowchart LR
   R --> Out[correcao]
             </div>
           </div>
+        </section>
+
+        <section class="panel" aria-labelledby="diagram-h-sujeito">
+          <div class="panel-head">
+            <h2 id="diagram-h-sujeito" class="panel-title"><code>detectarSujeito</code></h2>
+            <span class="badge">Mermaid</span>
+          </div>
+          <p class="hint" style="margin-top: 0">
+            Implementação em <code>vendors/conjugai-core/sujeito.ts</code>, invocada em <code>analisarFrase</code> após a
+            segmentação de orações (quando há). Primeiro <code>detectarSujeitoComposto</code>: prefixo antes do verbo com
+            pelo menos três tokens e conector <strong>«e»</strong> (padrão <em>X e Y</em> — não usa <em>ou</em> para este
+            composto). Depois <code>detectarSujeitoSimples</code>: pronome antes ou depois do verbo (inclui normalização
+            SVO), <em>Eu</em> + mamãe/papai, pronomes básicos estáticos, nome próprio / título, ou <strong>Eu</strong>
+            implícito por omissão.
+          </p>
+          <div class="diagram-mermaid">
+            <div class="mermaid">
+flowchart TD
+  SC{Sujeito composto<br/>X e Y antes do verbo?} -->|sim| SC1[Nós / Vocês / Eles]
+  SC -->|não| SPres{Pronome antes do verbo?}
+  SPres -->|sim| S1[Pessoa conforme pronome]
+  SPres -->|não| SPost{Pronome depois do verbo?}
+  SPost -->|sim| S2[Pessoa conforme pronome — normaliza SVO]
+  SPost -->|não| SFam{Eu + mamãe / papai?}
+  SFam -->|sim| SN[Nós — 1.ª plural]
+  SFam -->|não| Basic{Pronome básico estático?}
+  Basic -->|sim| S1
+  Basic -->|não| SNome{Nome próprio / título?}
+  SNome -->|sim| S3[3.ª pessoa — normaliza se pós-verbo]
+  SNome -->|não| SDef[Padrão: Eu implícito]
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="diagram-h-tempo">
+          <div class="panel-head">
+            <h2 id="diagram-h-tempo" class="panel-title"><code>detectarTempo</code></h2>
+            <span class="badge">Mermaid</span>
+          </div>
+          <p class="hint" style="margin-top: 0">
+            Implementação em <code>vendors/conjugai-core/tempo.ts</code>. Ordem efetiva: (1) argumento
+            <code>tempoManual</code> em <code>analisarFrase</code> (botões Hoje / Ontem / Amanhã na demo CAA); (2) token
+            <code>tempo:&lt;chave&gt;</code> ou <code>[tempo=&lt;chave&gt;]</code>; (3) se existir <strong>ontem</strong> →
+            <code>passado</code>; (4) se existir <strong>amanhã</strong> e o 1.º token for presente de <em>ir</em> →
+            <code>presente</code>; só <strong>amanhã</strong> → <code>futuro</code>; (5) léxico (MorphoBr via
+            <code>nlp-pt-br-lite</code>) e combinações com <em>já</em>, <em>quando</em>, <em>se</em>, <em>que</em>,
+            <em>talvez</em>, etc.; (6) caso contrário → presente do indicativo. O <em>que</em> de <em>ter que</em> /
+            <em>ter de</em> + infinitivo <strong>não</strong> conta para o ramo subjuntivo por <em>que</em> isolado.
+          </p>
+          <div class="diagram-mermaid">
+            <div class="mermaid">
+flowchart TD
+  MAN{tempoManual nas opções?} -->|sim| TMAN[Usar esse tempo]
+  MAN -->|não| OVR{Tag de tempo explícito na frase?}
+  OVR -->|sim| TEXP[Tempo da tag]
+  OVR -->|não| D1{Tem ontem?}
+  D1 -->|sim| TP1[passado]
+  D1 -->|não| D2{Tem amanhã?}
+  D2 -->|sim| PIR{Primeiro token vou vai vamos vão?}
+  PIR -->|sim| TN0[presente perífrase ir]
+  PIR -->|não| TF[futuro]
+  D2 -->|não| LEX{Léxico e marcadores já quando se que talvez}
+  LEX -->|caso especial| TVAR[subjuntivo composto imperativo]
+  LEX -->|fallback| TDEF[presente do indicativo]
+            </div>
+          </div>
+          <p class="hint" style="margin: 0.75rem 0 0">
+            * <em>que</em> com valor subjuntivo ignora o <em>que</em> de <em>tenho que</em> / <em>ter que</em> — ver
+            <code>temQueSubjuntivo</code> e <code>temLocucaoTerQue</code> em <code>tempo.ts</code>.
+          </p>
         </section>
 
         <section class="panel" aria-labelledby="diagram-h-extrair">

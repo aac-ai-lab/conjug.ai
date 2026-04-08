@@ -143,7 +143,7 @@ flowchart TD
         </p>
         <div class="mermaid">
 flowchart TD
-  OVR{tempo:<chave> / [tempo=<chave>] ?} -->|sim| TEXP[Usa tempo explícito]
+  OVR{Tag de tempo explícito na frase?} -->|sim| TEXP[Usa tempo explícito]
   OVR -->|não| J1{Tem ontem + já?}
   J1 -->|sim| PPC[Pretérito perfeito composto]
   J1 -->|não| J2{Tem amanhã + já?}

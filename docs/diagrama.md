@@ -44,7 +44,7 @@ flowchart TD
   F -->|não| H["null"]
 ```
 
-Diagrama interativo e restantes fluxos do núcleo: `demo/verbs/diagram.html`.
+Diagrama interativo do núcleo (inclui **sujeito**, **tempo**, lema, `conjugar`, `corrigir`): `demo/verbs/diagram.html`.
 
 ---
 
@@ -73,7 +73,7 @@ flowchart TD
 ```mermaid
 flowchart TD
   MAN{Tempo Manual (UI)?} -->|sim| TMAN[Prioridade Máxima]
-  MAN -->|não| OVR{tempo:<chave> / [tempo=<chave>] ?}
+  MAN -->|não| OVR{Tag de tempo explícito na frase?}
   OVR -->|sim| TEXP[Usa tempo explícito]
   OVR -->|não| J1{Tem "ontem" + "já"?}
   J1 -->|sim| PPC[Pretérito perfeito composto]
