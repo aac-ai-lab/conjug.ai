@@ -137,6 +137,34 @@ const FORMAS_PRESENTE_PODER = new Set(
   ["posso", "podes", "pode", "podemos", "podem"].map((s) => normalizarToken(s))
 );
 
+/** Presente de «ter» (normalizado) — ignorar o «que» de *ter que* ao localizar subordinação. */
+const FORMAS_PRESENTE_TER_SUB = new Set(
+  ["tenho", "tens", "tem", "temos", "têm"].map((s) => normalizarToken(s))
+);
+
+/**
+ * Índice do último «que» que **não** é locução *ter que* / *tenho que*…
+ * Permite priorizar o infinitivo dependente (*Ele dizer que eles falar* → *falar*).
+ */
+function ultimoQueSubordinante(tokens: string[]): number {
+  const lower = tokens.map(normalizarToken);
+  let last = -1;
+  for (let i = 0; i < lower.length; i++) {
+    if (lower[i] !== "que") continue;
+    const prev = i > 0 ? lower[i - 1] : "";
+    if (prev === "ter" || FORMAS_PRESENTE_TER_SUB.has(prev)) continue;
+    last = i;
+  }
+  return last;
+}
+
+function primeiroInfinitivoDepoisDe(tokens: string[], idx: number): string | null {
+  for (let i = idx + 1; i < tokens.length; i++) {
+    if (isVerbShape(tokens[i])) return tokens[i].trim().toLowerCase();
+  }
+  return null;
+}
+
 /** Lema do token: léxico primeiro, senão infinitivo por sufixo (-ar/-er/-ir/-pôr). */
 function lemmaDoToken(t: string): string | null {
   const nt = normalizarToken(t);
@@ -200,7 +228,9 @@ export function detectarLocucaoVerbalHeadLemma(tokens: string[]): string | null 
 
 /**
  * Extrai o lema verbal: em telegráfico CAA prioriza **infinitivo** (-ar/-er/-ir) na frase,
- * exceto perífrase **ir + infinitivo** («vou viajar» → «ir»); depois flexão no léxico.
+ * exceto perífrase **ir + infinitivo** («vou viajar» → «ir»), locuções em `detectarLocucaoVerbalHeadLemma`,
+ * e — se houver subordinação com **que** (que não seja *ter que*) — o **primeiro infinitivo após esse que**
+ * («Ele dizer que eles falar» → «falar»); depois flexão no léxico.
  */
 export function extrairVerbo(tokens: string[]): string | null {
   const lower = tokens.map(normalizarToken);
@@ -212,6 +242,12 @@ export function extrairVerbo(tokens: string[]): string | null {
 
   const loc = detectarLocucaoVerbalHeadLemma(tokens);
   if (loc) return loc;
+
+  const qi = ultimoQueSubordinante(tokens);
+  if (qi >= 0) {
+    const apos = primeiroInfinitivoDepoisDe(tokens, qi);
+    if (apos) return apos;
+  }
 
   for (const t of tokens) {
     if (isVerbShape(t)) {

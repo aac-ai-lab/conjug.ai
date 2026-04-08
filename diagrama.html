@@ -105,8 +105,8 @@ flowchart TD
         <h2>1.1. Extração de lema (<code>extrairVerbo</code>)</h2>
         <p class="hint" style="margin: 0 0 0.75rem; text-align: left; max-width: 64ch; margin-inline: auto">
           Ordem em <code>conjugador.ts</code>: (1) <em>ir</em> + infinitivo no início; (2)
-          <code>detectarLocucaoVerbalHeadLemma</code> (<em>ter que</em>, <em>poder</em>/<em>dever</em> + inf., etc.); (3) primeiro infinitivo
-          <code>-ar/-er/-ir/-pôr</code>; (4) <code>detectarVerboPorDicionario</code>.
+          <code>detectarLocucaoVerbalHeadLemma</code>; (3) último <em>que</em> que não seja <em>ter que</em> → primeiro infinitivo
+          à direita; (4) primeiro infinitivo <code>-ar/-er/-ir/-pôr</code>; (5) <code>detectarVerboPorDicionario</code>.
         </p>
         <div class="mermaid">
 flowchart TD
@@ -114,7 +114,9 @@ flowchart TD
   C -->|sim| D["retorna 'ir'"]
   C -->|não| L{"detectarLocucaoVerbalHeadLemma?"}
   L -->|sim| LEM["retorna lema da locução"]
-  L -->|não| A{"há 1.º token infinitivo -ar/-er/-ir/-pôr?"}
+  L -->|não| Q{"último que não ter que + inf. depois?"}
+  Q -->|sim| QI["retorna esse infinitivo"]
+  Q -->|não| A{"há 1.º token infinitivo -ar/-er/-ir/-pôr?"}
   A -->|sim| B["retorna esse infinitivo"]
   A -->|não| E["detectarVerboPorDicionario<br/>(ignora pronomes/partículas)"]
   E --> F{lema?}

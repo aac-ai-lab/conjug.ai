@@ -31,6 +31,15 @@ function temConectorE(tokens: string[]): boolean {
   return tokens.some((t) => normalize(t) === "e");
 }
 
+/** Índice do primeiro «que» subordinante antes do verbo a corrigir (telegrafia). */
+function indiceQueAntesDoVerbo(tokens: string[], verbIdx: number): number {
+  if (verbIdx <= 0) return -1;
+  for (let i = 0; i < verbIdx; i++) {
+    if (normalize(tokens[i]) === "que") return i;
+  }
+  return -1;
+}
+
 /** Prefixo antes do primeiro token verbal (infinitivo ou forma do léxico). */
 function prefixoAntesDoVerbo(tokens: string[]): string[] | null {
   const inf = extrairVerbo(tokens);
@@ -136,6 +145,23 @@ export async function detectarSujeito(tokens: string[]): Promise<InfoSujeito> {
   }
 
   // 2. Tentar Sujeito Explícito (Pronomes) - Busca Bidirecional
+
+  // Após «que»: sujeito da oração dependente fica entre «que» e o infinitivo (ex.: «Ele disse que eles falar» → eles).
+  const queIdx = indiceQueAntesDoVerbo(tokens, verbIdx);
+  if (verbIdx > 0 && queIdx >= 0) {
+    for (let i = verbIdx - 1; i > queIdx; i--) {
+      const info = await getPronomeInfo(tokens[i]);
+      if (info) {
+        return {
+          ...info,
+          rotulo: `explícito (dependente de «que»): ${tokens[i]}`,
+          tokenIndex: i,
+          posicaoOriginal: "antes",
+          implicito: false,
+        };
+      }
+    }
+  }
 
   // Prioridade 1: Pronome antes do verbo
   if (verbIdx > 0) {

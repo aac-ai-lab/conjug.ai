@@ -11,7 +11,7 @@ Para a arquitetura e o fluxo técnico, ver também `README.md` (raiz) e `vendors
 ## 1. Escopo geral
 
 - O pipeline (`tokenize` → sujeito → tempo → verbo → `corrigir`) foi pensado para **frases telegráficas curtas**, típicas de **CAA**, não para texto corrido longo ou estilo literário.
-- **Orações compostas por coordenação** (`e`, `ou`, `mas`, `porém`, `então`): o motor pode **segmentar** várias orações com verbo e aplicar o fluxo **a cada oração**; `e` e `ou` só cortam **depois do primeiro verbo** (para não confundir com sujeito composto *X e Y* / *X ou Y*). **Subordinação** (*que*, *embora*, orações relativas, etc.) **não** é decomposta em orações separadas.
+- **Orações compostas por coordenação** (`e`, `ou`, `mas`, `porém`, `então`): o motor pode **segmentar** várias orações com verbo e aplicar o fluxo **a cada oração**; `e` e `ou` só cortam **depois do primeiro verbo** (para não confundir com sujeito composto *X e Y* / *X ou Y*). **Subordinação** (*que*, *embora*, orações relativas, etc.) **não** é decomposta em orações separadas; há heurísticas para **lema** e **sujeito** do verbo **após** um *que* que não seja *ter que* (ex.: *Ele disse que eles falar*). **Uma** forma verbal é corrigida por análise (*Ele dizer que eles falar* + passado manual → *Ele dizer que eles falaram*, sem flexionar *dizer* na mesma passagem).
 - **Locuções verbais** (telegrafia): há suporte **heurístico** a padrões frequentes (*ter que/de*, *poder/dever* + infinitivo, *estar a*, *começar a*, *acabar de*, etc.); **não** cobre todas as locuções do português nem ordens não canónicas.
 - A **correção** em `corretor.ts` altera sobretudo a **forma verbal** e realiza a **normalização para ordem direta (SVO)** quando o sujeito é identificado após o verbo; também antecede pronome em sujeito **implícito**.
 - **Não** reescreve a frase como um revisor humano faria para além destes recortes.
@@ -25,6 +25,7 @@ Para a arquitetura e o fluxo técnico, ver também `README.md` (raiz) e `vendors
 | Padrão **X e Y** antes do verbo (sujeito composto) | Coordenação com **ou**, **nem**, vírgulas, mais de dois núcleos sem padrão fixo |
 | **Eu + mamãe/papai** (e variantes próximas) | Ordens de palavras muito livres ou com muitos constituintes entre o sujeito e o verbo |
 | Pronomes explícitos (eu, tu, ele, ela...) em **qualquer posição** (SVO, VSO) | Resolução de **correferência**, sujeito em oração relativa |
+| Pronome **entre «que» e o verbo** a corrigir (heurística de dependente) | Vários «que» aninhados, sujeito **nominal** só após «que» (sem pronome), relativas |
 | **Nomes próprios** (Maiúsculas) e **títulos** (médico, papai...) como sujeito | Substantivos comuns minúsculos que possam ser interpretados como objeto (ex: "comer pizza") |
 | **Pronomes básicos estáticos** (Eu, Nós...) | Detecção de sujeito oculto a partir de contexto visual de pranchas (o sistema só lê o texto linear) |
 

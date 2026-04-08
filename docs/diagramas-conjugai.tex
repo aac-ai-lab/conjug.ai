@@ -85,9 +85,10 @@ Pode copiar cada ambiente \texttt{tikzpicture} para o seu documento ou incluir e
     \node[proc, below=of x, text width=0.92\textwidth, align=left, font=\small] (steps) {%
       \textbf{Ordem em} \texttt{conjugador.ts}\textbf{:}\\[0.3em]
       1) Se o 1.\textsuperscript{o} token for presente de \textit{ir} e existir infinitivo à frente $\to$ lema \texttt{ir}.\\
-      2) Se \texttt{detectarLocucaoVerbalHeadLemma} casar (\textit{ter que}/\textit{ter de}, \textit{poder}/\textit{dever} + inf., \textit{estar a}, \textit{começar a}, \ldots) $\to$ lema da locução.\\
-      3) Senão, se existir token com forma de infinitivo \texttt{-ar/-er/-ir/-pôr} $\to$ o primeiro desses.\\
-      4) \texttt{detectarVerboPorDicionario} (filtro de pronomes/partículas) ou \texttt{null}.};
+      2) Se \texttt{detectarLocucaoVerbalHeadLemma} casar (\textit{ter que}/\textit{ter de}, \textit{poder}/\textit{dever} + inf., \ldots) $\to$ lema da locução.\\
+      3) Último \textit{que} que não seja \textit{ter que} $\to$ primeiro infinitivo à direita (subordinação).\\
+      4) Senão, primeiro token com forma \texttt{-ar/-er/-ir/-pôr} na ordem dos tokens.\\
+      5) \texttt{detectarVerboPorDicionario} (filtro) ou \texttt{null}.};
     \draw[->] (x) -- (steps);
   \end{tikzpicture}
   \caption{Identificação do lema verbal (\texttt{conjugador.ts}); alinhado a \texttt{docs/diagrama.md} e \texttt{diagrama.html}.}

@@ -28,7 +28,7 @@ flowchart TD
 
 ### 1.1. `extrairVerbo` (lema verbal)
 
-Detalhe de `conjugador.ts`, invocado dentro de `analisarFrase` após sujeito e tempo. **Ordem real no código:** (1) perífrase *ir* + infinitivo no início; (2) `detectarLocucaoVerbalHeadLemma` (*ter que/de*, *poder*/*dever* + infinitivo, *estar a*, *começar a*, *acabar de*, etc.); (3) primeiro token com forma de infinitivo `-ar/-er/-ir/-pôr`; (4) `detectarVerboPorDicionario`.
+Detalhe de `conjugador.ts`, invocado dentro de `analisarFrase` após sujeito e tempo. **Ordem real no código:** (1) perífrase *ir* + infinitivo no início; (2) `detectarLocucaoVerbalHeadLemma`; (3) **subordinação:** último *que* que não seja *ter que* → primeiro infinitivo à direita; (4) primeiro infinitivo `-ar/-er/-ir/-pôr` na frase; (5) `detectarVerboPorDicionario`.
 
 ```mermaid
 flowchart TD
@@ -36,7 +36,9 @@ flowchart TD
   C -->|sim| D["retorna 'ir'"]
   C -->|não| L{"detectarLocucaoVerbalHeadLemma<br/>(locução verbal)?"}
   L -->|sim| LEM["retorna lema da locução<br/>(ex.: ter, poder)"]
-  L -->|não| A{"há 1.º token infinitivo -ar/-er/-ir/-pôr?"}
+  L -->|não| Q{"último «que» que não seja ter que<br/>e há infinitivo depois?"}
+  Q -->|sim| QI["retorna esse infinitivo"]
+  Q -->|não| A{"há 1.º token infinitivo -ar/-er/-ir/-pôr?"}
   A -->|sim| B["retorna esse infinitivo"]
   A -->|não| E["detectarVerboPorDicionario<br/>(ignora pronomes/partículas)"]
   E --> F{lema?}

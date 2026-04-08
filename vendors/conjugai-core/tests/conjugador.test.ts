@@ -35,6 +35,15 @@ describe("extrairVerbo", () => {
   it("heurística de sufixo quando fora do léxico", () => {
     expect(extrairVerbo(["Eu", "cantar", "hoje"])).toBe("cantar");
   });
+
+  it("subordinação: infinitivo após «que» (não o da matriz)", () => {
+    expect(extrairVerbo(["Ele", "dizer", "que", "eles", "falar", "muito"])).toBe("falar");
+    expect(extrairVerbo(["Ele", "disse", "que", "eles", "falar", "muito"])).toBe("falar");
+  });
+
+  it("«ter que» continua a priorizar «ter»", () => {
+    expect(extrairVerbo(["Eu", "ter", "que", "dizer", "que", "eles", "falar"])).toBe("ter");
+  });
 });
 
 describe("detectarVerboPorDicionario", () => {

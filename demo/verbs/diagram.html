@@ -203,7 +203,8 @@ flowchart TD
           </div>
           <p class="hint" style="margin-top: 0">
             Implementação em <code>conjugador.ts</code>: (1) <em>ir</em> + infinitivo no início; (2)
-            <code>detectarLocucaoVerbalHeadLemma</code>; (3) primeiro infinitivo <code>-ar/-er/-ir/-pôr</code>; (4)
+            <code>detectarLocucaoVerbalHeadLemma</code>; (3) último <em>que</em> (exc. <em>ter que</em>) → primeiro infinitivo
+            depois; (4) primeiro infinitivo <code>-ar/-er/-ir/-pôr</code>; (5)
             <code>detectarVerboPorDicionario</code> (filtro de pronomes/partículas).
           </p>
           <div class="diagram-mermaid">
@@ -213,7 +214,9 @@ flowchart TD
   C -->|sim| D["retorna 'ir'"]
   C -->|não| L{"detectarLocucaoVerbalHeadLemma?"}
   L -->|sim| LEM["retorna lema da locução"]
-  L -->|não| A{"há 1.º token infinitivo -ar/-er/-ir/-pôr?"}
+  L -->|não| Q{"último que não ter que + inf. depois?"}
+  Q -->|sim| QI["retorna esse infinitivo"]
+  Q -->|não| A{"há 1.º token infinitivo -ar/-er/-ir/-pôr?"}
   A -->|sim| B["retorna esse infinitivo"]
   A -->|não| E["detectarVerboPorDicionario<br/>(ignora pronomes/partículas)"]
   E --> F{lema?}

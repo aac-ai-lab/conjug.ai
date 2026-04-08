@@ -98,7 +98,7 @@ python3 scripts/csv_to_verbos.py -i minhas_flexoes.csv -m data/verbos.json -o da
 
 Recursos DELAF em formato nativo exigem um passo prévio (conversão para este CSV); convém **documentar** o **mapeamento** das etiquetas morfológicas para `tense` + `person` ao integrar essas fontes.
 
-**Deteção do verbo na frase:** ver **§6.3** (ordem: perífrase *ir*, **locuções verbais** frequentes, primeiro infinitivo *-ar/-er/-ir*, léxico).
+**Deteção do verbo na frase:** ver **§6.3** (ordem: perífrase *ir*, **locuções verbais**, **subordinação com «que»** exc. *ter que*, primeiro infinitivo *-ar/-er/-ir*, léxico).
 
 ### 4.3 Tempos verbais na API e no pipeline CAA
 
@@ -138,8 +138,8 @@ Recursos DELAF em formato nativo exigem um passo prévio (conversão para este C
 - **Não** é etiquetagem morfossintática (POS) real.  
 - **Não** reconhece formas **conjugadas** como verbo (*como*, *danço*) se não coincidirem com o padrão de infinitivo.  
 - **Não** usa um dicionário aberto da língua — só padrões.  
-- **Não** resolve ambiguidades entre **dois** infinitivos na mesma frase: o **primeiro** token com forma de infinitivo “ganha” (salvo perífrase *ir + inf.* no início).  
-- **Não** trata vários verbos na mesma frase de forma explícita.
+- **Não** resolve todos os casos com **dois** infinitivos: há heurística para o primeiro infinitivo **após** um *que* de subordinação (não *ter que*); fora disso, o **primeiro** infinitivo na ordem dos tokens prevalece (salvo *ir + inf.* e locuções).  
+- **Não** conjuga **dois** verbos na mesma passagem (*Ele dizer…* + *eles falar*): só o lema escolhido por `extrairVerbo` é flexionado.
 
 ### 6.3 Evolução implementada (camadas)
 
@@ -148,7 +148,8 @@ Recursos DELAF em formato nativo exigem um passo prévio (conversão para este C
 3. **`extrairVerbo` (ordem atual, alinhada ao telegráfico CAA):**
    - **Perífrase *ir*:** se o **primeiro** token for forma de presente de **ir** (*vou*, *vais*, *vai*, *vamos*, *vão*) e houver infinitivo à frente (*vou viajar*), o lema é **ir**.
    - **Locuções verbais** (`detectarLocucaoVerbalHeadLemma`): padrões como *ter que/de* + infinitivo, *poder*/*dever* + infinitivo, *estar a*, *começar/continuar/voltar a*, *acabar/parar/deixar de*, *pretender a* — o lema é o **verbo auxiliar/modal** (não o segundo verbo). Formas de presente de **poder** (*posso*, *pode*…) tratam-se antes do léxico genérico para evitar colisão com **possar** (homógrafo *posso*).
-   - **Primeiro infinitivo** (`-ar`/`-er`/`-ir`/`-pôr`) na ordem dos tokens (ex.: *Ele viajar ontem* → *viajar*).
+   - **Subordinação «que»:** se existir um *que* que **não** seja *ter que* / *tenho que*…, usa-se o **primeiro infinitivo depois desse *que*** (ex.: *Ele dizer que eles falar* → *falar*, não *dizer*).
+   - **Primeiro infinitivo** (`-ar`/`-er`/`-ir`/`-pôr`) na ordem dos tokens se a regra anterior não aplicar (ex.: *Ele viajar ontem* → *viajar*).
    - **Depois:** `detectarVerboPorDicionario` (flexões conhecidas, com o filtro de ignorados).
 
 A API pública **`analisarFrase`** mantém a mesma assinatura.
@@ -307,6 +308,7 @@ O motor evoluiu de uma busca puramente por prefixo para uma **busca bidirecional
     *   **Nomes Próprios**: Palavras com inicial maiúscula (que não sejam verbos conhecidos ou partículas).
     *   **Títulos de Parentesco/Profissões**: Lista controlada de termos como `mamãe, vovô, médico, professor`.
     *   **Filtro de Objetos**: Substantivos comuns em minúsculas (ex: `pizza`) são ignorados para evitar falsos positivos de sujeito.
+4. **Dependente de «que»**: Se há um **que** antes do verbo a corrigir e um **pronome** entre esse **que** e o verbo, o sujeito para conjugar é esse pronome (ex.: *Ele disse que eles falar muito* → **eles**, não *ele*). Não cobre subordinação complexa (vários *que*, relativas, nomes nessa posição).
 
 ### 13.2 Normalização SVO
 

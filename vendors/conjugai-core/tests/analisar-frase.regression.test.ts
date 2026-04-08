@@ -115,6 +115,16 @@ const CASOS = [
       correcao: "Eu como mas ele dorme",
     },
   },
+  {
+    frase: "Ele disse que eles falar muito",
+    esperado: {
+      sujeito: "Eles",
+      infinitivo: "falar",
+      conjugado: "falem",
+      tempo: "subjuntivo_presente" as const,
+      correcao: "Ele disse que eles falem muito",
+    },
+  },
 ];
 
 describe("analisarFrase — regressão (integração)", () => {
@@ -152,5 +162,23 @@ describe("analisarFrase — regressão (integração)", () => {
     expect(r.erro).toBeUndefined();
     expect(r.composta).toBe(true);
     expect(r.correcao).toBe("Eu comerei ou ele dormirá");
+  });
+
+  it("«Ele disse que eles falar muito» + tempo manual passado → falaram", async () => {
+    const r = await analisarFrase("Ele disse que eles falar muito", { tempo: "passado" });
+    expect(r.erro).toBeUndefined();
+    expect(r.sujeito.texto).toBe("Eles");
+    expect(r.tempo.tipo).toBe("passado");
+    expect(r.verbo.conjugado).toBe("falaram");
+    expect(r.correcao).toBe("Ele disse que eles falaram muito");
+  });
+
+  it("«Ele dizer que eles falar muito» + tempo manual passado → só o dependente", async () => {
+    const r = await analisarFrase("Ele dizer que eles falar muito", { tempo: "passado" });
+    expect(r.erro).toBeUndefined();
+    expect(r.sujeito.texto).toBe("Eles");
+    expect(r.verbo.infinitivo).toBe("falar");
+    expect(r.verbo.conjugado).toBe("falaram");
+    expect(r.correcao).toBe("Ele dizer que eles falaram muito");
   });
 });
