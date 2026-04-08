@@ -1,6 +1,35 @@
-import { indiceDoVerboNaFrase } from "./conjugador";
+import { conjugarTempo, indiceDoVerboNaFrase, isVerbShape } from "./conjugador";
 import type { TempoVerbal } from "./types";
-import { normalize, getRegenciaInfo, loader } from "../nlp-pt-br-lite/src/index";
+import { normalize, getRegenciaInfo, getPronomeInfo, loader } from "../nlp-pt-br-lite/src/index";
+
+/** Tempos macro em que matriz e dependente usam o mesmo tempo (*Ele dizer…* + passado manual → *disse* + *falaram*). */
+const TEMPOS_MACRO_MATRIZ_IGUAL: TempoVerbal[] = ["passado", "presente", "futuro"];
+
+/**
+ * *Pronome + infinitivo + que* … verbo dependente: flexiona o infinitivo da matriz
+ * (passado/presente/futuro: mesmo tempo que o dependente; outros tempos do dependente → matriz no **pretérito**, ex. *disse* + *falem*).
+ */
+async function conjugadoMatrizInfinitivoAntesQue(
+  tokens: string[],
+  viDependente: number,
+  tempoDependente: TempoVerbal
+): Promise<{ matIdx: number; forma: string } | null> {
+  if (viDependente < 3 || tokens.length < 3) return null;
+  if (normalize(tokens[2]) !== "que") return null;
+  const pron = await getPronomeInfo(tokens[0]);
+  if (!pron) return null;
+  if (!isVerbShape(tokens[1])) return null;
+  const matIdx = 1;
+  if (matIdx === viDependente) return null;
+  const lemaMat = tokens[1].trim().toLowerCase();
+  const tempoMatriz: TempoVerbal = TEMPOS_MACRO_MATRIZ_IGUAL.includes(tempoDependente)
+    ? tempoDependente
+    : "passado";
+  const forma = conjugarTempo(lemaMat, pron.pessoa, tempoMatriz);
+  if (!forma) return null;
+  const fl = forma.charAt(0).toLowerCase() + forma.slice(1);
+  return { matIdx, forma: fl };
+}
 
 
 
@@ -46,6 +75,7 @@ async function aplicarRegenciaMovimentoLocais(resultado: string[], vi: number, i
  * Reconstrói a frase a partir dos **tokens originais**:
  * substitui só a forma verbal pelo `conjugado` e, se o sujeito for implícito, antecede o pronome.
  * Sujeito composto (ex.: «Mamãe e eu …») mantém-se na superfície — só o verbo é flexionado.
+ * Com *Pronome + infinitivo + que* e verbo dependente mais à frente, flexiona-se também o infinitivo da matriz (macro passado/presente/futuro: alinhado ao dependente; noutros tempos do dependente, matriz no pretérito: *Ele disse que eles falem*).
  * Não descarta complementos.
  */
 export async function corrigir(
@@ -60,7 +90,7 @@ export async function corrigir(
   },
   infinitivo: string,
   conjugado: string,
-  _tempoTipo: TempoVerbal
+  tempoTipo: TempoVerbal
 ): Promise<string> {
   const verbLower = conjugado.charAt(0).toLowerCase() + conjugado.slice(1);
   const vi = indiceDoVerboNaFrase(tokens, infinitivo);
@@ -68,9 +98,13 @@ export async function corrigir(
   // 1. Filtrar tokens para reconstrução
   // Se o sujeito for explícito e estiver depois do verbo, vamos movê-lo para o início (SVO)
   const normalizeSVO = sujeito.posicaoOriginal === "depois" && typeof sujeito.tokenIndex === "number";
-  
+  const matriz =
+    !normalizeSVO && !sujeito.implicito
+      ? await conjugadoMatrizInfinitivoAntesQue(tokens, vi, tempoTipo)
+      : null;
+
   const resultado: string[] = [];
-  
+
   // Se normalizando SVO, o sujeito vem primeiro
   if (normalizeSVO) {
     resultado.push(sujeito.texto);
@@ -83,7 +117,9 @@ export async function corrigir(
     // Pula o token do sujeito se estivermos normalizando SVO (pois já o adicionamos no início)
     if (normalizeSVO && i === sujeito.tokenIndex) continue;
 
-    if (i === vi) {
+    if (matriz && i === matriz.matIdx) {
+      resultado.push(matriz.forma);
+    } else if (i === vi) {
       resultado.push(verbLower);
     } else {
       resultado.push(tokens[i]);

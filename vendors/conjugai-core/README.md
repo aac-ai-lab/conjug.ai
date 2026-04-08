@@ -139,7 +139,7 @@ Recursos DELAF em formato nativo exigem um passo prévio (conversão para este C
 - **Não** reconhece formas **conjugadas** como verbo (*como*, *danço*) se não coincidirem com o padrão de infinitivo.  
 - **Não** usa um dicionário aberto da língua — só padrões.  
 - **Não** resolve todos os casos com **dois** infinitivos: há heurística para o primeiro infinitivo **após** um *que* de subordinação (não *ter que*); fora disso, o **primeiro** infinitivo na ordem dos tokens prevalece (salvo *ir + inf.* e locuções).  
-- **Não** conjuga **dois** verbos na mesma passagem (*Ele dizer…* + *eles falar*): só o lema escolhido por `extrairVerbo` é flexionado.
+- **Dois** verbos só no padrão *Pronome + infinitivo + que* + dependente (ver `corrigir`); fora disso, só o lema de `extrairVerbo` é flexionado.
 
 ### 6.3 Evolução implementada (camadas)
 
@@ -154,7 +154,7 @@ Recursos DELAF em formato nativo exigem um passo prévio (conversão para este C
 
 A API pública **`analisarFrase`** mantém a mesma assinatura.
 
-**Correção de frase:** `corrigir` usa **`indiceDoVerboNaFrase`** para localizar o token verbal mesmo quando a entrada é flexionada (*eu como maçã* → lema *comer*, substituição e complementos corretos).
+**Correção de frase:** `corrigir` usa **`indiceDoVerboNaFrase`** para localizar o token verbal mesmo quando a entrada é flexionada (*eu como maçã* → lema *comer*, substituição e complementos corretos). Com *Pronome + infinitivo + que* e predicado dependente, também flexiona o infinitivo da matriz (*Ele dizer que eles falar* → *Ele disse que…*).
 
 ### 6.4 Por que não verbecc / mlconjug “de fábrica”
 

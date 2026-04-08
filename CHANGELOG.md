@@ -35,7 +35,8 @@ Alterações em desenvolvimento que ainda não foram consolidadas num período d
 
 - **Regência de lugar** em `corretor.ts`: evita aplicar a contração **«à»**/**«ao»** duas vezes (casos «ao à praia»).
 - **Sujeito após «que»** (`sujeito.ts`): em frases como *Ele disse que eles falar*, o pronome **entre «que» e o infinitivo** passa a definir a pessoa verbal (evita *fala* com sujeito *eles*).
-- **Lema verbal em subordinação** (`extrairVerbo` em `conjugador.ts`): com *que* de dependência (exc. *ter que*), o alvo passa a ser o **primeiro infinitivo após esse *que*** — alinha com tempo manual **passado** (*Ele disse que eles falar* → *falaram*; *Ele dizer que eles falar* corrige só o dependente).
+- **Lema verbal em subordinação** (`extrairVerbo` em `conjugador.ts`): com *que* de dependência (exc. *ter que*), o alvo passa a ser o **primeiro infinitivo após esse *que*** — alinha com tempo manual **passado** (*Ele disse que eles falar* → *falaram*).
+- **Matriz *Pronome + infinitivo + que*** (`corretor.ts`): flexiona também o infinitivo antes de *que* (*Ele dizer que eles falar* → *Ele disse que eles falaram* ou *… falem*, conforme o tempo do dependente).
 
 ### Alterado
 

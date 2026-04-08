@@ -173,12 +173,18 @@ describe("analisarFrase — regressão (integração)", () => {
     expect(r.correcao).toBe("Ele disse que eles falaram muito");
   });
 
-  it("«Ele dizer que eles falar muito» + tempo manual passado → só o dependente", async () => {
+  it("«Ele dizer que eles falar muito» + tempo manual passado → matriz + dependente", async () => {
     const r = await analisarFrase("Ele dizer que eles falar muito", { tempo: "passado" });
     expect(r.erro).toBeUndefined();
     expect(r.sujeito.texto).toBe("Eles");
     expect(r.verbo.infinitivo).toBe("falar");
     expect(r.verbo.conjugado).toBe("falaram");
-    expect(r.correcao).toBe("Ele dizer que eles falaram muito");
+    expect(r.correcao).toBe("Ele disse que eles falaram muito");
+  });
+
+  it("«Ele dizer que eles falar muito» sem tempo manual → matriz pretérito + dependente subjuntivo", async () => {
+    const r = await analisarFrase("Ele dizer que eles falar muito");
+    expect(r.erro).toBeUndefined();
+    expect(r.correcao).toBe("Ele disse que eles falem muito");
   });
 });
