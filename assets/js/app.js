@@ -609,25 +609,222 @@
     });
   });
 
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function normTok(t) {
+    return String(t)
+      .trim()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+  }
+
+  function renderTokenViz() {
+    var mount = document.getElementById("token-viz-mount");
+    if (!mount) return;
+    if (!lastPipeline || !lastPipeline.tokens || !lastPipeline.tokens.length) {
+      mount.innerHTML =
+        '<p class="subject-viz__micro">Analise uma frase primeiro para ver os tokens desta entrada.</p>';
+      return;
+    }
+    var raw = lastPipeline.rawInput || lastPipeline.tokens.join(" ");
+    var chips = lastPipeline.tokens
+      .map(function (t, i) {
+        return (
+          '<div class="token-viz__chip"><span class="tv-chip tv-chip--idx">t' +
+          i +
+          '</span><span class="token-viz__word">' +
+          escapeHtml(t) +
+          "</span></div>"
+        );
+      })
+      .join("");
+    mount.innerHTML =
+      '<div class="token-viz">' +
+      '<div class="token-viz__row"><span class="token-viz__label">Entrada</span><div class="token-viz__raw"><code>' +
+      escapeHtml(raw) +
+      "</code></div></div>" +
+      '<div class="token-viz__split"></div><div class="token-viz__chips">' +
+      chips +
+      "</div></div>";
+  }
+
+  function renderSubjectViz() {
+    var mount = document.getElementById("subject-viz-mount");
+    if (!mount) return;
+    if (!lastPipeline || !lastPipeline.tokens || !lastPipeline.tokens.length) {
+      mount.innerHTML = '<p class="subject-viz__micro">Analise uma frase primeiro.</p>';
+      return;
+    }
+    var tokens = lastPipeline.tokens;
+    var vi = typeof lastPipeline.verbIndex === "number" ? lastPipeline.verbIndex : -1;
+    if (vi < 0) vi = 0;
+    var n = tokens.length;
+    var cols = n;
+    var tagCells = [];
+    var wordCells = [];
+    for (var i = 0; i < n; i++) {
+      var t = tokens[i];
+      var nt = normTok(t);
+      var tagClass = "sv-tag--rest";
+      var wClass = "subject-viz__wcell";
+      var tagLabel = "·";
+      if (i < vi) {
+        tagClass = "sv-tag--pre";
+        wClass += " subject-viz__wcell--prefix";
+        tagLabel = "pre";
+      } else if (i === vi) {
+        tagClass = "sv-tag--verb";
+        wClass += " subject-viz__wcell--verb";
+        tagLabel = "V";
+      } else if (nt === "ontem" || nt === "amanha") {
+        tagClass = "sv-tag--time";
+        tagLabel = "t";
+      }
+      tagCells.push(
+        '<div class="subject-viz__cell"><span class="sv-tag ' +
+          tagClass +
+          '">' +
+          tagLabel +
+          "</span></div>"
+      );
+      wordCells.push(
+        '<div class="subject-viz__cell"><div class="' +
+          wClass +
+          '"' +
+          (i === vi ? ' data-viz-role="verb"' : "") +
+          '><span class="sv-word">' +
+          escapeHtml(t) +
+          "</span></div></div>"
+      );
+    }
+    var caption =
+      lastPipeline.oracaoComposta && lastPipeline.oracoes
+        ? "Oração composta: o diagrama usa o lema principal desta análise; cada oração tem sujeito e tempo próprios no motor."
+        : "Sujeito de referência na conjugação: <strong>" +
+          escapeHtml(lastPipeline.sujeitoTexto || "—") +
+          "</strong> (pessoa " +
+          String(lastPipeline.sujeitoPessoa != null ? lastPipeline.sujeitoPessoa : "—") +
+          ").";
+    mount.innerHTML =
+      '<div class="subject-viz"><p class="subject-viz__caption">' +
+      caption +
+      '</p><div class="subject-viz__diagram" style="--sv-cols:' +
+      cols +
+      '"><div class="subject-viz__tags">' +
+      tagCells.join("") +
+      '</div><div class="subject-viz__arc"><svg class="subject-viz__svg" viewBox="0 0 100 28" preserveAspectRatio="none"><path class="subject-viz__path" d=""/></svg></div><div class="subject-viz__words">' +
+      wordCells.join("") +
+      '</div><span class="subject-viz__dep-label">prefixo / verbo / resto</span></div></div>';
+    var root = mount.querySelector(".subject-viz");
+    window.requestAnimationFrame(function () {
+      layoutSubjectVizArc(root || mount);
+    });
+  }
+
+  function renderTempoViz() {
+    var mount = document.getElementById("tempo-viz-mount");
+    if (!mount) return;
+    if (!lastPipeline || !lastPipeline.tokens || !lastPipeline.tokens.length) {
+      mount.innerHTML = '<p class="tempo-viz__rotulo">Analise uma frase primeiro.</p>';
+      return;
+    }
+    var tokens = lastPipeline.tokens;
+    var n = tokens.length;
+    var cols = Math.min(Math.max(n, 1), 12);
+    var tt = lastPipeline.tempoTipo || "presente";
+    var badgeClass = "tempo-badge--pres";
+    if (tt === "futuro" || String(tt).indexOf("futur") === 0) badgeClass = "tempo-badge--fut";
+    else if (tt === "passado" || String(tt).indexOf("preterito") === 0) badgeClass = "tempo-badge--past";
+    var parts = tokens.map(function (t) {
+      var nt = normTok(t);
+      var mark = nt === "ontem" || nt === "amanha";
+      return (
+        '<div class="tempo-viz__tok' +
+        (mark ? " tempo-viz__tok--mark" : "") +
+        '"><span class="tempo-viz__w">' +
+        escapeHtml(t) +
+        "</span>" +
+        (mark ? '<span class="sv-tag sv-tag--time">t</span>' : "") +
+        "</div>"
+      );
+    });
+    mount.innerHTML =
+      '<div class="tempo-viz__tokens" style="--sv-cols:' +
+      cols +
+      '">' +
+      parts.join("") +
+      '</div><p class="tempo-viz__rotulo">Decisão: <span class="tempo-badge ' +
+      badgeClass +
+      '">' +
+      escapeHtml(lastPipeline.nomeTempo || tt) +
+      "</span>. " +
+      escapeHtml(lastPipeline.tempoRotulo || "") +
+      "</p>";
+  }
+
+  function renderConjViz() {
+    var mount = document.getElementById("conj-viz-mount");
+    if (!mount) return;
+    if (!lastPipeline) {
+      mount.innerHTML = '<p class="subject-viz__micro">Analise uma frase primeiro.</p>';
+      return;
+    }
+    var lex = lastPipeline.viaLexico ? "léxico (verbos.json)" : "regra regular ou forma fora do léxico";
+    mount.innerHTML =
+      '<div class="conj-pipe">' +
+      '<div class="conj-pipe__col"><span class="conj-pipe__cap">Lema</span><span class="conj-pipe__box">' +
+      escapeHtml(lastPipeline.infinitivo || "—") +
+      '</span></div><span class="conj-pipe__plus">+</span>' +
+      '<div class="conj-pipe__col"><span class="conj-pipe__cap">Pessoa</span><span class="conj-pipe__box">' +
+      escapeHtml(String(lastPipeline.sujeitoPessoa != null ? lastPipeline.sujeitoPessoa : "—")) +
+      '</span></div><span class="conj-pipe__plus">+</span>' +
+      '<div class="conj-pipe__col"><span class="conj-pipe__cap">Tempo</span><span class="conj-pipe__box">' +
+      escapeHtml(lastPipeline.nomeTempo || "—") +
+      '</span></div><span class="conj-pipe__arrow">→</span>' +
+      '<div class="conj-pipe__col conj-pipe__col--out"><span class="conj-pipe__cap">Forma</span><span class="conj-pipe__box conj-pipe__box--out">' +
+      escapeHtml(lastPipeline.conjugado || "—") +
+      "</span></div></div>" +
+      '<p class="subject-viz__micro">Fonte da forma: <strong>' +
+      escapeHtml(lex) +
+      "</strong>.</p>";
+  }
+
   // Modal handlers
   [el.tokenStepTrigger, el.subjectStepTrigger, el.tempoStepTrigger, el.ruleStepTrigger].forEach(function (trigger) {
     if (!trigger) return;
     trigger.addEventListener("click", function () {
       var dialogId = trigger.getAttribute("aria-controls");
       var dialog = document.getElementById(dialogId);
-      if (dialog) {
+      if (!dialog) return;
+      try {
         if (dialogId === "dialog-token-algo") renderTokenViz();
         if (dialogId === "dialog-subject-algo") renderSubjectViz();
         if (dialogId === "dialog-tempo-algo") renderTempoViz();
         if (dialogId === "dialog-conj-algo") renderConjViz();
         dialog.showModal();
+      } catch (err) {
+        console.error("ConjugAI: modal de etapa", err);
+        try {
+          dialog.showModal();
+        } catch (e2) {
+          console.error(e2);
+        }
       }
     });
   });
 
-  el.btnProjectContext.addEventListener("click", function () {
-    if (el.dialogProject) el.dialogProject.showModal();
-  });
+  if (el.btnProjectContext) {
+    el.btnProjectContext.addEventListener("click", function () {
+      if (el.dialogProject) el.dialogProject.showModal();
+    });
+  }
 
   document.querySelectorAll("[data-close-dialog]").forEach(function (btn) {
     btn.addEventListener("click", function () {
