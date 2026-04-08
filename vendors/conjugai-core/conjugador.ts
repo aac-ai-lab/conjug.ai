@@ -131,6 +131,74 @@ const FORMAS_PRESENTE_IR = new Set(
 );
 
 /**
+ * Formas de presente de «poder» — «posso» colide no léxico com o verbo «possar» (forma homógrafa).
+ */
+const FORMAS_PRESENTE_PODER = new Set(
+  ["posso", "podes", "pode", "podemos", "podem"].map((s) => normalizarToken(s))
+);
+
+/** Lema do token: léxico primeiro, senão infinitivo por sufixo (-ar/-er/-ir/-pôr). */
+function lemmaDoToken(t: string): string | null {
+  const nt = normalizarToken(t);
+  if (FORMAS_PRESENTE_PODER.has(nt)) return "poder";
+  const via = detectarVerboPorDicionario([t]);
+  if (via) return via;
+  if (isVerbShape(t)) return t.trim().toLowerCase();
+  return null;
+}
+
+/**
+ * Locuções verbais frequentes em telegrafia (PT-BR): núcleo flexionado + partícula + não-finito.
+ * Ex.: «tenho que comer» → lema **ter** (não «comer»); «começo a trabalhar» → **começar**.
+ */
+export function detectarLocucaoVerbalHeadLemma(tokens: string[]): string | null {
+  const n = tokens.length;
+  for (let i = 0; i < n; i++) {
+    const lem = lemmaDoToken(tokens[i]);
+    if (!lem) continue;
+
+    const next1 = i + 1 < n ? normalizarToken(tokens[i + 1]) : "";
+    const segVerbo = i + 2 < n ? lemmaDoToken(tokens[i + 2]) : null;
+    const segDireto = i + 1 < n ? lemmaDoToken(tokens[i + 1]) : null;
+
+    if (lem === "ter" && i + 2 < n && (next1 === "que" || next1 === "de") && segVerbo) {
+      return "ter";
+    }
+
+    if ((lem === "poder" || lem === "dever") && i + 1 < n && segDireto) {
+      return lem;
+    }
+
+    if (lem === "estar" && i + 2 < n && next1 === "a" && segVerbo) {
+      return "estar";
+    }
+
+    if (
+      (lem === "começar" || lem === "continuar" || lem === "voltar") &&
+      i + 2 < n &&
+      next1 === "a" &&
+      segVerbo
+    ) {
+      return lem;
+    }
+
+    if (
+      (lem === "acabar" || lem === "parar" || lem === "deixar") &&
+      i + 2 < n &&
+      next1 === "de" &&
+      segVerbo
+    ) {
+      return lem;
+    }
+
+    if (lem === "pretender" && i + 2 < n && next1 === "a" && segVerbo) {
+      return "pretender";
+    }
+  }
+  return null;
+}
+
+/**
  * Extrai o lema verbal: em telegráfico CAA prioriza **infinitivo** (-ar/-er/-ir) na frase,
  * exceto perífrase **ir + infinitivo** («vou viajar» → «ir»); depois flexão no léxico.
  */
@@ -141,6 +209,9 @@ export function extrairVerbo(tokens: string[]): string | null {
   if (temInfinitivoDepois && FORMAS_PRESENTE_IR.has(primeiro)) {
     return "ir";
   }
+
+  const loc = detectarLocucaoVerbalHeadLemma(tokens);
+  if (loc) return loc;
 
   for (const t of tokens) {
     if (isVerbShape(t)) {

@@ -31,10 +31,13 @@ export type BlocoOracao = {
   conectorDepois: string | null;
 };
 
+/** Conectores copulativos/disjuntivos tratados como «e»: só após o 1.º verbo (não partir «X e Y» / «X ou Y» sujeito). */
+const CONJ_FRACA_POS_VERBO = new Set(["e", "ou"]);
+
 /**
  * Encontra o primeiro corte em orações coordenadas:
  * - «mas», «porém», «então» entre dois troços com verbo;
- * - «e» só **depois** do primeiro verbo da frase (evita partir «X e Y» em sujeito composto).
+ * - «e» / «ou» só **depois** do primeiro verbo da frase (evita partir sujeito composto *X e Y* / *X ou Y*).
  */
 function findFirstSplit(tokens: string[]): { left: string[]; right: string[]; conector: string } | null {
   const inf = extrairVerbo(tokens);
@@ -55,12 +58,12 @@ function findFirstSplit(tokens: string[]): { left: string[]; right: string[]; co
   }
 
   for (let i = 0; i < tokens.length; i++) {
-    if (nt(tokens[i]) !== "e") continue;
+    if (!CONJ_FRACA_POS_VERBO.has(nt(tokens[i]))) continue;
     if (i <= vi) continue;
     const left = tokens.slice(0, i);
     const right = tokens.slice(i + 1);
     if (!extrairVerbo(right)) continue;
-    return { left, right, conector: "e" };
+    return { left, right, conector: tokens[i] };
   }
 
   return null;

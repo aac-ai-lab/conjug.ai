@@ -6,6 +6,11 @@ export type InfoTempo = {
   rotulo: string;
 };
 
+/** Presente de «ter» (normalizado como em `normalize`) — para «tenho que» vs «ter» literal. */
+const FORMAS_PRESENTE_TER = new Set(
+  ["tenho", "tens", "tem", "temos", "têm"].map((s) => normalize(s))
+);
+
 const TEMPOS_EXPLICITOS = new Set<TempoVerbal>([
   "presente",
   "futuro",
@@ -108,6 +113,21 @@ export async function detectarTempo(tokens: string[], tempoManual?: TempoVerbal)
   const temTalvez = tokensInfo.some(info => info?.cat?.includes("SUBJUNTIVO"));
   const temQuando = lower.includes("quando");
   const temSe = lower.includes("se");
+  /** «que» que dispara leitura subjuntiva — exclui o «que» da locução «ter que» + infinitivo. */
+  const temQueSubjuntivo = lower.some((t, i) => {
+    if (t !== "que") return false;
+    if (i > 0) {
+      const prev = lower[i - 1];
+      if (prev === "ter" || FORMAS_PRESENTE_TER.has(prev)) return false;
+    }
+    return true;
+  });
+  /** Sequência «ter»/«tenho»… + «que» (locução verbal); não deve forçar subjuntivo por «talvez» no léxico. */
+  const temLocucaoTerQue = lower.some((t, i) => {
+    if (t !== "que" || i < 1) return false;
+    const prev = lower[i - 1];
+    return prev === "ter" || FORMAS_PRESENTE_TER.has(prev);
+  });
   const temQue = lower.includes("que");
   const temNao = lower.includes("nao");
   const temPassadoLexico = tokensInfo.some(info => info?.cat?.includes("PASSADO"));
@@ -143,7 +163,7 @@ export async function detectarTempo(tokens: string[], tempoManual?: TempoVerbal)
     return { tipo: "preterito_imperfeito", rotulo: 'Marcador aspectual (hábito/passado) → Pretérito Imperfeito.' };
   }
 
-  if (temTalvez || temQue) {
+  if (temQueSubjuntivo || (temTalvez && !temLocucaoTerQue)) {
     return { tipo: "subjuntivo_presente", rotulo: 'Marcador "talvez"/"que" → Subjuntivo Presente.' };
   }
 

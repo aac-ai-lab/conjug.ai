@@ -154,6 +154,16 @@
       ],
     },
     {
+      texto: "Eu comer ou ele dormir",
+      rotulo:
+        "Coordenação disjuntiva («ou») após o primeiro verbo; teste com botão «Amanhã» (futuro) para conjugar as duas orações.",
+      badges: [
+        { texto: "Composta (ou)", tipo: "other" },
+        { texto: "2 sujeitos", tipo: "subject" },
+        { texto: "Ver futuro na UI", tipo: "time" },
+      ],
+    },
+    {
       texto: "Eu comer pizza e dormir",
       rotulo:
         "Dois predicados (mesmo sujeito); a segunda parte sem pronome omite «eu» repetido na frase corrigida.",
@@ -170,6 +180,56 @@
       badges: [
         { texto: "Composta (mas)", tipo: "other" },
         { texto: "2 tempos/heur.", tipo: "time" },
+        { texto: "Conjugação", tipo: "verb" },
+      ],
+    },
+    {
+      texto: "Eu ter que comer maçã",
+      rotulo:
+        "Locução verbal «ter que» + infinitivo: o núcleo é «ter»; «que» não dispara subjuntivo neste padrão.",
+      badges: [
+        { texto: "Locução verbal", tipo: "locucao" },
+        { texto: "Presente", tipo: "time" },
+        { texto: "Conjugação", tipo: "verb" },
+      ],
+    },
+    {
+      texto: "Tenho que comer pizza",
+      rotulo:
+        "«Tenho que»: forma flexionada de «ter» + locução; sujeito implícito «eu» na correção.",
+      badges: [
+        { texto: "ter + que", tipo: "locucao" },
+        { texto: "Presente", tipo: "time" },
+        { texto: "Sujeito implícito", tipo: "subject" },
+      ],
+    },
+    {
+      texto: "Posso nadar",
+      rotulo:
+        "«posso» + infinitivo: núcleo «poder» (evita colisão léxica «posso»/«possar»).",
+      badges: [
+        { texto: "Modal (poder)", tipo: "locucao" },
+        { texto: "Presente", tipo: "time" },
+        { texto: "Conjugação", tipo: "verb" },
+      ],
+    },
+    {
+      texto: "Eu começar a trabalhar amanhã",
+      rotulo:
+        "Locução «começar a» + infinitivo; «amanhã» → futuro na segunda parte do predicado.",
+      badges: [
+        { texto: "começar a", tipo: "locucao" },
+        { texto: "Futuro", tipo: "time" },
+        { texto: "Conjugação", tipo: "verb" },
+      ],
+    },
+    {
+      texto: "Eu acabar de dormir",
+      rotulo:
+        "«acabar de» + infinitivo: núcleo no verbo auxiliar «acabar».",
+      badges: [
+        { texto: "acabar de", tipo: "locucao" },
+        { texto: "Presente", tipo: "time" },
         { texto: "Conjugação", tipo: "verb" },
       ],
     },
@@ -219,6 +279,7 @@
       time: "example-badge--time",
       verb: "example-badge--verb",
       other: "example-badge--other",
+      locucao: "example-badge--locucao",
     };
     return m[tipo] || m.other;
   }

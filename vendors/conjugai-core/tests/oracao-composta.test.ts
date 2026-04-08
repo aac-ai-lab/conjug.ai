@@ -35,6 +35,22 @@ describe("segmentarOracoesCoordenadas", () => {
     expect(b).toHaveLength(2);
     expect(b[0].conectorDepois).toBe("mas");
   });
+
+  it("não parte sujeito «X ou Y» antes do verbo", () => {
+    const t = ["Ana", "ou", "Pedro", "viajar", "praia"];
+    const b = segmentarOracoesCoordenadas(t);
+    expect(b).toHaveLength(1);
+    expect(b[0].tokens).toEqual(t);
+  });
+
+  it("parte «eu comer ou ele dormir» com conector «ou»", () => {
+    const t = ["Eu", "comer", "ou", "ele", "dormir"];
+    const b = segmentarOracoesCoordenadas(t);
+    expect(b).toHaveLength(2);
+    expect(b[0].tokens).toEqual(["Eu", "comer"]);
+    expect(b[0].conectorDepois).toBe("ou");
+    expect(b[1].tokens).toEqual(["ele", "dormir"]);
+  });
 });
 
 describe("juntarCorrecoesOracoes", () => {

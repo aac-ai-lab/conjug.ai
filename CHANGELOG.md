@@ -28,7 +28,8 @@ Alterações em desenvolvimento que ainda não foram consolidadas num período d
 
 ### Adicionado
 
-- **Oração composta (coordenação)**: `analisarFrase` segmenta períodos com **«e»**, **«mas»**, **«porém»**, **«então»** (com heurísticas documentadas em `oracao-composta.ts`); resultado com `composta: true` e `oracoes[]`. Exemplos na demo CAA (`demo/caa/index.html`, `assets/js/app.js`).
+- **Locuções verbais** (telegrafia): `extrairVerbo` / `detectarLocucaoVerbalHeadLemma` em `conjugador.ts`; `tempo.ts` não trata o «que» de *ter que* como subjuntivo isolado. Exemplos na demo CAA.
+- **Oração composta (coordenação)**: `analisarFrase` segmenta períodos com **«e»**, **«ou»**, **«mas»**, **«porém»**, **«então»** (heurísticas em `oracao-composta.ts`); resultado com `composta: true` e `oracoes[]`. Exemplos na demo CAA (`demo/caa/index.html`, `assets/js/app.js`).
 
 ### Corrigido
 

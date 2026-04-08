@@ -98,7 +98,7 @@ python3 scripts/csv_to_verbos.py -i minhas_flexoes.csv -m data/verbos.json -o da
 
 Recursos DELAF em formato nativo exigem um passo prévio (conversão para este CSV); convém **documentar** o **mapeamento** das etiquetas morfológicas para `tense` + `person` ao integrar essas fontes.
 
-**Deteção do verbo na frase:** ver **§6.3** (ordem: infinitivo explícito, perífrase *ir*, léxico com filtro de pronomes/partículas, regex de infinitivo).
+**Deteção do verbo na frase:** ver **§6.3** (ordem: perífrase *ir*, **locuções verbais** frequentes, primeiro infinitivo *-ar/-er/-ir*, léxico).
 
 ### 4.3 Tempos verbais na API e no pipeline CAA
 
@@ -146,10 +146,10 @@ Recursos DELAF em formato nativo exigem um passo prévio (conversão para este C
 1. **Dicionário (`VERBOS` / `verbos.json`):** constrói-se um **índice** forma → lema com **todos** os paradigmas de cinco pessoas presentes no JSON, mais **gerúndio**, **particípios** (m/f × sg/pl), **infinitivo** anotado e **infinitivo pessoal** (quando existir), além da chave do lema.
 2. **`detectarVerboPorDicionario(tokens)`:** percorre os tokens **em ordem**, **ignora** tokens numa lista de **pronomes, conectores e palavras funcionais** (para evitar homógrafos como *ele* → lema espúrio) e devolve o lema do primeiro token encontrado no índice.
 3. **`extrairVerbo` (ordem atual, alinhada ao telegráfico CAA):**
-   - **Primeiro:** se existir token com forma de **infinitivo** (`-ar`/`-er`/`-ir`/`-pôr`), usa-se o **primeiro** desses na frase (ex.: *Ele viajar ontem* → *viajar*).
-   - **Perífrase:** se o primeiro token for forma de presente de **ir** (*vou*, *vais*, *vai*, *vamos*, *vão*) e houver infinitivo à frente (*vou viajar*), o lema é **ir**.
-   - **Depois:** `detectarVerboPorDicionario` (flexões conhecidas, com o filtro acima).
-   - **Já não há** um segundo passe só com `isVerbShape` após o léxico — infinitivos explícitos são tratados no primeiro passo.
+   - **Perífrase *ir*:** se o **primeiro** token for forma de presente de **ir** (*vou*, *vais*, *vai*, *vamos*, *vão*) e houver infinitivo à frente (*vou viajar*), o lema é **ir**.
+   - **Locuções verbais** (`detectarLocucaoVerbalHeadLemma`): padrões como *ter que/de* + infinitivo, *poder*/*dever* + infinitivo, *estar a*, *começar/continuar/voltar a*, *acabar/parar/deixar de*, *pretender a* — o lema é o **verbo auxiliar/modal** (não o segundo verbo). Formas de presente de **poder** (*posso*, *pode*…) tratam-se antes do léxico genérico para evitar colisão com **possar** (homógrafo *posso*).
+   - **Primeiro infinitivo** (`-ar`/`-er`/`-ir`/`-pôr`) na ordem dos tokens (ex.: *Ele viajar ontem* → *viajar*).
+   - **Depois:** `detectarVerboPorDicionario` (flexões conhecidas, com o filtro de ignorados).
 
 A API pública **`analisarFrase`** mantém a mesma assinatura.
 
@@ -191,7 +191,7 @@ UI (HTML + CSS + app.js)
 | `tokenizer.ts` | `tokenize` |
 | `sujeito.ts` | `detectarSujeito`, `detectarSujeitoComposto` (sujeito simples + composto) |
 | `tempo.ts` | `detectarTempo` (marcadores + seleção explícita de tempo) |
-| `conjugador.ts` | `conjugar`, `conjugarTempo`, `conjugarPessoaTabela`, `extrairVerbo`, `detectarVerboPorDicionario`, `indiceDoVerboNaFrase`, `gerundio`, `participio`, `infinitivoLexico`, léxico + presente regular |
+| `conjugador.ts` | `conjugar`, `conjugarTempo`, `conjugarPessoaTabela`, `extrairVerbo`, `detectarLocucaoVerbalHeadLemma`, `detectarVerboPorDicionario`, `indiceDoVerboNaFrase`, `gerundio`, `participio`, `infinitivoLexico`, léxico + presente regular |
 | `corretor.ts` | `corrigir` — substitui só o token verbal (e antecede pronome se sujeito implícito) |
 | `types.ts` | `ResultadoAnalise`, `TempoVerbal`, `GeneroParticipio`, `NumeroParticipio`, … (inclui `posicaoOriginal` e `tokenIndex` no sujeito) |
 | `data/verbos.json` | Léxico (importado em `verbos-data.ts`); tipicamente minificado; ver §4.1 |

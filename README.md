@@ -29,10 +29,12 @@ Além de CAA, o núcleo pode ser reutilizado em:
 
 ```bash
 cd /caminho/para/conjugai
-python3 -m http.server 8765
+npm run dev
 ```
 
-Abrir: `http://localhost:8765/`
+Por omissão usa a porta **8765**. Se aparecer «Address already in use», ou termina o outro servidor nessa porta, ou usa outra: `PORT=8766 npm run dev`.
+
+Abrir: `http://localhost:8765/` (ajusta o número da porta se mudares `PORT`).
 
 ## Repositório Git
 

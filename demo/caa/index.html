@@ -373,7 +373,7 @@
 
           <h3 class="algo-dialog__h3">6. Oração composta (coordenação)</h3>
           <p>
-            Se a frase tiver <strong>duas (ou mais) orações</strong> ligadas por coordenação (<strong>«e»</strong>, <strong>«mas»</strong>, <strong>«porém»</strong>, <strong>«então»</strong>), o motor <strong>segmenta</strong> em blocos com verbo cada um. O conector <strong>«e»</strong> só parte orações quando aparece <strong>depois do primeiro verbo</strong> — assim <em>João e Maria comer</em> continua a ser tratado como <strong>sujeito composto</strong>, não como duas orações. Exemplos na barra lateral: <em>Eu comer e ele dormir</em>, <em>Eu comer pizza e dormir</em>, <em>Ele viajar mas eu ficar</em>.
+            Se a frase tiver <strong>duas (ou mais) orações</strong> ligadas por coordenação (<strong>«e»</strong>, <strong>«ou»</strong>, <strong>«mas»</strong>, <strong>«porém»</strong>, <strong>«então»</strong>), o motor <strong>segmenta</strong> em blocos com verbo cada um. Os conectores <strong>«e»</strong> e <strong>«ou»</strong> só partem orações quando aparecem <strong>depois do primeiro verbo</strong> — assim <em>João e Maria comer</em> ou <em>Ana ou Pedro viajar</em> continuam como <strong>sujeito composto</strong>. Exemplos na barra lateral: <em>Eu comer e ele dormir</em>, <em>Eu comer ou ele dormir</em> (com tempo futuro na UI), <em>Eu comer pizza e dormir</em>, <em>Ele viajar mas eu ficar</em>.
           </p>
 
           <p class="algo-dialog__note">
@@ -426,6 +426,10 @@
             <span class="algo-dialog__legend-title">Legenda:</span>
             <span class="algo-legend"><span class="conj-pipe__box conj-pipe__box--lex">léxico</span> forma vinda de <code>verbos.json</code></span>
             <span class="algo-legend"><span class="conj-pipe__box conj-pipe__box--reg">regra</span> presente regular (-ar/-er/-ir)</span>
+          </p>
+          <h3 class="algo-dialog__h3">Locuções verbais (telegrafia)</h3>
+          <p>
+            O lema escolhido para conjugar pode ser o núcleo de uma locução: por exemplo <em>ter que</em> ou <em>ter de</em> + infinitivo (o verbo flexionado é <strong>ter</strong>, não o segundo verbo); <em>poder</em> / <em>dever</em> + infinitivo; <em>começar a</em>, <em>acabar de</em>, etc. O «que» de <em>ter que</em> não deve ser lido como subjuntivo isolado — o tempo segue os marcadores habituais (ou a seleção manual). A forma <em>posso</em> é tratada como <strong>poder</strong> nestes padrões (evita colisão léxica com outro verbo homógrafo).
           </p>
           <h3 class="algo-dialog__h3">Orações compostas coordenadas</h3>
           <p>

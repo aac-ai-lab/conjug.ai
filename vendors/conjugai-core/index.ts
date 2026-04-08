@@ -23,6 +23,7 @@ export {
   conjugar,
   conjugarPessoaTabela,
   conjugarTempo,
+  detectarLocucaoVerbalHeadLemma,
   detectarVerboPorDicionario,
   extrairVerbo,
   gerundio,
@@ -122,7 +123,7 @@ async function analisarOracaoUnica(
 
 /**
  * Pipeline principal: tokenização → sujeito → tempo → verbo → conjugação → correção.
- * Orações coordenadas (por «e», «mas», «porém», «então») são segmentadas e analisadas em sequência.
+ * Orações coordenadas (por «e», «ou», «mas», «porém», «então») são segmentadas e analisadas em sequência.
  * @param frase Texto bruto para processar.
  * @param contexto Opções manuais para guiar a análise (ex: tempo verbal).
  */

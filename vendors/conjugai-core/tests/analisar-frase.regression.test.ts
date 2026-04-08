@@ -146,4 +146,11 @@ describe("analisarFrase — regressão (integração)", () => {
       if ("oracoes" in e && typeof e.oracoes === "number") expect(r.oracoes?.length).toBe(e.oracoes);
     });
   }
+
+  it("«Eu comer ou ele dormir» + tempo manual futuro (coordenação disjuntiva)", async () => {
+    const r = await analisarFrase("Eu comer ou ele dormir", { tempo: "futuro" });
+    expect(r.erro).toBeUndefined();
+    expect(r.composta).toBe(true);
+    expect(r.correcao).toBe("Eu comerei ou ele dormirá");
+  });
 });

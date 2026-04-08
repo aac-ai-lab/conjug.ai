@@ -70,7 +70,7 @@ body {
 }
 
 .app {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 1.5rem 1.25rem 2rem;
 }
@@ -167,9 +167,21 @@ button.brand-mark:focus-visible {
 
 .layout {
   display: grid;
-  grid-template-columns: minmax(200px, 260px) 1fr;
-  gap: 1.5rem;
+  grid-template-columns: minmax(260px, 1fr) minmax(0, 1.35fr);
+  gap: 1.75rem;
   align-items: start;
+}
+
+@media (min-width: 1100px) {
+  .layout {
+    grid-template-columns: minmax(340px, 520px) minmax(0, 1fr);
+  }
+}
+
+@media (min-width: 1320px) {
+  .layout {
+    grid-template-columns: minmax(380px, 580px) minmax(0, 1fr);
+  }
 }
 
 @media (max-width: 880px) {
@@ -181,35 +193,55 @@ button.brand-mark:focus-visible {
 .sidebar {
   position: sticky;
   top: 1rem;
-  padding: 1.25rem;
+  padding: 1.25rem 1.1rem 1.35rem;
   background: var(--bg-elevated);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 2rem);
+  min-height: 0;
 }
 
 .sidebar-title {
-  margin: 0 0 0.75rem;
+  margin: 0 0 0.5rem;
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--text-muted);
+  flex-shrink: 0;
 }
 
 .example-list {
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: 0.5rem;
   width: 100%;
-  max-height: 22rem;
+  flex: 1;
+  min-height: 14rem;
+  max-height: min(72vh, 46rem);
   overflow-y: auto;
+  overflow-x: hidden;
   font-family: var(--font);
   font-size: 0.82rem;
   color: var(--text);
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.45rem;
+  align-content: start;
+}
+
+@media (min-width: 1180px) {
+  .example-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+    padding: 0.55rem;
+  }
 }
 
 .example-list:focus {
@@ -219,14 +251,11 @@ button.brand-mark:focus-visible {
 
 .example-item {
   margin: 0;
-  padding: 0.45rem 0.5rem;
-  border-bottom: 1px solid var(--border);
+  padding: 0.5rem 0.55rem 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: background 0.12s ease;
-}
-
-.example-item:last-child {
-  border-bottom: none;
+  transition: background 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
 }
 
 .example-item:hover {
@@ -235,14 +264,15 @@ button.brand-mark:focus-visible {
 
 .example-item.is-selected {
   background: color-mix(in srgb, var(--accent) 14%, var(--bg-card));
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
   box-shadow: inset 3px 0 0 var(--accent);
 }
 
 .example-item__badges {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.3rem;
-  margin-bottom: 0.35rem;
+  gap: 0.28rem;
+  margin-bottom: 0.4rem;
 }
 
 .example-badge {
@@ -285,10 +315,16 @@ button.brand-mark:focus-visible {
 
 .example-item__phrase {
   display: block;
-  font-size: 0.88rem;
-  line-height: 1.35;
+  font-size: 0.9rem;
+  line-height: 1.4;
   color: var(--text);
   word-break: break-word;
+}
+
+.example-badge--locucao {
+  color: #5eead4;
+  background: rgba(94, 234, 212, 0.1);
+  border-color: rgba(94, 234, 212, 0.35);
 }
 
 .hint {
