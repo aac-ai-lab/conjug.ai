@@ -6,7 +6,7 @@ Documentação em Mermaid. Pode pré-visualizar no VS Code/Cursor (extensão Mer
 
 ## 1. Pipeline de análise (`analisarFrase`)
 
-Fluxo em `vendors/conjugai-core/index.ts`: desde o texto bruto até `correcao`. A UI chama `ConjugaiCore.analisarFrase` a partir de `assets/js/app.js` (`analyze`). Depois de `tokenize`, pode aplicar-se **segmentação por coordenação** (`oracao-composta.ts`); com mais de uma oração, o fluxo abaixo corre **por oração** e as correções juntam-se no fim.
+Fluxo em `vendors/conjugai-core/index.ts`: desde o texto bruto até `correcao`. A UI chama `ConjugaiCore.analisarFrase` a partir de `assets/js/app.js` (`analyze`). Depois de `tokenize`, pode aplicar-se **segmentação por coordenação** (`oracao-composta.ts`; conectores típicos **«e»**, **«ou»**, **«mas»**, **«porém»**, **«então»** — com heurísticas para não partir sujeito composto *X e Y* / *X ou Y*); com mais de uma oração, o fluxo abaixo corre **por oração** e as correções juntam-se no fim.
 
 ```mermaid
 flowchart TD
@@ -28,15 +28,17 @@ flowchart TD
 
 ### 1.1. `extrairVerbo` (lema verbal)
 
-Detalhe de `conjugador.ts`, invocado dentro de `analisarFrase` após sujeito e tempo.
+Detalhe de `conjugador.ts`, invocado dentro de `analisarFrase` após sujeito e tempo. **Ordem real no código:** (1) perífrase *ir* + infinitivo no início; (2) `detectarLocucaoVerbalHeadLemma` (*ter que/de*, *poder*/*dever* + infinitivo, *estar a*, *começar a*, *acabar de*, etc.); (3) primeiro token com forma de infinitivo `-ar/-er/-ir/-pôr`; (4) `detectarVerboPorDicionario`.
 
 ```mermaid
 flowchart TD
-  X["extrairVerbo(tokens)"] --> A{"há infinitivo -ar/-er/-ir/-pôr?"}
-  A -->|sim| B["retorna 1.º infinitivo"]
-  A -->|não| C{"1.º token é vou/vais/vai/vamos/vão<br/>e há infinitivo à frente?"}
+  X["extrairVerbo(tokens)"] --> C{"1.º token é vou/vais/vai/vamos/vão<br/>e há infinitivo à frente?"}
   C -->|sim| D["retorna 'ir'"]
-  C -->|não| E["detectarVerboPorDicionario<br/>(ignora pronomes/partículas)"]
+  C -->|não| L{"detectarLocucaoVerbalHeadLemma<br/>(locução verbal)?"}
+  L -->|sim| LEM["retorna lema da locução<br/>(ex.: ter, poder)"]
+  L -->|não| A{"há 1.º token infinitivo -ar/-er/-ir/-pôr?"}
+  A -->|sim| B["retorna esse infinitivo"]
+  A -->|não| E["detectarVerboPorDicionario<br/>(ignora pronomes/partículas)"]
   E --> F{lema?}
   F -->|sim| G["retorna infinitivo"]
   F -->|não| H["null"]
@@ -48,11 +50,11 @@ Diagrama interativo e restantes fluxos do núcleo: `demo/verbs/diagram.html`.
 
 ## 2. Sujeito e tempo (detalhe)
 
-**Sujeito** (`sujeito.ts`: primeiro `detectarSujeitoComposto`, depois regras simples)
+**Sujeito** (`sujeito.ts`: primeiro `detectarSujeitoComposto`, depois regras simples; padrão composto **X e Y** ou **X ou Y** antes do verbo)
 
 ```mermaid
 flowchart TD
-  SC{Sujeito Composto<br/>X e Y antes do verbo?} -->|sim| SC1[Nós / Vocês / Eles]
+  SC{Sujeito Composto<br/>X e Y ou X ou Y<br/>antes do verbo?} -->|sim| SC1[Nós / Vocês / Eles]
   SC -->|não| SPres{Pronome antes do verbo?}
   SPres -->|sim| S1[Pessoa conforme pronome]
   SPres -->|não| SPost{Pronome depois do verbo?}
@@ -87,6 +89,8 @@ flowchart TD
   T1 -->|sim| TP[Pretérito Perfeito]
   T1 -->|não| TN[Presente do indicativo]
 ```
+
+O ramo **«que»** para subjuntivo **não** cobre o *que* de *ter que* / *ter de* + infinitivo: esse contexto é tratado em `tempo.ts` para não forçar subjuntivo indevido.
 
 ---
 

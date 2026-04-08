@@ -44,7 +44,8 @@ Pode copiar cada ambiente \texttt{tikzpicture} para o seu documento ou incluir e
     \node[proc, below=of a] (b) {\texttt{tokenize}};
     \node[dec, below=of b] (c) {Tokens vazios?};
     \node[err, below left=8mm and 4mm of c, align=center, font=\scriptsize] (err) {Erro:\\Digite ou selecione uma frase};
-    \node[proc, below right=8mm and 4mm of c] (d) {\texttt{detectarSujeito}};
+    \node[proc, below right=8mm and 4mm of c] (s0) {\texttt{segmentar orações}\\\footnotesize\textit{(coordenação)}};
+    \node[proc, below=of s0] (d) {\texttt{detectarSujeito}};
     \node[proc, below=of d] (e) {\texttt{detectarTempo}};
     \node[proc, below=of e] (f) {\texttt{extrairVerbo}};
     \node[dec, below=of f] (g) {Lema verbal?};
@@ -58,7 +59,8 @@ Pode copiar cada ambiente \texttt{tikzpicture} para o seu documento ou incluir e
     \draw[->] (a) -- (b);
     \draw[->] (b) -- (c);
     \draw[->] (c) -| node[near start, left, font=\scriptsize] {sim} (err);
-    \draw[->] (c) -| node[near start, right, font=\scriptsize] {não} (d);
+    \draw[->] (c) -| node[near start, right, font=\scriptsize] {não} (s0);
+    \draw[->] (s0) -- (d);
     \draw[->] (d) -- (e);
     \draw[->] (e) -- (f);
     \draw[->] (f) -- (g);
@@ -70,7 +72,7 @@ Pode copiar cada ambiente \texttt{tikzpicture} para o seu documento ou incluir e
     \draw[->] (j) -- (k);
   \end{tikzpicture}%
   }
-  \caption{Fluxo principal desde o texto bruto até \texttt{correcao} (\texttt{vendors/conjugai-core/index.ts}).}
+  \caption{Fluxo principal desde o texto bruto até \texttt{correcao} (\texttt{vendors/conjugai-core/index.ts}). Com mais de uma oração coordenada, os passos após a segmentação repetem-se por oração antes de juntar correções.}
   \label{fig:pipeline-analisar}
 \end{figure}
 
@@ -78,29 +80,17 @@ Pode copiar cada ambiente \texttt{tikzpicture} para o seu documento ou incluir e
 
 \begin{figure}[htbp]
   \centering
-  \resizebox{0.92\textwidth}{!}{%
-  \begin{tikzpicture}[node distance=7mm, auto]
+  \begin{tikzpicture}[node distance=5mm]
     \node[proc] (x) {\texttt{extrairVerbo(tokens)}};
-    \node[dec, below=of x] (a) {há infinitivo\\\texttt{-ar/-er/-ir/-pôr}?};
-    \node[proc, below left=10mm and 2mm of a] (b) {retorna 1.\textsuperscript{o} infinitivo};
-    \node[dec, below right=10mm and 2mm of a] (c) {1.\textsuperscript{o} token é\\\texttt{vou/vais/vai/...}\\e há infinitivo?};
-    \node[proc, below left=10mm and 2mm of c] (d) {retorna \texttt{ir}};
-    \node[proc, below right=10mm and 2mm of c] (e) {\texttt{detectarVerboPorDicionario}\\(filtro funcional)};
-    \node[dec, below=of e] (f) {lema?};
-    \node[proc, below left=10mm and 2mm of f] (g) {retorna infinitivo};
-    \node[proc, below right=10mm and 2mm of f] (h) {\texttt{null}};
-
-    \draw[->] (x) -- (a);
-    \draw[->] (a) -| node[near start, left, font=\scriptsize] {sim} (b);
-    \draw[->] (a) -| node[near start, right, font=\scriptsize] {não} (c);
-    \draw[->] (c) -| node[near start, left, font=\scriptsize] {sim} (d);
-    \draw[->] (c) -| node[near start, right, font=\scriptsize] {não} (e);
-    \draw[->] (e) -- (f);
-    \draw[->] (f) -| node[near start, left, font=\scriptsize] {sim} (g);
-    \draw[->] (f) -| node[near start, right, font=\scriptsize] {não} (h);
-  \end{tikzpicture}%
-  }
-  \caption{Identificação do lema verbal (\texttt{conjugador.ts}).}
+    \node[proc, below=of x, text width=0.92\textwidth, align=left, font=\small] (steps) {%
+      \textbf{Ordem em} \texttt{conjugador.ts}\textbf{:}\\[0.3em]
+      1) Se o 1.\textsuperscript{o} token for presente de \textit{ir} e existir infinitivo à frente $\to$ lema \texttt{ir}.\\
+      2) Se \texttt{detectarLocucaoVerbalHeadLemma} casar (\textit{ter que}/\textit{ter de}, \textit{poder}/\textit{dever} + inf., \textit{estar a}, \textit{começar a}, \ldots) $\to$ lema da locução.\\
+      3) Senão, se existir token com forma de infinitivo \texttt{-ar/-er/-ir/-pôr} $\to$ o primeiro desses.\\
+      4) \texttt{detectarVerboPorDicionario} (filtro de pronomes/partículas) ou \texttt{null}.};
+    \draw[->] (x) -- (steps);
+  \end{tikzpicture}
+  \caption{Identificação do lema verbal (\texttt{conjugador.ts}); alinhado a \texttt{docs/diagrama.md} e \texttt{diagrama.html}.}
   \label{fig:extrair-verbo}
 \end{figure}
 
@@ -110,7 +100,7 @@ Pode copiar cada ambiente \texttt{tikzpicture} para o seu documento ou incluir e
   \centering
   \resizebox{0.98\textwidth}{!}{%
   \begin{tikzpicture}[node distance=7mm]
-    \node[dec] (sc) {Prefixo \emph{X e Y} antes do verbo?};
+    \node[dec] (sc) {Prefixo \emph{X e Y} ou \emph{X ou Y}\\antes do verbo?};
     \node[proc, below left=14mm and 6mm of sc, align=center, font=\small] (sc1) {Nós / Vocês / Eles\\(\texttt{detectarSujeitoComposto})};
     \node[dec, below right=14mm and 6mm of sc] (s0) {Eu + mamãe ou papai?};
     \node[proc, below left=12mm and 4mm of s0] (sn) {Nós --- 1.\textsuperscript{a} plural};

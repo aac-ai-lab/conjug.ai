@@ -20,7 +20,8 @@ Avaliar se as frases corrigidas pelo ConjugAI sao:
   - tempos verbais (`presente`, `passado`, `futuro`);
   - pessoas (`0..4`);
   - verbos regulares e irregulares;
-  - sujeito explicito e implicito.
+  - sujeito explicito e implicito;
+  - quando relevante para o produto: **oracoes compostas coordenadas** e **locucoes verbais** (para medir erros de segmentacao e de lema).
 
 ### Condicao cega
 

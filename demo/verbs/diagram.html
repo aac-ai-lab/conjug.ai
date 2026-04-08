@@ -107,8 +107,8 @@
             <span class="badge">Mermaid</span>
           </div>
           <p class="hint" style="margin-top: 0">
-            Ordem em <code>vendors/conjugai-core/index.ts</code>: tokens → (se aplicável) segmentar orações coordenadas → sujeito → tempo → lema verbal →
-            <code>conjugarTempo</code> → <code>corrigir</code>.
+            Ordem em <code>vendors/conjugai-core/index.ts</code>: tokens → (se aplicável) segmentar orações coordenadas (<em>e</em>, <em>ou</em>, <em>mas</em>, …) → sujeito → tempo → lema verbal →
+            <code>conjugarTempo</code> → <code>corrigir</code> (com normalização SVO quando aplicável). Com várias orações, o bloco central repete-se por oração antes de juntar correções.
           </p>
           <div class="diagram-mermaid">
             <div class="mermaid">
@@ -131,18 +131,20 @@ flowchart LR
             <span class="badge">Mermaid</span>
           </div>
           <p class="hint" style="margin-top: 0">
-            Implementação em <code>conjugador.ts</code>: primeiro infinitivo explícito; depois caso
-            <em>ir + infinitivo</em> no início (<em>vou viajar</em>); por fim
-            <code>detectarVerboPorDicionario</code> (com filtro de pronomes/partículas).
+            Implementação em <code>conjugador.ts</code>: (1) <em>ir</em> + infinitivo no início; (2)
+            <code>detectarLocucaoVerbalHeadLemma</code>; (3) primeiro infinitivo <code>-ar/-er/-ir/-pôr</code>; (4)
+            <code>detectarVerboPorDicionario</code> (filtro de pronomes/partículas).
           </p>
           <div class="diagram-mermaid">
             <div class="mermaid">
 flowchart TD
-  X["extrairVerbo(tokens)"] --> A{"há infinitivo -ar/-er/-ir/-pôr?"}
-  A -->|sim| B["retorna 1.º infinitivo"]
-  A -->|não| C{"1.º token é vou/vais/vai/vamos/vão<br/>e há infinitivo à frente?"}
+  X["extrairVerbo(tokens)"] --> C{"1.º token é vou/vais/vai/vamos/vão<br/>e há infinitivo à frente?"}
   C -->|sim| D["retorna 'ir'"]
-  C -->|não| E["detectarVerboPorDicionario<br/>(ignora pronomes/partículas)"]
+  C -->|não| L{"detectarLocucaoVerbalHeadLemma?"}
+  L -->|sim| LEM["retorna lema da locução"]
+  L -->|não| A{"há 1.º token infinitivo -ar/-er/-ir/-pôr?"}
+  A -->|sim| B["retorna esse infinitivo"]
+  A -->|não| E["detectarVerboPorDicionario<br/>(ignora pronomes/partículas)"]
   E --> F{lema?}
   F -->|sim| G["retorna infinitivo"]
   F -->|não| H["null"]

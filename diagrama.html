@@ -80,7 +80,7 @@
       <section class="diagram-block">
         <h2>1. Pipeline <code>analisarFrase</code></h2>
         <p class="hint" style="margin: 0 0 0.75rem; text-align: left; max-width: 64ch; margin-inline: auto">
-          Após <code>tokenize</code>, pode aplicar-se <strong>segmentação por coordenação</strong> (<code>oracao-composta.ts</code>); com mais de uma oração, o fluxo repete-se por oração e junta-se as correções.
+          Após <code>tokenize</code>, pode aplicar-se <strong>segmentação por coordenação</strong> (<code>oracao-composta.ts</code>; conectores típicos <strong>«e»</strong>, <strong>«ou»</strong>, <strong>«mas»</strong>, <strong>«porém»</strong>, <strong>«então»</strong>). Com mais de uma oração, o fluxo repete-se por oração e junta-se as correções.
         </p>
         <div class="mermaid">
 flowchart TD
@@ -96,7 +96,7 @@ flowchart TD
   G -->|sim| H[conjugarTempo]
   H --> I{Forma no tempo?}
   I -->|não| ERR3[Erro: não foi possível conjugar neste tempo]
-  I -->|sim| J[corrigir]
+  I -->|sim| J[corrigir + normalizar SVO]
   J --> K[Frase corrigida]
         </div>
       </section>
@@ -104,17 +104,19 @@ flowchart TD
       <section class="diagram-block">
         <h2>1.1. Extração de lema (<code>extrairVerbo</code>)</h2>
         <p class="hint" style="margin: 0 0 0.75rem; text-align: left; max-width: 64ch; margin-inline: auto">
-          Ordem atual em <code>conjugador.ts</code>: primeiro infinitivo explícito na frase; caso especial
-          <em>ir + infinitivo</em> no início (<em>vou viajar</em>); depois dicionário
-          (<code>detectarVerboPorDicionario</code>) com filtro de pronomes/partículas.
+          Ordem em <code>conjugador.ts</code>: (1) <em>ir</em> + infinitivo no início; (2)
+          <code>detectarLocucaoVerbalHeadLemma</code> (<em>ter que</em>, <em>poder</em>/<em>dever</em> + inf., etc.); (3) primeiro infinitivo
+          <code>-ar/-er/-ir/-pôr</code>; (4) <code>detectarVerboPorDicionario</code>.
         </p>
         <div class="mermaid">
 flowchart TD
-  X["extrairVerbo(tokens)"] --> A{"há infinitivo -ar/-er/-ir/-pôr?"}
-  A -->|sim| B["retorna 1.º infinitivo"]
-  A -->|não| C{"1.º token é vou/vais/vai/vamos/vão<br/>e há infinitivo à frente?"}
+  X["extrairVerbo(tokens)"] --> C{"1.º token é vou/vais/vai/vamos/vão<br/>e há infinitivo à frente?"}
   C -->|sim| D["retorna 'ir'"]
-  C -->|não| E["detectarVerboPorDicionario<br/>(ignora pronomes/partículas)"]
+  C -->|não| L{"detectarLocucaoVerbalHeadLemma?"}
+  L -->|sim| LEM["retorna lema da locução"]
+  L -->|não| A{"há 1.º token infinitivo -ar/-er/-ir/-pôr?"}
+  A -->|sim| B["retorna esse infinitivo"]
+  A -->|não| E["detectarVerboPorDicionario<br/>(ignora pronomes/partículas)"]
   E --> F{lema?}
   F -->|sim| G["retorna infinitivo"]
   F -->|não| H["null"]
@@ -124,12 +126,12 @@ flowchart TD
       <section class="diagram-block">
         <h2>2a. Sujeito</h2>
         <p class="hint" style="margin: 0 0 0.75rem; text-align: left; max-width: 56ch; margin-inline: auto">
-          Ordem em <code>sujeito.ts</code>: <code>detectarSujeitoComposto</code> (padrão <em>X e Y</em> antes do verbo);
+          Ordem em <code>sujeito.ts</code>: <code>detectarSujeitoComposto</code> (padrão <em>X e Y</em> ou <em>X ou Y</em> antes do verbo);
           se não aplicar, <code>detectarSujeitoSimples</code> (inclui <em>Eu + mamãe/papai</em> e ordem de pronomes).
         </p>
         <div class="mermaid">
 flowchart TD
-  SC{Prefixo X e Y antes do verbo?} -->|sim| SC1[Nós / Vocês / Eles conforme regras]
+  SC{Prefixo X e Y ou X ou Y antes do verbo?} -->|sim| SC1[Nós / Vocês / Eles conforme regras]
   SC -->|não| S0[Eu + mamãe ou papai?]
   S0 -->|sim| SN[Nós — 1ª plural]
   S0 -->|não| S1[Ordem: nós, eles, ela, ele, eu, padrão eu]
@@ -156,6 +158,9 @@ flowchart TD
   T1 -->|sim| TP[Pretérito Perfeito]
   T1 -->|não| TN[Presente do indicativo]
         </div>
+        <p class="hint" style="margin: 0.75rem auto 0; text-align: left; max-width: 56ch">
+          O <em>que</em> de <em>ter que</em> / <em>ter de</em> + infinitivo não segue o ramo de subjuntivo por «que» isolado — ver <code>tempo.ts</code>.
+        </p>
       </section>
 
       <section class="diagram-block">

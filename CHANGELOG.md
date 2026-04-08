@@ -35,6 +35,10 @@ Alterações em desenvolvimento que ainda não foram consolidadas num período d
 
 - **Regência de lugar** em `corretor.ts`: evita aplicar a contração **«à»**/**«ao»** duas vezes (casos «ao à praia»).
 
+### Alterado
+
+- **Diagramas e LaTeX**: `docs/diagrama.md`, `diagrama.html` e `demo/verbs/diagram.html` — fluxo de `extrairVerbo` alinhado à ordem real (ir + inf., locuções, 1.º infinitivo, léxico); notas sobre coordenação, sujeito *X ou Y* e exceção *ter que* no tempo verbal; `docs/diagramas-conjugai.tex` — nó de segmentação no pipeline e secção `extrairVerbo` atualizada.
+
 ---
 
 ## [2026-03-27]
