@@ -4,9 +4,8 @@ export type InfoTempo = {
     rotulo: string;
 };
 /**
- * *ontem* → passado.
- * *amanhã* → futuro, exceto quando a frase já tem perífrase **ir + infinitivo** no presente
- * (ex.: «vou viajar amanhã»), caso em que o primeiro verbo permanece no presente.
- * Caso contrário → presente.
+ * Deteta o tempo verbal baseado em tokens, marcadores e contexto opcional.
+ * @param tokens Lista de palavras da frase.
+ * @param tempoManual Tempo verbal fornecido manualmente (prioridade).
  */
-export declare function detectarTempo(tokens: string[]): InfoTempo;
+export declare function detectarTempo(tokens: string[], tempoManual?: TempoVerbal): Promise<InfoTempo>;

@@ -91,24 +91,48 @@ const CASOS = [
       correcao: "Ana e Pedro viajam à praia",
     },
   },
+  {
+    frase: "Eu comer e ele dormir",
+    esperado: {
+      composta: true,
+      oracoes: 2,
+      correcao: "Eu como e ele dorme",
+    },
+  },
+  {
+    frase: "Eu comer pizza e dormir",
+    esperado: {
+      composta: true,
+      oracoes: 2,
+      correcao: "Eu como pizza e durmo",
+    },
+  },
+  {
+    frase: "Eu comer mas ele dormir",
+    esperado: {
+      composta: true,
+      oracoes: 2,
+      correcao: "Eu como mas ele dorme",
+    },
+  },
 ];
 
 describe("analisarFrase — regressão (integração)", () => {
-  it("frase vazia → erro amigável", () => {
-    const r = analisarFrase("   ");
+  it("frase vazia → erro amigável", async () => {
+    const r = await analisarFrase("   ");
     expect(r.erro).toBeTruthy();
     expect(r.tokens).toEqual([]);
   });
 
-  it("sem verbo reconhecível → erro", () => {
-    const r = analisarFrase("Eu qqqqqwwwww rrrrrrrrr");
+  it("sem verbo reconhecível → erro", async () => {
+    const r = await analisarFrase("Eu qqqqqwwwww rrrrrrrrr");
     expect(r.erro).toBeTruthy();
     expect(r.verbo.infinitivo).toBe("");
   });
 
   for (const c of CASOS) {
-    it(`«${c.frase}»`, () => {
-      const r = analisarFrase(c.frase);
+    it(`«${c.frase}»`, async () => {
+      const r = await analisarFrase(c.frase);
       expect(r.erro, r.erro).toBeUndefined();
       const e = c.esperado;
       if (e.tokens) expect(r.tokens).toEqual(e.tokens);
@@ -118,6 +142,8 @@ describe("analisarFrase — regressão (integração)", () => {
       if (e.infinitivo) expect(r.verbo.infinitivo).toBe(e.infinitivo);
       if (e.conjugado) expect(r.verbo.conjugado).toBe(e.conjugado);
       if (e.correcao) expect(r.correcao).toBe(e.correcao);
+      if ("composta" in e && e.composta !== undefined) expect(r.composta).toBe(e.composta);
+      if ("oracoes" in e && typeof e.oracoes === "number") expect(r.oracoes?.length).toBe(e.oracoes);
     });
   }
 });

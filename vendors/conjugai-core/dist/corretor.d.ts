@@ -10,4 +10,6 @@ export declare function corrigir(tokens: string[], sujeito: {
     pessoa: number;
     implicito?: boolean;
     composto?: boolean;
-}, infinitivo: string, conjugado: string, _tempoTipo: TempoVerbal): string;
+    posicaoOriginal?: "antes" | "depois";
+    tokenIndex?: number;
+}, infinitivo: string, conjugado: string, _tempoTipo: TempoVerbal): Promise<string>;

@@ -36,19 +36,21 @@ export type TempoVerbal =
 export type GeneroParticipio = "m" | "f";
 export type NumeroParticipio = "sg" | "pl";
 
-export type ResultadoAnalise = {
+export type InfoSujeitoAnalise = {
+  texto: string;
+  pessoa: number;
+  rotulo?: string;
+  implicito?: boolean;
+  composto?: boolean;
+  /** 'antes' ou 'depois' do verbo. */
+  posicaoOriginal?: "antes" | "depois";
+  /** Índice do token na frase original (se não for implícito). */
+  tokenIndex?: number;
+};
+
+export type ResultadoAnaliseClausula = {
   tokens: string[];
-  sujeito: {
-    texto: string;
-    pessoa: number;
-    rotulo?: string;
-    implicito?: boolean;
-    composto?: boolean;
-    /** 'antes' ou 'depois' do verbo. */
-    posicaoOriginal?: "antes" | "depois";
-    /** Índice do token na frase original (se não for implícito). */
-    tokenIndex?: number;
-  };
+  sujeito: InfoSujeitoAnalise;
   tempo: {
     tipo: string;
   };
@@ -63,6 +65,28 @@ export type ResultadoAnalise = {
     etapa3: string;
     etapa4: string;
   };
+};
+
+export type ResultadoAnalise = {
+  tokens: string[];
+  sujeito: InfoSujeitoAnalise;
+  tempo: {
+    tipo: string;
+  };
+  verbo: {
+    infinitivo: string;
+    conjugado: string;
+  };
+  correcao: string;
+  debug: {
+    etapa1: string;
+    etapa2: string;
+    etapa3: string;
+    etapa4: string;
+  };
+  /** Várias orações coordenadas analisadas em sequência (ver `oracao-composta.ts`). */
+  composta?: boolean;
+  oracoes?: ResultadoAnaliseClausula[];
   /** Preenchido quando a análise não pôde completar (ex.: sem infinitivo). */
   erro?: string;
 };

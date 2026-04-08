@@ -371,6 +371,11 @@
             Se <strong>não houver</strong> pronome reconhecível, assume-se <strong>Eu</strong> (1.ª pessoa do singular) — adequado a muitas telegrafias em que o falante omite o pronome.
           </p>
 
+          <h3 class="algo-dialog__h3">6. Oração composta (coordenação)</h3>
+          <p>
+            Se a frase tiver <strong>duas (ou mais) orações</strong> ligadas por coordenação (<strong>«e»</strong>, <strong>«mas»</strong>, <strong>«porém»</strong>, <strong>«então»</strong>), o motor <strong>segmenta</strong> em blocos com verbo cada um. O conector <strong>«e»</strong> só parte orações quando aparece <strong>depois do primeiro verbo</strong> — assim <em>João e Maria comer</em> continua a ser tratado como <strong>sujeito composto</strong>, não como duas orações. Exemplos na barra lateral: <em>Eu comer e ele dormir</em>, <em>Eu comer pizza e dormir</em>, <em>Ele viajar mas eu ficar</em>.
+          </p>
+
           <p class="algo-dialog__note">
             No pipeline CAA, os índices <strong>0–4</strong> correspondem a: eu, tu, ele/ela, nós, eles/vocês. Na demo de paradigma da raiz existe também API de tabela com <strong>0–5</strong> (inclui <em>vós</em>).
           </p>
@@ -400,6 +405,7 @@
             <li><strong>«ontem»</strong> em qualquer posição → <strong>Pretérito Perfeito</strong> (<code>passado</code>).</li>
             <li><strong>«amanhã»</strong> → por defeito <strong>Futuro do Presente</strong> (<code>futuro</code>), <em>exceto</em> se a frase começar com perífrase de <strong>ir</strong> no presente (<em>vou/vai/vamos…</em>) e ainda houver «amanhã» — aí o verbo suporte fica no <strong>presente</strong> (caso típico <em>vou viajar amanhã</em>).</li>
             <li>Sem marcadores ou seleção → <strong>Presente</strong> (<code>presente</code>).</li>
+            <li><strong>Oração composta</strong>: em períodos com várias orações coordenadas, os marcadores são lidos <strong>dentro de cada oração</strong> (a seleção manual de tempo na UI aplica-se a todas, como antes).</li>
           </ul>
         </div>
       </div>
@@ -420,6 +426,10 @@
             <span class="algo-dialog__legend-title">Legenda:</span>
             <span class="algo-legend"><span class="conj-pipe__box conj-pipe__box--lex">léxico</span> forma vinda de <code>verbos.json</code></span>
             <span class="algo-legend"><span class="conj-pipe__box conj-pipe__box--reg">regra</span> presente regular (-ar/-er/-ir)</span>
+          </p>
+          <h3 class="algo-dialog__h3">Orações compostas coordenadas</h3>
+          <p>
+            Quando a entrada é segmentada em várias orações, cada uma passa pelo mesmo fluxo (sujeito → tempo → conjugação → <code>corrigir</code>); a frase final junta as correções e repete o conector. <strong>Subordinação</strong> (ex.: <em>que</em>, <em>embora</em>) não é analisada como orações separadas nesta versão.
           </p>
           <h3 class="algo-dialog__h3">Fallbacks</h3>
           <p>

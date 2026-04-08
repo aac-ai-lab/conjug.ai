@@ -107,14 +107,15 @@
             <span class="badge">Mermaid</span>
           </div>
           <p class="hint" style="margin-top: 0">
-            Ordem em <code>vendors/conjugai-core/index.ts</code>: tokens → sujeito → tempo → lema verbal →
+            Ordem em <code>vendors/conjugai-core/index.ts</code>: tokens → (se aplicável) segmentar orações coordenadas → sujeito → tempo → lema verbal →
             <code>conjugarTempo</code> → <code>corrigir</code>.
           </p>
           <div class="diagram-mermaid">
             <div class="mermaid">
 flowchart LR
   F[Frase] --> T[tokenize]
-  T --> S[detectarSujeito]
+  T --> O[segmentar orações coordenadas]
+  O --> S[detectarSujeito]
   S --> M[detectarTempo]
   M --> E[extrairVerbo]
   E --> C[conjugarTempo]

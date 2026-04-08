@@ -79,12 +79,16 @@
 
       <section class="diagram-block">
         <h2>1. Pipeline <code>analisarFrase</code></h2>
+        <p class="hint" style="margin: 0 0 0.75rem; text-align: left; max-width: 64ch; margin-inline: auto">
+          Após <code>tokenize</code>, pode aplicar-se <strong>segmentação por coordenação</strong> (<code>oracao-composta.ts</code>); com mais de uma oração, o fluxo repete-se por oração e junta-se as correções.
+        </p>
         <div class="mermaid">
 flowchart TD
   A[Texto bruto] --> B[tokenize]
   B --> C{Tokens vazios?}
   C -->|sim| ERR[Erro: Digite ou selecione uma frase]
-  C -->|não| D[detectarSujeito]
+  C -->|não| S0[segmentar orações coordenadas]
+  S0 --> D[detectarSujeito]
   D --> E[detectarTempo]
   E --> F[extrairVerbo]
   F --> G{Lema verbal?}

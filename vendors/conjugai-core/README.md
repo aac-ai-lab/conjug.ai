@@ -175,9 +175,9 @@ UI (HTML + CSS + app.js)
         ↓
   conjugai-core (ConjugaiCore.analisarFrase)
         ↓
-  tokenizer → sujeito → tempo → conjugador → corretor
+  tokenizer → [segmentação por coordenação, se aplicável] → sujeito → tempo → conjugador → corretor
         ↓
-  { tokens, sujeito, tempo, verbo, correcao, debug }
+  { tokens, sujeito, tempo, verbo, correcao, debug }  (+ composta/oracoes se várias orações)
 ```
 
 *(O diagrama pode referir React noutros contextos; neste repositório a UI é estática.)*
@@ -187,6 +187,7 @@ UI (HTML + CSS + app.js)
 | Ficheiro | Função |
 |----------|--------|
 | `index.ts` | `analisarFrase`, exportações públicas |
+| `oracao-composta.ts` | `segmentarOracoesCoordenadas`, `juntarCorrecoesOracoes` — coordenação entre orações |
 | `tokenizer.ts` | `tokenize` |
 | `sujeito.ts` | `detectarSujeito`, `detectarSujeitoComposto` (sujeito simples + composto) |
 | `tempo.ts` | `detectarTempo` (marcadores + seleção explícita de tempo) |

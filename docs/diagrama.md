@@ -6,14 +6,15 @@ Documentação em Mermaid. Pode pré-visualizar no VS Code/Cursor (extensão Mer
 
 ## 1. Pipeline de análise (`analisarFrase`)
 
-Fluxo em `vendors/conjugai-core/index.ts`: desde o texto bruto até `correcao`. A UI chama `ConjugaiCore.analisarFrase` a partir de `assets/js/app.js` (`analyze`).
+Fluxo em `vendors/conjugai-core/index.ts`: desde o texto bruto até `correcao`. A UI chama `ConjugaiCore.analisarFrase` a partir de `assets/js/app.js` (`analyze`). Depois de `tokenize`, pode aplicar-se **segmentação por coordenação** (`oracao-composta.ts`); com mais de uma oração, o fluxo abaixo corre **por oração** e as correções juntam-se no fim.
 
 ```mermaid
 flowchart TD
   A[Texto bruto] --> B[tokenize]
   B --> C{Tokens vazios?}
   C -->|sim| ERR[Erro: Digite ou selecione uma frase]
-  C -->|não| D[detectarSujeito]
+  C -->|não| S0[segmentar orações coordenadas]
+  S0 --> D[detectarSujeito]
   D --> E[detectarTempo]
   E --> F[extrairVerbo]
   F --> G{Lema verbal?}

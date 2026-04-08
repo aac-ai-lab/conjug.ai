@@ -7,6 +7,10 @@ export type InfoSujeito = {
     implicito?: boolean;
     /** Sujeito composto: `texto` é rótulo (ex.: Nós) para UI; a pessoa serve à conjugação. A frase corrigida mantém os tokens do sujeito. */
     composto?: boolean;
+    /** 'antes' ou 'depois' do verbo. */
+    posicaoOriginal?: "antes" | "depois";
+    /** Índice do token na frase original (se não for implícito). */
+    tokenIndex?: number;
 };
 /**
  * Sujeito composto com padrão **X e Y** antes do verbo (telegrafia).
@@ -17,6 +21,7 @@ export type InfoSujeito = {
 export declare function detectarSujeitoComposto(tokens: string[]): InfoSujeito | null;
 /**
  * Identifica sujeito e pessoa (0–4).
- * Tenta primeiro sujeito composto (**X e Y** antes do verbo); depois regras simples e *Eu + mamãe/papai*.
+ * Tenta primeiro sujeito composto (**X e Y** antes do verbo);
+ * depois procura pronomes ou nomes em qualquer posição (bidirecional).
  */
-export declare function detectarSujeito(tokens: string[]): InfoSujeito;
+export declare function detectarSujeito(tokens: string[]): Promise<InfoSujeito>;

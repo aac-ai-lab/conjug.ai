@@ -98,16 +98,8 @@ export async function corrigir(
   // Se o sujeito era explícito e estava ANTES do verbo, ele já está nos 'tokens[i]' 
   // e foi adicionado naturalmente no loop acima. Não precisamos unshift.
   
-  // Se vi não foi encontrado, mas temos tokens (ex: erro no índice), garantir que não perdemos o verbo
-  const viFinal = vi >= 0 ? (normalizeSVO ? (sujeito.tokenIndex! < vi ? vi - 1 : vi) + 1 : vi) : -1;
-
-  await aplicarRegenciaMovimentoLocais(resultado, viFinal + (normalizeSVO || sujeito.implicito ? 0 : 0), infinitivo);
-  
-  // Re-calculando o índice do verbo no array 'resultado' para a regência
-  const viNoResultado = resultado.findIndex(t => normalize(t) === normalize(verbLower));
-  if (viNoResultado >= 0) {
-    await aplicarRegenciaMovimentoLocais(resultado, viNoResultado, infinitivo);
-  }
+  const viNoResultado = resultado.findIndex((t) => normalize(t) === normalize(verbLower));
+  await aplicarRegenciaMovimentoLocais(resultado, viNoResultado, infinitivo);
 
   const out = resultado.join(" ").replace(/\s+/g, " ").trim();
   return out.charAt(0).toUpperCase() + out.slice(1);

@@ -1,0 +1,3 @@
+import { loader, normalize, isStopword, getPronomeInfo, isSubstantivoHumano, isTempoMarker, getRegenciaInfo, isBasicPronoun } from "./pos-tagger";
+export * from "./tokenizer";
+export { loader, normalize, isStopword, getPronomeInfo, isSubstantivoHumano, isTempoMarker, getRegenciaInfo, isBasicPronoun, };

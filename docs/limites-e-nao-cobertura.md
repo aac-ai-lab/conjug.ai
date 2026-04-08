@@ -10,7 +10,8 @@ Para a arquitetura e o fluxo técnico, ver também `README.md` (raiz) e `vendors
 
 ## 1. Escopo geral
 
-- O pipeline (`tokenize` → sujeito → tempo → verbo → `corrigir`) foi pensado para **frases telegráficas curtas**, típicas de **CAA**, não para texto corrido, múltiplas orações ou estilo literário.
+- O pipeline (`tokenize` → sujeito → tempo → verbo → `corrigir`) foi pensado para **frases telegráficas curtas**, típicas de **CAA**, não para texto corrido longo ou estilo literário.
+- **Orações compostas por coordenação** (`e`, `mas`, `porém`, `então`): o motor pode **segmentar** várias orações com verbo e aplicar o fluxo **a cada oração**; o `e` coordenativo só corta **depois do primeiro verbo** (para não confundir com sujeito composto *X e Y*). **Subordinação** (*que*, *embora*, orações relativas, etc.) **não** é decomposta em orações separadas.
 - A **correção** em `corretor.ts` altera sobretudo a **forma verbal** e realiza a **normalização para ordem direta (SVO)** quando o sujeito é identificado após o verbo; também antecede pronome em sujeito **implícito**.
 - **Não** reescreve a frase como um revisor humano faria para além destes recortes.
 

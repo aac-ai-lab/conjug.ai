@@ -143,6 +143,36 @@
         { texto: "Normalização", tipo: "verb" },
       ],
     },
+    {
+      texto: "Eu comer e ele dormir",
+      rotulo:
+        "Oração composta coordenada: o «e» liga duas orações após o primeiro verbo; sujeito e tempo por oração.",
+      badges: [
+        { texto: "Oração composta", tipo: "other" },
+        { texto: "2 sujeitos", tipo: "subject" },
+        { texto: "Presente", tipo: "time" },
+      ],
+    },
+    {
+      texto: "Eu comer pizza e dormir",
+      rotulo:
+        "Dois predicados (mesmo sujeito); a segunda parte sem pronome omite «eu» repetido na frase corrigida.",
+      badges: [
+        { texto: "Composta (e)", tipo: "other" },
+        { texto: "Sujeito 1.ª sg.", tipo: "subject" },
+        { texto: "Presente", tipo: "time" },
+      ],
+    },
+    {
+      texto: "Ele viajar mas eu ficar",
+      rotulo:
+        "Coordenação adversativa («mas»); conjugação e tempo calculados em cada oração em separado.",
+      badges: [
+        { texto: "Composta (mas)", tipo: "other" },
+        { texto: "2 tempos/heur.", tipo: "time" },
+        { texto: "Conjugação", tipo: "verb" },
+      ],
+    },
   ];
 
   function exemploTexto(ex) {
@@ -322,7 +352,17 @@
     }
 
     var nomeTempo = labelTempo(r.tempo.tipo);
-    var ruleLine = "Aplicar " + nomeTempo + " de «" + r.verbo.infinitivo + "» para " + r.sujeito.texto + ".";
+    var ruleLine;
+    if (r.composta && r.oracoes && r.oracoes.length > 1) {
+      ruleLine = r.oracoes
+        .map(function (o, i) {
+          var nt = labelTempo(o.tempo.tipo);
+          return "Oração " + (i + 1) + ": aplicar " + nt + " de «" + o.verbo.infinitivo + "» para " + o.sujeito.texto + ".";
+        })
+        .join(" ");
+    } else {
+      ruleLine = "Aplicar " + nomeTempo + " de «" + r.verbo.infinitivo + "» para " + r.sujeito.texto + ".";
+    }
 
     var verbIndex =
       typeof core.indiceDoVerboNaFrase === "function"
@@ -340,12 +380,21 @@
       tempoRotulo = r.debug.etapa3.replace(/^Tempo:\s*[^\s]+\s*[—–-]\s*/, "").trim();
     }
 
+    var subjectDisplay =
+      r.composta && r.oracoes && r.oracoes.length > 1
+        ? r.oracoes
+            .map(function (o, i) {
+              return "Oração " + (i + 1) + ": " + o.sujeito.texto + " (pessoa " + o.sujeito.pessoa + ")";
+            })
+            .join(" | ")
+        : r.sujeito.texto + " (pessoa " + r.sujeito.pessoa + ")";
+
     return {
       ok: true,
       analysis: {
         tokens: r.tokens,
         subject: {
-          display: r.sujeito.texto + " (pessoa " + r.sujeito.pessoa + ")",
+          display: subjectDisplay,
           label: r.sujeito.rotulo || "—",
         },
         temporal: {
@@ -371,6 +420,8 @@
           tempoRotulo: tempoRotulo,
           nomeTempo: nomeTempo,
           viaLexico: viaLexico,
+          oracaoComposta: !!r.composta,
+          oracoes: r.oracoes || null,
         },
       },
     };

@@ -29,36 +29,36 @@ Para cada item, o avaliador deve ver:
 - entrada telegrafica;
 - saida gerada.
 
-Nao deve saber qual sistema gerou a saida (ConjugAI ou baseline).
+Nao deve saber qual sistema gerou a saída (ConjugAI ou baseline).
 
-### Comparacao
+### Comparação
 
 Comparar o ConjugAI com pelo menos um baseline:
 
 - baseline simples por regra;
-- opcionalmente, baseline "sem correcao".
+- opcionalmente, baseline "sem correção".
 
-## Equipa de avaliacao
+## Equipa de avaliação
 
 - 2 avaliadores independentes por exemplo.
 - 1 avaliador de desempate (adjudicador) quando houver conflito.
 
-## Rubrica de avaliacao (escala 1-5)
+## Rubrica de avaliação (escala 1-5)
 
-Cada exemplo deve receber nota em quatro criterios:
+Cada exemplo deve receber nota em quatro critérios:
 
 1. Correcao gramatical
-   - Forma verbal, concordancia, tempo e pessoa.
+   - Forma verbal, concordância, tempo e pessoa.
 2. Preservacao de significado
-   - Mantem a intencao original da frase telegrafica.
+   - Mantem a intencao original da frase telegráfica.
 3. Naturalidade em PT-BR
    - Frase soa natural para uso cotidiano.
 4. Utilidade para CAA
-   - A saida ajuda o utilizador a comunicar melhor.
+   - A saída ajuda o utilizador a comunicar melhor.
 
-Campo adicional (binario):
+Campo adicional (binário):
 
-- Aceitavel sem edicao? (`sim`/`nao`)
+- Aceitavel sem edição? (`sim`/`nao`)
 
 ## Metricas humanas principais
 

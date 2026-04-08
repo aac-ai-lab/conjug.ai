@@ -26,6 +26,14 @@ O formato inspira-se em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 Alterações em desenvolvimento que ainda não foram consolidadas num período datado abaixo.
 
+### Adicionado
+
+- **Oração composta (coordenação)**: `analisarFrase` segmenta períodos com **«e»**, **«mas»**, **«porém»**, **«então»** (com heurísticas documentadas em `oracao-composta.ts`); resultado com `composta: true` e `oracoes[]`. Exemplos na demo CAA (`demo/caa/index.html`, `assets/js/app.js`).
+
+### Corrigido
+
+- **Regência de lugar** em `corretor.ts`: evita aplicar a contração **«à»**/**«ao»** duas vezes (casos «ao à praia»).
+
 ---
 
 ## [2026-03-27]
