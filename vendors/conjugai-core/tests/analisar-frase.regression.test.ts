@@ -92,6 +92,26 @@ const CASOS = [
     },
   },
   {
+    frase: "Eu visitar meu escola",
+    esperado: {
+      sujeito: "Eu",
+      tempo: "presente" as const,
+      infinitivo: "visitar",
+      conjugado: "visito",
+      correcao: "Eu visito minha escola",
+    },
+  },
+  {
+    frase: "Eu visitar o escola bonito",
+    esperado: {
+      sujeito: "Eu",
+      tempo: "presente" as const,
+      infinitivo: "visitar",
+      conjugado: "visito",
+      correcao: "Eu visito a escola bonita",
+    },
+  },
+  {
     frase: "Eu comer e ele dormir",
     esperado: {
       composta: true,

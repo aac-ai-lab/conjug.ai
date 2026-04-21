@@ -1,9 +1,40 @@
 import { conjugarTempo, indiceDoVerboNaFrase, isVerbShape } from "./conjugador";
+import { ADJETIVOS_BIFORMES } from "./data/adjetivos-biformes";
 import type { TempoVerbal } from "./types";
 import { normalize, getRegenciaInfo, getPronomeInfo, loader } from "../nlp-pt-br-lite/src/index";
 
 /** Tempos macro em que matriz e dependente usam o mesmo tempo (*Ele dizer…* + passado manual → *disse* + *falaram*). */
 const TEMPOS_MACRO_MATRIZ_IGUAL: TempoVerbal[] = ["passado", "presente", "futuro"];
+type GeneroNominal = "f" | "m";
+
+const PARES_GENERO: Array<[masc: string, fem: string]> = [
+  ["o", "a"],
+  ["os", "as"],
+  ["um", "uma"],
+  ["uns", "umas"],
+  ["meu", "minha"],
+  ["meus", "minhas"],
+  ["teu", "tua"],
+  ["teus", "tuas"],
+  ["seu", "sua"],
+  ["seus", "suas"],
+  ["nosso", "nossa"],
+  ["nossos", "nossas"],
+  ["vosso", "vossa"],
+  ["vossos", "vossas"],
+  ["este", "esta"],
+  ["estes", "estas"],
+  ["esse", "essa"],
+  ["esses", "essas"],
+  ["aquele", "aquela"],
+  ["aqueles", "aquelas"],
+];
+
+function manterCaixa(orig: string, novo: string): string {
+  if (orig === orig.toUpperCase()) return novo.toUpperCase();
+  if (orig[0] === orig[0].toUpperCase()) return novo.charAt(0).toUpperCase() + novo.slice(1);
+  return novo;
+}
 
 /**
  * *Pronome + infinitivo + que* … verbo dependente: flexiona o infinitivo da matriz
@@ -35,11 +66,59 @@ async function conjugadoMatrizInfinitivoAntesQue(
 
 
 
-async function generoLocativoSubs(subs: string): Promise<"f" | "m" | null> {
+async function generoSubstantivo(subs: string): Promise<GeneroNominal | null> {
   const info = await loader.getWordInfo(subs);
-  if (info?.cat?.includes("LUGAR_FEM")) return "f";
-  if (info?.cat?.includes("LUGAR_MASC")) return "m";
+  const cats: string[] = Array.isArray(info?.cat) ? info.cat : [];
+  const ehNucleoNominal = cats.includes("SUBST") || cats.includes("LUGAR");
+  if (!ehNucleoNominal) return null;
+  const fem = cats.includes("LUGAR_FEM");
+  const masc = cats.includes("LUGAR_MASC");
+  if (fem && !masc) return "f";
+  if (masc && !fem) return "m";
   return null;
+}
+
+function ajustarTokenPorGenero(token: string, genero: GeneroNominal): string | null {
+  const n = normalize(token);
+  for (const [masc, fem] of PARES_GENERO) {
+    if (genero === "f" && n === masc) return manterCaixa(token, fem);
+    if (genero === "m" && n === fem) return manterCaixa(token, masc);
+  }
+  return null;
+}
+
+function ajustarAdjetivoConhecidoPorGenero(token: string, genero: GeneroNominal): string | null {
+  const n = normalize(token);
+  for (const [masc, fem] of ADJETIVOS_BIFORMES) {
+    if (genero === "f" && n === masc) return manterCaixa(token, fem);
+    if (genero === "m" && n === fem) return manterCaixa(token, masc);
+  }
+  return null;
+}
+
+/**
+ * Concordância nominal local e conservadora:
+ * - Ajusta determinante/possessivo imediatamente antes do substantivo.
+ * - Ajusta adjetivo biforme conhecido imediatamente após o substantivo.
+ * Não tenta resolver número nem dependências longas.
+ */
+async function aplicarConcordanciaGeneroLocal(resultado: string[]): Promise<void> {
+  for (let i = 0; i < resultado.length; i++) {
+    const genero = await generoSubstantivo(resultado[i]);
+    if (!genero) continue;
+
+    const iPrev = i - 1;
+    if (iPrev >= 0) {
+      const prev = ajustarTokenPorGenero(resultado[iPrev], genero);
+      if (prev) resultado[iPrev] = prev;
+    }
+
+    const iNext = i + 1;
+    if (iNext < resultado.length) {
+      const next = ajustarAdjetivoConhecidoPorGenero(resultado[iNext], genero);
+      if (next) resultado[iNext] = next;
+    }
+  }
 }
 
 /**
@@ -55,7 +134,7 @@ async function aplicarRegenciaMovimentoLocais(resultado: string[], vi: number, i
 
   for (let k = vi + 1; k < resultado.length - 1; k++) {
     const art = normalize(resultado[k]);
-    const gen = await generoLocativoSubs(resultado[k + 1]);
+    const gen = await generoSubstantivo(resultado[k + 1]);
     if (!gen) continue;
     if (gen === "f") {
       if (art === "a" || art === "o") resultado[k] = "à";
@@ -66,7 +145,7 @@ async function aplicarRegenciaMovimentoLocais(resultado: string[], vi: number, i
 
   const j = vi + 1;
   if (j >= resultado.length) return;
-  const gen = await generoLocativoSubs(resultado[j]);
+  const gen = await generoSubstantivo(resultado[j]);
   if (gen === "f") resultado.splice(j, 0, "à");
   else if (gen === "m") resultado.splice(j, 0, "ao");
 }
@@ -136,6 +215,7 @@ export async function corrigir(
   
   const viNoResultado = resultado.findIndex((t) => normalize(t) === normalize(verbLower));
   await aplicarRegenciaMovimentoLocais(resultado, viNoResultado, infinitivo);
+  await aplicarConcordanciaGeneroLocal(resultado);
 
   const out = resultado.join(" ").replace(/\s+/g, " ").trim();
   return out.charAt(0).toUpperCase() + out.slice(1);

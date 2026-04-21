@@ -193,10 +193,11 @@ UI (HTML + CSS + app.js)
 | `sujeito.ts` | `detectarSujeito`, `detectarSujeitoComposto` (sujeito simples + composto) |
 | `tempo.ts` | `detectarTempo` (marcadores + seleção explícita de tempo) |
 | `conjugador.ts` | `conjugar`, `conjugarTempo`, `conjugarPessoaTabela`, `extrairVerbo`, `detectarLocucaoVerbalHeadLemma`, `detectarVerboPorDicionario`, `indiceDoVerboNaFrase`, `gerundio`, `participio`, `infinitivoLexico`, léxico + presente regular |
-| `corretor.ts` | `corrigir` — substitui só o token verbal (e antecede pronome se sujeito implícito) |
+| `corretor.ts` | `corrigir` — reconstrói a frase com verbo conjugado (pronome implícito se aplicável), regência **à**/**ao** quando cabe e concordância local de **gênero** (determinante/possessivo + adjetivos em lista fechada) |
 | `types.ts` | `ResultadoAnalise`, `TempoVerbal`, `GeneroParticipio`, `NumeroParticipio`, … (inclui `posicaoOriginal` e `tokenIndex` no sujeito) |
 | `data/verbos.json` | Léxico (importado em `verbos-data.ts`); tipicamente minificado; ver §4.1 |
 | `data/verbos-data.ts` | Tipos `EntradaVerbo`, constante `CHAVES_PARADIGMA_CINCO`, export `VERBOS` |
+| `data/adjetivos-biformes.ts` | Lista `ADJETIVOS_BIFORMES` para concordância de gênero em adjetivos (editável sem alterar `corretor.ts`) |
 | `scripts/morphobr_dict_to_verbos.py` | MorphoBr `.dict` → `verbos.json` (tempos alargados, minify por omissão) |
 | `scripts/build_verbos_from_morphobr.sh` | Descarrega `verbs-a`…`z` para `cache/` e invoca o Python |
 | `scripts/fetch_morphobr_verb_dicts.sh` | Descarrega subconjunto de letras (útil sem build completo) |

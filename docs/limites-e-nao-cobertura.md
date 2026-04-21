@@ -69,7 +69,7 @@ Implementação em `corretor.ts` (`aplicarRegenciaMovimentoLocais`):
 
 ## 7. Outras lacunas gramaticais superficiais
 
-- **Concordância nominal** (adjetivo, participo com objeto, etc.) e **pontuação** **não** são objetivo central da correção atual.
+- **Concordância nominal** continua **parcial**: há ajuste local de **gênero** em recortes simples (*determinante/possessivo + substantivo*) e em **adjetivos biformes de lista controlada** imediatamente após o substantivo. **Número** (singular/plural), adjetivos fora da lista e dependências longas continuam fora do objetivo central da correção atual.
 - **Normalização sintática**: coberta apenas para a ordem **SVO** quando o sujeito é detectado após o verbo. Outras reordenações não são tratadas.
 - **Ambiguidade**, **polissemia**, **nomes próprios** vs comum (em minúsculas), **registo** (formal/coloquial) **não** são tratados.
 
