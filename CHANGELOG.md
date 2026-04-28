@@ -28,6 +28,8 @@ Alterações em desenvolvimento que ainda não foram consolidadas num período d
 
 ### Adicionado
 
+- **Demo CAA** (`assets/js/app.js`): mais **frases telegráficas** de exemplo com vocabulário alinhado à API de palavras-chave **Arasaac** (`br`: água, beber, banho, hospital, médico, …).
+
 - **Locuções verbais** (telegrafia): `extrairVerbo` / `detectarLocucaoVerbalHeadLemma` em `conjugador.ts`; `tempo.ts` não trata o «que» de *ter que* como subjuntivo isolado. Exemplos na demo CAA.
 - **Oração composta (coordenação)**: `analisarFrase` segmenta períodos com **«e»**, **«ou»**, **«mas»**, **«porém»**, **«então»** (heurísticas em `oracao-composta.ts`); resultado com `composta: true` e `oracoes[]`. Exemplos na demo CAA (`demo/caa/index.html`, `assets/js/app.js`).
 
@@ -43,6 +45,8 @@ Alterações em desenvolvimento que ainda não foram consolidadas num período d
 - **Matriz *Pronome + infinitivo + que*** (`corretor.ts`): flexiona também o infinitivo antes de *que* (*Ele dizer que eles falar* → *Ele disse que eles falaram* ou *… falem*, conforme o tempo do dependente).
 
 ### Alterado
+
+- **Demo CAA** (`assets/js/app.js`, `demo/caa/index.html`): frases de exemplo **sem** «ontem»/«amanhã» no texto; tempo ilustrado pela barra **Hoje / Ontem / Amanhã** (rótulos e dica na barra lateral atualizados).
 
 - **Diagramas e LaTeX**: `docs/diagrama.md`, `diagrama.html` e `demo/verbs/diagram.html` — fluxo de `extrairVerbo` alinhado à ordem real (ir + inf., locuções, 1.º infinitivo, léxico); notas sobre coordenação, sujeito *X ou Y* e exceção *ter que* no tempo verbal; `docs/diagramas-conjugai.tex` — nó de segmentação no pipeline e secção `extrairVerbo` atualizada.
 

@@ -7,6 +7,8 @@
   /**
    * Cada exemplo: frase + badges na lista (tipo: subject | time | verb | other).
    * `rotulo` = descrição longa (tooltip no item).
+   * Bloco «AAC / …»: palavras alinhadas a vocabulário do catálogo de pictogramas
+   * (chave **br** em https://api.arasaac.org/api/keywords/br), típico em painéis CAA.
    */
   const EXAMPLES = [
     {
@@ -20,21 +22,22 @@
       ],
     },
     {
-      texto: "Mamãe e eu ir shopping amanhã",
+      texto: "Mamãe e eu ir shopping",
       rotulo:
-        "Sujeito composto (contém «eu» → rótulo «nós»); futuro; verbo «ir»; regência «ao shopping» (a + o).",
+        "Sujeito composto (contém «eu» → rótulo «nós»); verbo «ir»; regência «ao shopping» (a + o). Para ver **futuro** na correção, escolha **Amanhã** na barra de tempo (a frase de exemplo não inclui o adverbio).",
       badges: [
         { texto: "Sujeito composto", tipo: "subject" },
-        { texto: "Futuro", tipo: "time" },
+        { texto: "Barra: Amanhã", tipo: "time" },
         { texto: "Ir + regência", tipo: "other" },
       ],
     },
     {
-      texto: "Ele viajar ontem",
-      rotulo: "Sujeito «ele»; tempo passado (marcador «ontem»); conjugação no pretérito.",
+      texto: "Ele viajar",
+      rotulo:
+        "Sujeito «ele»; conjugação no pretérito com o botão **Ontem** na barra (a frase não traz «ontem» escrito).",
       badges: [
         { texto: "Sujeito «ele»", tipo: "subject" },
-        { texto: "Passado", tipo: "time" },
+        { texto: "Barra: Ontem", tipo: "time" },
         { texto: "Conjugação", tipo: "verb" },
       ],
     },
@@ -57,21 +60,22 @@
       ],
     },
     {
-      texto: "Ela fazer bolo amanhã",
-      rotulo: "Sujeito «ela»; tempo futuro («amanhã»); conjugação no futuro do presente.",
+      texto: "Ela fazer bolo",
+      rotulo:
+        "Sujeito «ela»; com **Amanhã** na barra de tempo → futuro do presente (sem «amanhã» na frase de exemplo).",
       badges: [
         { texto: "Sujeito «ela»", tipo: "subject" },
-        { texto: "Futuro", tipo: "time" },
+        { texto: "Barra: Amanhã", tipo: "time" },
         { texto: "Conjugação", tipo: "verb" },
       ],
     },
     {
-      texto: "Vou viajar amanhã",
+      texto: "Vou viajar",
       rotulo:
-        "Forma já conjugada do verbo auxiliar («vou»); o motor reconhece a forma do léxico em vez de re-flexionar o infinitivo.",
+        "Forma já conjugada do verbo auxiliar («vou»); o motor reconhece a forma do léxico. Opcional: **Amanhã** na barra mantém o núcleo no presente com perífrase de «ir».",
       badges: [
         { texto: "Forma no léxico", tipo: "verb" },
-        { texto: "Presente", tipo: "time" },
+        { texto: "Presente / barra", tipo: "time" },
         { texto: "Perífrase", tipo: "other" },
       ],
     },
@@ -106,12 +110,12 @@
       ],
     },
     {
-      texto: "Ana e você viajar amanhã",
+      texto: "Ana e você viajar",
       rotulo:
-        "Composto com «você» → rótulo «vocês» (forma verbal como 3.ª do plural); futuro.",
+        "Composto com «você» → rótulo «vocês» (3.ª do plural). **Amanhã** na barra para ilustrar futuro.",
       badges: [
         { texto: "Composto + você", tipo: "subject" },
-        { texto: "Futuro", tipo: "time" },
+        { texto: "Barra: Amanhã", tipo: "time" },
         { texto: "Conjugação", tipo: "verb" },
       ],
     },
@@ -125,21 +129,22 @@
       ],
     },
     {
-      texto: "Eles fazer trabalho ontem",
-      rotulo: "Sujeito «eles» explícito; passado; concordância verbal na 3.ª do plural.",
+      texto: "Eles fazer trabalho",
+      rotulo:
+        "Sujeito «eles» explícito; concordância na 3.ª do plural. **Ontem** na barra para pretérito.",
       badges: [
         { texto: "Sujeito «eles»", tipo: "subject" },
-        { texto: "Passado", tipo: "time" },
+        { texto: "Barra: Ontem", tipo: "time" },
         { texto: "Conjugação", tipo: "verb" },
       ],
     },
     {
-      texto: "Nós ir escola amanhã",
+      texto: "Nós ir escola",
       rotulo:
-        "Regência de «ir» + lugar: insere «à» antes de substantivo feminino conhecido («à escola»); futuro.",
+        "Regência de «ir» + lugar: insere «à» («à escola»). **Amanhã** na barra para futuro na correção.",
       badges: [
         { texto: "Regência (à escola)", tipo: "other" },
-        { texto: "Futuro", tipo: "time" },
+        { texto: "Barra: Amanhã", tipo: "time" },
         { texto: "Normalização", tipo: "verb" },
       ],
     },
@@ -254,12 +259,12 @@
       ],
     },
     {
-      texto: "Eu começar a trabalhar amanhã",
+      texto: "Eu começar a trabalhar",
       rotulo:
-        "Locução «começar a» + infinitivo; «amanhã» → futuro na segunda parte do predicado.",
+        "Locução «começar a» + infinitivo. **Amanhã** na barra para futuro (sem adverbio na frase).",
       badges: [
         { texto: "começar a", tipo: "locucao" },
-        { texto: "Futuro", tipo: "time" },
+        { texto: "Barra: Amanhã", tipo: "time" },
         { texto: "Conjugação", tipo: "verb" },
       ],
     },
@@ -269,6 +274,126 @@
         "«acabar de» + infinitivo: núcleo no verbo auxiliar «acabar».",
       badges: [
         { texto: "acabar de", tipo: "locucao" },
+        { texto: "Presente", tipo: "time" },
+        { texto: "Conjugação", tipo: "verb" },
+      ],
+    },
+    {
+      texto: "Eu beber água",
+      rotulo:
+        "AAC (Arasaac «água», «beber»): necessidade básica; telegrafema sujeito + infinitivo + objeto.",
+      badges: [
+        { texto: "AAC / necessidade", tipo: "other" },
+        { texto: "Presente", tipo: "time" },
+        { texto: "Conjugação", tipo: "verb" },
+      ],
+    },
+    {
+      texto: "Eu tomar banho",
+      rotulo:
+        "«tomar», «banho» — higiene em conjuntos pictográficos.",
+      badges: [
+        { texto: "AAC / higiene", tipo: "other" },
+        { texto: "Presente", tipo: "time" },
+        { texto: "Conjugação", tipo: "verb" },
+      ],
+    },
+    {
+      texto: "Eu tomar remédio",
+      rotulo:
+        "«tomar», «remédio» — rotina de saúde (medicamento).",
+      badges: [
+        { texto: "AAC / saúde", tipo: "other" },
+        { texto: "Presente", tipo: "time" },
+        { texto: "Conjugação", tipo: "verb" },
+      ],
+    },
+    {
+      texto: "Eu brincar bola",
+      rotulo:
+        "«brincar», «bola» — lazer motor com objetos muito frequentes em painéis infantis.",
+      badges: [
+        { texto: "AAC / lazer", tipo: "other" },
+        { texto: "Presente", tipo: "time" },
+        { texto: "Conjugação", tipo: "verb" },
+      ],
+    },
+    {
+      texto: "Eu ir hospital",
+      rotulo:
+        "«ir», «hospital» — deslocação para serviço de saúde; a correção pode inserir preposição («ao hospital»).",
+      badges: [
+        { texto: "AAC / saúde", tipo: "other" },
+        { texto: "Ir + lugar", tipo: "verb" },
+        { texto: "Presente", tipo: "time" },
+      ],
+    },
+    {
+      texto: "Eu ir médico",
+      rotulo:
+        "«ir», «médico» — consulta; mesmo esquema que outros destinos de «ir».",
+      badges: [
+        { texto: "AAC / saúde", tipo: "other" },
+        { texto: "Ir + destino", tipo: "verb" },
+        { texto: "Presente", tipo: "time" },
+      ],
+    },
+    {
+      texto: "Eu ler livro",
+      rotulo:
+        "«ler», «livro» — leitura / escola.",
+      badges: [
+        { texto: "AAC / escola", tipo: "other" },
+        { texto: "Presente", tipo: "time" },
+        { texto: "Conjugação", tipo: "verb" },
+      ],
+    },
+    {
+      texto: "Eu precisar ajuda",
+      rotulo:
+        "«precisar», «ajuda» — pedido de apoio; regência completa («de») pode não aparecer no telegrafema.",
+      badges: [
+        { texto: "AAC / apoio", tipo: "other" },
+        { texto: "Presente", tipo: "time" },
+        { texto: "Conjugação", tipo: "verb" },
+      ],
+    },
+    {
+      texto: "Eu ajudar amigo",
+      rotulo:
+        "«ajudar», «amigo» — relações sociais em vocabulário AAC.",
+      badges: [
+        { texto: "AAC / social", tipo: "other" },
+        { texto: "Presente", tipo: "time" },
+        { texto: "Conjugação", tipo: "verb" },
+      ],
+    },
+    {
+      texto: "Eu ver televisão",
+      rotulo:
+        "«ver», «televisão» — lazer em casa; «ver» irregular no léxico.",
+      badges: [
+        { texto: "AAC / lazer", tipo: "other" },
+        { texto: "Presente", tipo: "time" },
+        { texto: "Conjugação", tipo: "verb" },
+      ],
+    },
+    {
+      texto: "Eu ouvir música",
+      rotulo:
+        "«ouvir», «música» — audição / lazer.",
+      badges: [
+        { texto: "AAC / lazer", tipo: "other" },
+        { texto: "Presente", tipo: "time" },
+        { texto: "Conjugação", tipo: "verb" },
+      ],
+    },
+    {
+      texto: "Eu entrar casa",
+      rotulo:
+        "«entrar», «casa» — chegada ao lar (telegrafema sem «em»).",
+      badges: [
+        { texto: "AAC / casa", tipo: "other" },
         { texto: "Presente", tipo: "time" },
         { texto: "Conjugação", tipo: "verb" },
       ],
