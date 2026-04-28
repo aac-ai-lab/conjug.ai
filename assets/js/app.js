@@ -144,6 +144,46 @@
       ],
     },
     {
+      texto: "Eu visitar meu escola",
+      rotulo:
+        "Concordância nominal local de gênero: possessivo ajustado pelo substantivo feminino.",
+      badges: [
+        { texto: "Gênero local", tipo: "other" },
+        { texto: "Possessivo", tipo: "subject" },
+        { texto: "Conjugação", tipo: "verb" },
+      ],
+    },
+    {
+      texto: "Eu visitar o escola bonito",
+      rotulo:
+        "Concordância local de gênero: artigo e adjetivo biforme conhecido ajustados pelo substantivo.",
+      badges: [
+        { texto: "Gênero local", tipo: "other" },
+        { texto: "Adjetivo biforme", tipo: "other" },
+        { texto: "Conjugação", tipo: "verb" },
+      ],
+    },
+    {
+      texto: "Eu visitar as escola bonita",
+      rotulo:
+        "Concordância local de número: plural regular em substantivo e adjetivo quando há determinante plural.",
+      badges: [
+        { texto: "Número local", tipo: "other" },
+        { texto: "Plural regular", tipo: "other" },
+        { texto: "Conjugação", tipo: "verb" },
+      ],
+    },
+    {
+      texto: "Eu visitar meus escola bonito",
+      rotulo:
+        "Concordância local combinada: possessivo, substantivo e adjetivo ajustados em gênero e número.",
+      badges: [
+        { texto: "Gênero+Número", tipo: "other" },
+        { texto: "Possessivo", tipo: "subject" },
+        { texto: "Plural regular", tipo: "other" },
+      ],
+    },
+    {
       texto: "Eu comer e ele dormir",
       rotulo:
         "Oração composta coordenada: o «e» liga duas orações após o primeiro verbo; sujeito e tempo por oração.",

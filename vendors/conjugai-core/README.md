@@ -193,7 +193,7 @@ UI (HTML + CSS + app.js)
 | `sujeito.ts` | `detectarSujeito`, `detectarSujeitoComposto` (sujeito simples + composto) |
 | `tempo.ts` | `detectarTempo` (marcadores + seleção explícita de tempo) |
 | `conjugador.ts` | `conjugar`, `conjugarTempo`, `conjugarPessoaTabela`, `extrairVerbo`, `detectarLocucaoVerbalHeadLemma`, `detectarVerboPorDicionario`, `indiceDoVerboNaFrase`, `gerundio`, `participio`, `infinitivoLexico`, léxico + presente regular |
-| `corretor.ts` | `corrigir` — reconstrói a frase com verbo conjugado (pronome implícito se aplicável), regência **à**/**ao** quando cabe e concordância local de **gênero** (determinante/possessivo + adjetivos em lista fechada) |
+| `corretor.ts` | `corrigir` — reconstrói a frase com verbo conjugado (pronome implícito se aplicável), regência **à**/**ao** quando cabe e concordância local de **gênero e número** (determinante/possessivo, substantivo com flexão regular básica e adjetivos em lista fechada) |
 | `types.ts` | `ResultadoAnalise`, `TempoVerbal`, `GeneroParticipio`, `NumeroParticipio`, … (inclui `posicaoOriginal` e `tokenIndex` no sujeito) |
 | `data/verbos.json` | Léxico (importado em `verbos-data.ts`); tipicamente minificado; ver §4.1 |
 | `data/verbos-data.ts` | Tipos `EntradaVerbo`, constante `CHAVES_PARADIGMA_CINCO`, export `VERBOS` |

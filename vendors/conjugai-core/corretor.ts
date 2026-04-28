@@ -6,6 +6,7 @@ import { normalize, getRegenciaInfo, getPronomeInfo, loader } from "../nlp-pt-br
 /** Tempos macro em que matriz e dependente usam o mesmo tempo (*Ele dizer…* + passado manual → *disse* + *falaram*). */
 const TEMPOS_MACRO_MATRIZ_IGUAL: TempoVerbal[] = ["passado", "presente", "futuro"];
 type GeneroNominal = "f" | "m";
+type NumeroNominal = "sg" | "pl";
 
 const PARES_GENERO: Array<[masc: string, fem: string]> = [
   ["o", "a"],
@@ -30,10 +31,37 @@ const PARES_GENERO: Array<[masc: string, fem: string]> = [
   ["aqueles", "aquelas"],
 ];
 
+const TOKENS_SINGULAR = new Set(
+  PARES_GENERO.flatMap(([m, f]) =>
+    [m, f].filter((t) => !t.endsWith("s"))
+  )
+);
+
+const TOKENS_PLURAL = new Set(
+  PARES_GENERO.flatMap(([m, f]) =>
+    [m, f].filter((t) => t.endsWith("s"))
+  )
+);
+
 function manterCaixa(orig: string, novo: string): string {
   if (orig === orig.toUpperCase()) return novo.toUpperCase();
   if (orig[0] === orig[0].toUpperCase()) return novo.charAt(0).toUpperCase() + novo.slice(1);
   return novo;
+}
+
+function pluralRegular(token: string): string | null {
+  const n = normalize(token);
+  if (n.endsWith("s")) return null;
+  if (/[aeiou]$/.test(n)) return `${token}s`;
+  if (n.endsWith("m") && token.length > 1) return `${token.slice(0, -1)}ns`;
+  return null;
+}
+
+function singularRegular(token: string): string | null {
+  const n = normalize(token);
+  if (n.endsWith("ns") && token.length > 2) return `${token.slice(0, -2)}m`;
+  if (/[aeiou]s$/.test(n) && token.length > 1) return token.slice(0, -1);
+  return null;
 }
 
 /**
@@ -67,15 +95,33 @@ async function conjugadoMatrizInfinitivoAntesQue(
 
 
 async function generoSubstantivo(subs: string): Promise<GeneroNominal | null> {
-  const info = await loader.getWordInfo(subs);
-  const cats: string[] = Array.isArray(info?.cat) ? info.cat : [];
-  const ehNucleoNominal = cats.includes("SUBST") || cats.includes("LUGAR");
-  if (!ehNucleoNominal) return null;
-  const fem = cats.includes("LUGAR_FEM");
-  const masc = cats.includes("LUGAR_MASC");
+  const infoAtual = await loader.getWordInfo(subs);
+  const catsAtual: string[] = Array.isArray(infoAtual?.cat) ? infoAtual.cat : [];
+  const ehNucleoAtual = catsAtual.includes("SUBST") || catsAtual.includes("LUGAR");
+  if (ehNucleoAtual) {
+    const femAtual = catsAtual.includes("LUGAR_FEM");
+    const mascAtual = catsAtual.includes("LUGAR_MASC");
+    if (femAtual && !mascAtual) return "f";
+    if (mascAtual && !femAtual) return "m";
+  }
+
+  const singular = singularRegular(subs);
+  if (!singular) return null;
+  const infoSing = await loader.getWordInfo(singular);
+  const catsSing: string[] = Array.isArray(infoSing?.cat) ? infoSing.cat : [];
+  const ehNucleoSing = catsSing.includes("SUBST") || catsSing.includes("LUGAR");
+  if (!ehNucleoSing) return null;
+  const fem = catsSing.includes("LUGAR_FEM");
+  const masc = catsSing.includes("LUGAR_MASC");
   if (fem && !masc) return "f";
   if (masc && !fem) return "m";
   return null;
+}
+
+async function ehSubstantivoOuLugar(token: string): Promise<boolean> {
+  const info = await loader.getWordInfo(token);
+  const cats: string[] = Array.isArray(info?.cat) ? info.cat : [];
+  return cats.includes("SUBST") || cats.includes("LUGAR");
 }
 
 function ajustarTokenPorGenero(token: string, genero: GeneroNominal): string | null {
@@ -90,17 +136,69 @@ function ajustarTokenPorGenero(token: string, genero: GeneroNominal): string | n
 function ajustarAdjetivoConhecidoPorGenero(token: string, genero: GeneroNominal): string | null {
   const n = normalize(token);
   for (const [masc, fem] of ADJETIVOS_BIFORMES) {
+    const mascPl = `${masc}s`;
+    const femPl = `${fem}s`;
     if (genero === "f" && n === masc) return manterCaixa(token, fem);
     if (genero === "m" && n === fem) return manterCaixa(token, masc);
+    if (genero === "f" && n === mascPl) return manterCaixa(token, femPl);
+    if (genero === "m" && n === femPl) return manterCaixa(token, mascPl);
   }
   return null;
+}
+
+function ajustarAdjetivoConhecidoPorNumero(token: string, numero: NumeroNominal): string | null {
+  const n = normalize(token);
+  for (const [masc, fem] of ADJETIVOS_BIFORMES) {
+    const mascPl = `${masc}s`;
+    const femPl = `${fem}s`;
+
+    if (numero === "pl") {
+      if (n === masc) return manterCaixa(token, mascPl);
+      if (n === fem) return manterCaixa(token, femPl);
+      continue;
+    }
+
+    if (n === mascPl) return manterCaixa(token, masc);
+    if (n === femPl) return manterCaixa(token, fem);
+  }
+  return null;
+}
+
+function numeroEsperadoPeloContexto(resultado: string[], idxSubst: number): NumeroNominal | null {
+  const prev = idxSubst - 1 >= 0 ? normalize(resultado[idxSubst - 1]) : "";
+  if (TOKENS_PLURAL.has(prev)) return "pl";
+  if (TOKENS_SINGULAR.has(prev)) return "sg";
+  return null;
+}
+
+/**
+ * Concordância nominal local e conservadora de número:
+ * - Usa determinante/possessivo imediatamente anterior para inferir singular/plural.
+ * - Ajusta substantivo com flexão regular básica.
+ * - Ajusta adjetivo conhecido imediatamente após o substantivo.
+ */
+async function aplicarConcordanciaNumeroLocal(resultado: string[]): Promise<void> {
+  for (let i = 0; i < resultado.length; i++) {
+    if (!(await ehSubstantivoOuLugar(resultado[i]))) continue;
+    const esperado = numeroEsperadoPeloContexto(resultado, i);
+    if (!esperado) continue;
+
+    const subst = esperado === "pl" ? pluralRegular(resultado[i]) : singularRegular(resultado[i]);
+    if (subst) resultado[i] = subst;
+
+    const iNext = i + 1;
+    if (iNext < resultado.length) {
+      const adj = ajustarAdjetivoConhecidoPorNumero(resultado[iNext], esperado);
+      if (adj) resultado[iNext] = adj;
+    }
+  }
 }
 
 /**
  * Concordância nominal local e conservadora:
  * - Ajusta determinante/possessivo imediatamente antes do substantivo.
  * - Ajusta adjetivo biforme conhecido imediatamente após o substantivo.
- * Não tenta resolver número nem dependências longas.
+ * Não tenta resolver dependências longas.
  */
 async function aplicarConcordanciaGeneroLocal(resultado: string[]): Promise<void> {
   for (let i = 0; i < resultado.length; i++) {
@@ -215,6 +313,7 @@ export async function corrigir(
   
   const viNoResultado = resultado.findIndex((t) => normalize(t) === normalize(verbLower));
   await aplicarRegenciaMovimentoLocais(resultado, viNoResultado, infinitivo);
+  await aplicarConcordanciaNumeroLocal(resultado);
   await aplicarConcordanciaGeneroLocal(resultado);
 
   const out = resultado.join(" ").replace(/\s+/g, " ").trim();
