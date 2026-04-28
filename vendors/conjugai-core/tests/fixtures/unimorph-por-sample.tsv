@@ -1,0 +1,26 @@
+# Amostra CC BY-SA (mesmo esquema que unimorph/por): lema TAB forma TAB features
+# Casos escolhidos para bater com o léxico MorphoBr deste repositório (PT-BR).
+falar	falo	V;1;SG;IND;PRS
+falar	falou	V;3;SG;IND;PST;PFV
+falar	falava	V;1;SG;IND;PST;IPFV
+falar	falará	V;3;SG;IND;FUT
+falar	falaria	V;3;SG;COND
+falar	fale	V;3;SG;SBJV;PRS
+falar	falasse	V;3;SG;SBJV;PST;IPFV
+falar	falar	V;3;SG;SBJV;FUT
+comer	comi	V;1;SG;IND;PST;PFV
+comer	comera	V;3;SG;IND;PST;PRF
+ter	tenho	V;1;SG;IND;PRS
+ter	tinha	V;1;SG;IND;PST;IPFV
+ser	foi	V;3;SG;IND;PST;PFV
+ser	será	V;3;SG;IND;FUT
+ir	vou	V;1;SG;IND;PRS
+ir	ia	V;1;SG;IND;PST;IPFV
+falar	falando	V.PTCP;PRS
+falar	falado	V.PTCP;MASC;SG;PST
+falar	falada	V.PTCP;FEM;SG;PST
+falar	falados	V.PTCP;MASC;PL;PST
+falar	falar	V;NFIN
+falar	falares	V;2;SG;NFIN
+falar	falarmos	V;1;PL;NFIN
+falar	falarem	V;3;PL;NFIN

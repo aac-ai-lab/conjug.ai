@@ -9,7 +9,8 @@
     "build:core:package": "npm --prefix vendors/conjugai-core run build",
     "build": "npm run build:nlp:data && npm run build:core",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:unimorph": "vitest run --run vendors/conjugai-core/tests/unimorph-crosscheck.test.ts"
   },
   "devDependencies": {
     "esbuild": "^0.24.2",

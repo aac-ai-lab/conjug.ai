@@ -10,7 +10,7 @@ O objetivo é **acessibilidade linguística** em contexto de Tecnologia Assistiv
 
 ### Testes automatizados (Vitest)
 
-Na **raiz** do repositório ConjugAI: `npm install`, depois `npm test` (ou `npm run test:watch`). Os ficheiros `*.test.ts` dentro de `vendors/conjugai-core/` cobrem **testes unitários** (`tokenizer`, `sujeito`, `tempo`, `conjugador`), **integração/regressão** do pipeline `analisarFrase` (`analisar-frase.regression.test.ts`) e devem ser atualizados quando o comportamento do motor mudar de forma intencional.
+Na **raiz** do repositório ConjugAI: `npm install`, depois `npm test` (ou `npm run test:watch`). Os ficheiros `*.test.ts` dentro de `vendors/conjugai-core/` cobrem **testes unitários** (`tokenizer`, `sujeito`, `tempo`, `conjugador`), **integração/regressão** do pipeline `analisarFrase` (`analisar-frase.regression.test.ts`), **validação cruzada opcional** com amostra UniMorph (`unimorph-crosscheck.test.ts`) e devem ser atualizados quando o comportamento do motor mudar de forma intencional.
 
 **Limites e o que não está coberto** (regência **à**/**ao**, verbos `ir`/`viajar`, listas de lugares, sujeito, tempos, etc.): **`../docs/limites-e-nao-cobertura.md`**.
 
@@ -70,6 +70,19 @@ python3 morphobr_dict_to_verbos.py -i cache/verbs-c.dict -o ../data/verbos.json
 ```
 
 **Nota:** O ficheiro `verbos.json` completo é **grande** (~30 MB); o bundle `conjugai-core.js` cresce na mesma ordem. Para dispositivos muito limitados, usar whitelist ou léxico parcial.
+
+### 4.1.1 UniMorph (`por`) — validação cruzada opcional
+
+O projeto **[UniMorph](https://unimorph.github.io/)** publica o português (`unimorph/por`, CC BY-SA) como lema + forma + traços universais. **Não substitui o MorphoBr:** serve só para comparar o que o núcleo gera com uma referência externa (variedade europeia vs. brasileira pode divergir).
+
+- **Teste fixo:** `tests/fixtures/unimorph-por-sample.tsv` + `tests/unimorph-crosscheck.test.ts` (corre em `npm test`).
+- **Relatório opcional** com o ficheiro completo `por` descarregado do repositório oficial (ficheiro grande):
+
+  ```bash
+  UNIMORPH_POR_PATH=/caminho/para/por UNIMORPH_MAX_LINES=8000 npm test -- unimorph
+  ```
+
+  Imprime contagens de match/mismatch no consola; não bloqueia o CI se não definir a variável.
 
 ### 4.2 Importação CSV → `verbos.json` (recurso validado)
 

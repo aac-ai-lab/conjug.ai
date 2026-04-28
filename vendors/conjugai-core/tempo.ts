@@ -76,6 +76,15 @@ export async function detectarTempo(tokens: string[], tempoManual?: TempoVerbal)
   // Detecção robusta de marcadores básicos (fallback se o léxico falhar)
   const temOntem = lower.includes("ontem");
   const temAmanha = lower.includes("amanha");
+  const temJa = lower.includes("ja");
+
+  if (temOntem && temJa) {
+    return {
+      tipo: "preterito_perfeito_composto",
+      rotulo:
+        'Marcadores "ontem" + "já" → Pretérito perfeito composto (passado composto).',
+    };
+  }
 
   if (temOntem) {
     return {
@@ -132,7 +141,6 @@ export async function detectarTempo(tokens: string[], tempoManual?: TempoVerbal)
   const temNao = lower.includes("nao");
   const temPassadoLexico = tokensInfo.some(info => info?.cat?.includes("PASSADO"));
   const temAmanhaLexico = tokensInfo.some(info => info?.cat?.includes("FUTURO"));
-  const temJa = lower.includes("ja");
   const temImperfeito = tokensInfo.some(info => info?.cat?.includes("IMPERFEITO"));
 
   if (temQuando && temJa) {

@@ -343,6 +343,7 @@ export function conjugar(verbo: string, pessoa: number, tempo: TempoVerbal): str
     return conjugarRegularPassado(v, pessoa);
   }
   if (tempo === "futuro") {
+    if (!isVerbShape(v)) return null;
     return conjugarRegularFuturo(v, pessoa);
   }
 

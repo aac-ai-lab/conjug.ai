@@ -33,6 +33,10 @@ Alterações em desenvolvimento que ainda não foram consolidadas num período d
 
 ### Corrigido
 
+- **`detectarTempo`** (`tempo.ts`): ordem dos marcadores — **«ontem» + «já»** devolve `preterito_perfeito_composto` antes do ramo só com «ontem».
+- **`conjugar`** (`conjugador.ts`): **futuro** por sufixo só para lemas com forma verbal (-ar/-er/-ir/-pôr); evita anexar terminações a strings que não são infinitivo.
+- **Testes** (`tempo.test.ts`): uso de `await` com `detectarTempo` (API assíncrona).
+
 - **Regência de lugar** em `corretor.ts`: evita aplicar a contração **«à»**/**«ao»** duas vezes (casos «ao à praia»).
 - **Sujeito após «que»** (`sujeito.ts`): em frases como *Ele disse que eles falar*, o pronome **entre «que» e o infinitivo** passa a definir a pessoa verbal (evita *fala* com sujeito *eles*).
 - **Lema verbal em subordinação** (`extrairVerbo` em `conjugador.ts`): com *que* de dependência (exc. *ter que*), o alvo passa a ser o **primeiro infinitivo após esse *que*** — alinha com tempo manual **passado** (*Ele disse que eles falar* → *falaram*).
