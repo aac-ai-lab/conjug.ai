@@ -34,7 +34,8 @@ Para a arquitetura e o fluxo técnico, ver também `README.md` (raiz) e `vendors
 ## 3. Perífrase progressiva (*estar* + V)
 
 - **Coberto:** telegrafia *estar* + infinitivo do segundo verbo → forma flexionada de **estar** + **gerúndio** (ex.: *estava brincando* com Ontem; *estou / estarei brincando* com Hoje / Amanhã). Opcional *estar a* + infinitivo (omissão de «a» na saída).
-- **Não coberto (por agora):** flexionar orações dependentes temporais (*quando ela chegar* → *chegou*); progressiva com verbo **fora do léxico** sem gerúndio gerado.
+- **Dependente *quando* + pronome + verbo** com macro-tempo **passado** (ex. Ontem): o verbo da dependente passa a **pretérito** coerente com o pronome (*quando ela chegou*), em `corretor.ts` — não aplica a Hoje/Amanhã (mantém-se *quando ela chegar* no telegráfico).
+- **Não coberto (por agora):** *quando* + sujeito **não** pronome (ex. *quando a chuva passar*); progressiva com verbo **fora do léxico** sem gerúndio gerado.
 
 ---
 

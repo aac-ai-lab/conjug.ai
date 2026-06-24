@@ -1,4 +1,9 @@
-import { conjugarTempo, indiceDoVerboNaFrase, isVerbShape } from "./conjugador";
+import {
+  conjugarTempo,
+  detectarVerboPorDicionario,
+  indiceDoVerboNaFrase,
+  isVerbShape,
+} from "./conjugador";
 import { ADJETIVOS_BIFORMES } from "./data/adjetivos-biformes";
 import type { TempoVerbal } from "./types";
 import { normalize, getRegenciaInfo, getPronomeInfo, loader } from "../nlp-pt-br-lite/src/index";
@@ -90,8 +95,34 @@ async function conjugadoMatrizInfinitivoAntesQue(
   return { matIdx, forma: fl };
 }
 
-
-
+/**
+ * Com macro-tempo **passado** (ex.: «ontem» na UI), oração **quando** + **pronome** + verbo
+ * (telegráfico, p.ex. infinitivo no lugar do futuro do subjuntivo) alinha-se ao passado
+ * (*quando ela chegou*), coerente com a matriz no imperfeito + gerúndio.
+ */
+async function flexionarQuandoSubordinadaNoPassado(
+  resultado: string[],
+  tempoTipo: TempoVerbal
+): Promise<void> {
+  if (tempoTipo !== "passado") return;
+  for (let i = 0; i < resultado.length - 2; i++) {
+    if (normalize(resultado[i]) !== "quando") continue;
+    const pron = await getPronomeInfo(resultado[i + 1]);
+    if (!pron) continue;
+    const tokV = resultado[i + 2];
+    let lema: string | null = null;
+    if (isVerbShape(tokV)) {
+      lema = tokV.trim().toLowerCase();
+    } else {
+      lema = detectarVerboPorDicionario([tokV]);
+    }
+    if (!lema) continue;
+    const forma = conjugarTempo(lema, pron.pessoa, "passado");
+    if (!forma) continue;
+    const fl = forma.charAt(0).toLowerCase() + forma.slice(1);
+    resultado[i + 2] = manterCaixa(tokV, fl);
+  }
+}
 
 
 async function generoSubstantivo(subs: string): Promise<GeneroNominal | null> {
@@ -321,6 +352,8 @@ export async function corrigir(
   // Se o sujeito era explícito e estava ANTES do verbo, ele já está nos 'tokens[i]' 
   // e foi adicionado naturalmente no loop acima. Não precisamos unshift.
   
+  await flexionarQuandoSubordinadaNoPassado(resultado, tempoTipo);
+
   const viNoResultado = resultado.findIndex((t) => normalize(t) === normalize(verbLower));
   await aplicarRegenciaMovimentoLocais(resultado, viNoResultado, infinitivo);
   await aplicarConcordanciaNumeroLocal(resultado);

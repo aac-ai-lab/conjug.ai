@@ -207,7 +207,7 @@ UI (HTML + CSS + app.js)
 | `tempo.ts` | `detectarTempo` (marcadores + seleção explícita de tempo) |
 | `conjugador.ts` | `conjugar`, `conjugarTempo`, `conjugarPessoaTabela`, `extrairVerbo`, `detectarLocucaoVerbalHeadLemma`, `detectarVerboPorDicionario`, `indiceDoVerboNaFrase`, `gerundio`, `participio`, `infinitivoLexico`, léxico + presente regular |
 | `progressivo-estar.ts` | Perífrase **estar + gerúndio** quando o utilizador escreve *estar* + infinitivo (PT-BR); `passado` → imperfeito do auxiliar (*estava Vndo*) |
-| `corretor.ts` | `corrigir` — reconstrói a frase com verbo conjugado (pronome implícito se aplicável), omissão de tokens em progressiva *estar*, regência **à**/**ao** quando cabe e concordância local de **gênero e número** (determinante/possessivo, substantivo com flexão regular básica e adjetivos em lista fechada) |
+| `corretor.ts` | `corrigir` — reconstrói a frase com verbo conjugado (pronome implícito se aplicável), omissão de tokens em progressiva *estar*, com macro `passado` **quando** + pronome + verbo na dependente → pretérito (*quando ela chegou*), regência **à**/**ao** quando cabe e concordância local de **gênero e número** (determinante/possessivo, substantivo com flexão regular básica e adjetivos em lista fechada) |
 | `types.ts` | `ResultadoAnalise`, `TempoVerbal`, `GeneroParticipio`, `NumeroParticipio`, … (inclui `posicaoOriginal` e `tokenIndex` no sujeito) |
 | `data/verbos.json` | Léxico (importado em `verbos-data.ts`); tipicamente minificado; ver §4.1 |
 | `data/verbos-data.ts` | Tipos `EntradaVerbo`, constante `CHAVES_PARADIGMA_CINCO`, export `VERBOS` |

@@ -35,7 +35,7 @@ Alterações em desenvolvimento que ainda não foram consolidadas num período d
 
 ### Corrigido
 
-- **Perífrase progressiva** (`progressivo-estar.ts`, `index.ts`, `corretor.ts`): *estar* + segundo verbo em infinitivo → **estar** + **gerúndio** em todos os macro-tempos; com `passado`, auxiliar no **imperfeito** (*estava brincando*, não *estive brincar*).
+- **Perífrase progressiva** (`progressivo-estar.ts`, `index.ts`, `corretor.ts`): *estar* + segundo verbo em infinitivo → **estar** + **gerúndio** em todos os macro-tempos; com `passado`, auxiliar no **imperfeito** (*estava brincando*, não *estive brincar*). Com o mesmo macro `passado`, *quando* + **pronome** + verbo telegráfico alinha a dependente ao pretérito (*quando ela chegou*).
 
 - **`detectarSujeito`** (`sujeito.ts`): **Eu + núcleo familiar** no prefixo antes do verbo **sem** «e», **qualquer ordem** — lista extensível (`NUCLEO_FAMILIA_EU_COMPOSTO`: mamãe/papai, **titio**, **vovô**, tio/tia, avô, irmão, …); diminutivos *titio…*, *vovo…*.
 

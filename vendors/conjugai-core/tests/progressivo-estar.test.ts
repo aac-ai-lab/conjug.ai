@@ -28,11 +28,17 @@ describe("resolverConjugacaoProgressivaEstar", () => {
 });
 
 describe("analisarFrase — progressiva estar + V", () => {
-  it("com tempo passado (Ontem) → estava + gerúndio, sem infinitivo solto", async () => {
+  it("com tempo passado (Ontem) → estava + gerúndio, sem infinitivo solto; dependente «quando ela chegar» → chegou", async () => {
     const r = await analisarFrase("Eu estar brincar quando ela chegar", { tempo: "passado" });
     expect(r.correcao.toLowerCase()).toMatch(/estava brincando/);
+    expect(r.correcao.toLowerCase()).toMatch(/quando ela chegou/);
     expect(r.correcao.toLowerCase()).not.toMatch(/brincar/);
     expect(r.correcao.toLowerCase()).not.toMatch(/estive brincar/);
+  });
+
+  it("com presente, mantém «quando ela chegar»", async () => {
+    const r = await analisarFrase("Eu estar brincar quando ela chegar", { tempo: "presente" });
+    expect(r.correcao.toLowerCase()).toMatch(/quando ela chegar/);
   });
 
   it("futuro → estarei + gerúndio", async () => {
