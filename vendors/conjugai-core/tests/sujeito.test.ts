@@ -45,6 +45,32 @@ describe("detectarSujeito", () => {
     expect(r.composto).toBe(true);
   });
 
+  it("«eu mamae gostar» (sem «e») → Nós, ordem eu–mamãe", async () => {
+    const r = await detectarSujeito(["eu", "mamae", "gostar", "eles"]);
+    expect(r.texto).toBe("Nós");
+    expect(r.pessoa).toBe(3);
+    expect(r.composto).toBe(true);
+  });
+
+  it("«mamãe eu gostar» (sem «e») → Nós, ordem mamãe–eu", async () => {
+    const r = await detectarSujeito(["mamãe", "eu", "gostar"]);
+    expect(r.texto).toBe("Nós");
+    expect(r.composto).toBe(true);
+  });
+
+  it("«eu papai comer» → Nós", async () => {
+    const r = await detectarSujeito(["eu", "papai", "comer", "pizza"]);
+    expect(r.texto).toBe("Nós");
+    expect(r.composto).toBe(true);
+  });
+
+  it("«eu titio gostar» e «vovo eu comer» → Nós (família, ordem livre)", async () => {
+    const a = await detectarSujeito(["eu", "titio", "gostar"]);
+    expect(a.texto).toBe("Nós");
+    const b = await detectarSujeito(["vovo", "eu", "comer", "arroz"]);
+    expect(b.texto).toBe("Nós");
+  });
+
   it("«Ele disse que eles falar» → sujeito Eles (não Ele)", async () => {
     const r = await detectarSujeito(["Ele", "disse", "que", "eles", "falar", "muito"]);
     expect(r.texto).toBe("Eles");

@@ -1,5 +1,6 @@
 import { conjugar, conjugarPessoaTabela, conjugarTempo, extrairVerbo } from "./conjugador";
 import { corrigir } from "./corretor";
+import { resolverConjugacaoProgressivaEstar } from "./progressivo-estar";
 import { detectarSujeito } from "./sujeito";
 import { detectarTempo } from "./tempo";
 import type { ResultadoAnalise, ResultadoAnaliseClausula, TempoVerbal } from "./types";
@@ -33,6 +34,11 @@ export {
   participio,
 } from "./conjugador";
 export { corrigir } from "./corretor";
+export type { OpcoesCorrigir } from "./corretor";
+export {
+  resolverConjugacaoProgressivaEstar,
+  tempoConjugacaoEstarProgressivo,
+} from "./progressivo-estar";
 export { segmentarOracoesCoordenadas } from "./oracao-composta";
 
 async function analisarOracaoUnica(
@@ -69,7 +75,15 @@ async function analisarOracaoUnica(
     };
   }
 
-  const conjugado = conjugarTempo(infinitivo, sujeito.pessoa, tempo.tipo as TempoVerbal);
+  const progEstar = resolverConjugacaoProgressivaEstar(
+    tokens,
+    infinitivo,
+    sujeito.pessoa,
+    tempo.tipo as TempoVerbal
+  );
+  const conjugado = progEstar
+    ? progEstar.conjugado
+    : conjugarTempo(infinitivo, sujeito.pessoa, tempo.tipo as TempoVerbal);
 
   if (!conjugado) {
     return {
@@ -96,7 +110,9 @@ async function analisarOracaoUnica(
     };
   }
 
-  const correcao = await corrigir(tokens, sujeito, infinitivo, conjugado, tempo.tipo as TempoVerbal);
+  const correcao = await corrigir(tokens, sujeito, infinitivo, conjugado, tempo.tipo as TempoVerbal, {
+    omitirIndicesTokens: progEstar?.omitirIndices,
+  });
 
   return {
     tokens,

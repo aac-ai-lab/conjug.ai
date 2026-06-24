@@ -52,18 +52,18 @@ Diagrama interativo do núcleo (inclui **sujeito**, **tempo**, lema, `conjugar`,
 
 ## 2. Sujeito e tempo (detalhe)
 
-**Sujeito** (`sujeito.ts`: primeiro `detectarSujeitoComposto`, depois regras simples; padrão composto **X e Y** ou **X ou Y** antes do verbo)
+**Sujeito** (`sujeito.ts`: `detectarSujeitoComposto` com **e**; depois **eu + mamãe/papai** no prefixo **sem** «e» (ordem livre); depois pronomes e nomes)
 
 ```mermaid
 flowchart TD
-  SC{Sujeito Composto<br/>X e Y ou X ou Y<br/>antes do verbo?} -->|sim| SC1[Nós / Vocês / Eles]
-  SC -->|não| SPres{Pronome antes do verbo?}
+  SC{Sujeito composto<br/>X e Y … antes do verbo?} -->|sim| SC1[Nós / Vocês / Eles]
+  SC -->|não| SFam{No prefixo: eu + mamãe/papai<br/>ordem livre, sem «e»?}
+  SFam -->|sim| SN[Nós — 1ª plural<br/>lista família em sujeito.ts]
+  SFam -->|não| SPres{Pronome antes do verbo?}
   SPres -->|sim| S1[Pessoa conforme pronome]
   SPres -->|não| SPost{Pronome depois do verbo?}
   SPost -->|sim| S2[Pessoa conforme pronome<br/>Normaliza SVO]
-  SPost -->|não| SFam{Eu + mamãe/papai?}
-  SFam -->|sim| SN[Nós — 1ª plural]
-  SFam -->|não| Basic{Pronome Básico Estático?}
+  SPost -->|não| Basic{Pronome Básico Estático?}
   Basic -->|sim| S1
   Basic -->|não| SNome{Nome Próprio / Título?}
   SNome -->|sim| S3[3ª pessoa (ele/ela)<br/>Normaliza se pós-verbo]

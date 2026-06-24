@@ -255,6 +255,11 @@ async function aplicarRegenciaMovimentoLocais(resultado: string[], vi: number, i
  * Com *Pronome + infinitivo + que* e verbo dependente mais à frente, flexiona-se também o infinitivo da matriz (macro passado/presente/futuro: alinhado ao dependente; noutros tempos do dependente, matriz no pretérito: *Ele disse que eles falem*).
  * Não descarta complementos.
  */
+export type OpcoesCorrigir = {
+  /** Índices em `tokens` que não entram na frase corrigida (ex.: segundo verbo em infinitivo → gerúndio incorporado ao auxiliar). */
+  omitirIndicesTokens?: ReadonlySet<number>;
+};
+
 export async function corrigir(
   tokens: string[],
   sujeito: {
@@ -267,7 +272,8 @@ export async function corrigir(
   },
   infinitivo: string,
   conjugado: string,
-  tempoTipo: TempoVerbal
+  tempoTipo: TempoVerbal,
+  opcoes?: OpcoesCorrigir
 ): Promise<string> {
   const verbLower = conjugado.charAt(0).toLowerCase() + conjugado.slice(1);
   const vi = indiceDoVerboNaFrase(tokens, infinitivo);
@@ -290,9 +296,13 @@ export async function corrigir(
     resultado.push(sujeito.texto);
   }
 
+  const omitir = opcoes?.omitirIndicesTokens;
+
   for (let i = 0; i < tokens.length; i++) {
     // Pula o token do sujeito se estivermos normalizando SVO (pois já o adicionamos no início)
     if (normalizeSVO && i === sujeito.tokenIndex) continue;
+
+    if (omitir?.has(i)) continue;
 
     if (matriz && i === matriz.matIdx) {
       resultado.push(matriz.forma);

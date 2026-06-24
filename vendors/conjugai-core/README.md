@@ -206,7 +206,8 @@ UI (HTML + CSS + app.js)
 | `sujeito.ts` | `detectarSujeito`, `detectarSujeitoComposto` (sujeito simples + composto) |
 | `tempo.ts` | `detectarTempo` (marcadores + seleção explícita de tempo) |
 | `conjugador.ts` | `conjugar`, `conjugarTempo`, `conjugarPessoaTabela`, `extrairVerbo`, `detectarLocucaoVerbalHeadLemma`, `detectarVerboPorDicionario`, `indiceDoVerboNaFrase`, `gerundio`, `participio`, `infinitivoLexico`, léxico + presente regular |
-| `corretor.ts` | `corrigir` — reconstrói a frase com verbo conjugado (pronome implícito se aplicável), regência **à**/**ao** quando cabe e concordância local de **gênero e número** (determinante/possessivo, substantivo com flexão regular básica e adjetivos em lista fechada) |
+| `progressivo-estar.ts` | Perífrase **estar + gerúndio** quando o utilizador escreve *estar* + infinitivo (PT-BR); `passado` → imperfeito do auxiliar (*estava Vndo*) |
+| `corretor.ts` | `corrigir` — reconstrói a frase com verbo conjugado (pronome implícito se aplicável), omissão de tokens em progressiva *estar*, regência **à**/**ao** quando cabe e concordância local de **gênero e número** (determinante/possessivo, substantivo com flexão regular básica e adjetivos em lista fechada) |
 | `types.ts` | `ResultadoAnalise`, `TempoVerbal`, `GeneroParticipio`, `NumeroParticipio`, … (inclui `posicaoOriginal` e `tokenIndex` no sujeito) |
 | `data/verbos.json` | Léxico (importado em `verbos-data.ts`); tipicamente minificado; ver §4.1 |
 | `data/verbos-data.ts` | Tipos `EntradaVerbo`, constante `CHAVES_PARADIGMA_CINCO`, export `VERBOS` |
@@ -285,7 +286,7 @@ Frases telegráficas podem ter **vários núcleos** no sujeito (*eu e João*, *J
    - existe token **eu** → pronome **Nós**, pessoa **1.ª plural** (índice 3);
    - existe **tu** ou **você** (`voce` normalizado) → **Vocês**, pessoa **4** (em PT-BR, mesmas terminações que *eles* no sistema);
    - caso contrário → **Eles**, pessoa **4** (ex.: *João e Maria*, *meu pai e minha mãe* — nomes próprios ou grupos nominais simples).
-4. Mantém-se a regra legada **`isCompostoEuOutra`** (*mamãe e eu*, *eu e papai* sem depender estritamente do ponto 3) em `detectarSujeitoSimples`, com `composto: true`.
+4. **Telegrafia CAA (sem «e»):** se o prefixo tiver **pelo menos dois tokens** antes do verbo e, entre eles, existirem **eu** e um **núcleo familiar** — **ordem livre** (*eu mamae*, *titio eu*, *vovo eu comer*) — aplica-se **Nós** / 1.ª plural (`prefixoTemEuEFamilia`). Os léxicos aceites estão em `NUCLEO_FAMILIA_EU_COMPOSTO` em `sujeito.ts` (mãe/mamãe, pai/papai, titio/titia, tio/tia, vovô/vovó→`vovo`, avô/avó, irmão/irmã, neto/a, primos, sogros, etc.; diminutivos *titio…*, *vovo…*). Esta regra corre **antes** de escolher o primeiro pronome isolado (*eu*).
 5. Na correção da frase, **`corrigir`** só substitui a **forma verbal** no sítio certo; os tokens do sujeito (incluindo prefixo *X e Y*) **mantêm-se** na superfície. O pronome em `sujeito.texto` (ex.: Nós, Eles) serve à **UI** e à **pessoa** para `conjugar`, não à reconstrução literal quando `composto` é verdadeiro.
 
 ### 11.3 Limitações

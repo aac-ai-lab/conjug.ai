@@ -92,16 +92,66 @@ export function detectarSujeitoComposto(tokens: string[]): InfoSujeito | null {
   };
 }
 
-function isCompostoEuOutra(tokens: string[]): boolean {
-  const lower = tokens.map(normalize);
-  const hasEu = lower.includes("eu");
-  if (!hasEu) return false;
-  if (lower.includes("mamae") || lower.some((t) => t.startsWith("mamae")))
+/**
+ * Núcleos de parentesco / tratamento em telegrafia CAA (PT-BR), **após** `normalize`
+ * (sem acentos). Lista extensível (vocabulário tipo pictogramas / Arasaac «br»).
+ */
+const NUCLEO_FAMILIA_EU_COMPOSTO = new Set<string>([
+  "mae",
+  "mamae",
+  "papai",
+  "pai",
+  "titio",
+  "titia",
+  "tio",
+  "tia",
+  "vovo",
+  "avo",
+  "irmao",
+  "irma",
+  "neto",
+  "neta",
+  "primo",
+  "prima",
+  "sobrinho",
+  "sobrinha",
+  "cunhado",
+  "cunhada",
+  "sogro",
+  "sogra",
+  "genro",
+  "nora",
+  "filho",
+  "filha",
+  "bebe",
+  "nenem",
+  "bisavo",
+  "afilhado",
+  "afilhada",
+]);
+
+function tokenEUmNucleoFamiliarComposto(tokenNorm: string): boolean {
+  if (tokenNorm === "mamae" || tokenNorm.startsWith("mamae")) return true;
+  if (NUCLEO_FAMILIA_EU_COMPOSTO.has(tokenNorm)) return true;
+  if (
+    tokenNorm.startsWith("titio") ||
+    tokenNorm.startsWith("titia") ||
+    tokenNorm.startsWith("vovo")
+  ) {
     return true;
-  if (lower.includes("papai")) return true;
-  const joined = lower.join(" ");
-  if (/(mamae|papai)\s+e\s+eu|eu\s+e\s+(mamae|papai)/.test(joined)) return true;
+  }
   return false;
+}
+
+/**
+ * Telegrafia CAA: «eu» + núcleo familiar (mamãe, papai, titio, vovô, etc.) **antes do verbo**,
+ * **ordem livre**, sem conector «e». Só `tokens.slice(0, verbIdx)`.
+ */
+function prefixoTemEuEFamilia(prefixTokens: string[]): boolean {
+  if (prefixTokens.length < 2) return false;
+  const n = prefixTokens.map(normalize);
+  if (!n.some((t) => t === "eu")) return false;
+  return n.some((t) => tokenEUmNucleoFamiliarComposto(t));
 }
 
 async function isNounCandidate(token: string): Promise<boolean> {
@@ -132,6 +182,7 @@ async function isNounCandidate(token: string): Promise<boolean> {
 /**
  * Identifica sujeito e pessoa (0–4).
  * Tenta primeiro sujeito composto (**X e Y** antes do verbo);
+ * depois **eu + núcleo familiar** no prefixo (ordem livre, sem «e»);
  * depois procura pronomes ou nomes em qualquer posição (bidirecional).
  */
 export async function detectarSujeito(tokens: string[]): Promise<InfoSujeito> {
@@ -142,6 +193,22 @@ export async function detectarSujeito(tokens: string[]): Promise<InfoSujeito> {
   if (verbIdx > 0) {
     const comp = detectarSujeitoComposto(tokens);
     if (comp) return { ...comp, posicaoOriginal: "antes" };
+  }
+
+  // 1b. Eu + núcleo familiar antes do verbo (ordem livre; ex.: «eu titio gostar», «vovo eu comer»)
+  if (verbIdx >= 2) {
+    const prefix = tokens.slice(0, verbIdx);
+    if (prefixoTemEuEFamilia(prefix)) {
+      return {
+        texto: "Nós",
+        pessoa: 3,
+        rotulo:
+          "composto (Eu + família/parentesco antes do verbo, ordem livre) → 1ª plural",
+        implicito: false,
+        composto: true,
+        posicaoOriginal: "antes",
+      };
+    }
   }
 
   // 2. Tentar Sujeito Explícito (Pronomes) - Busca Bidirecional
@@ -195,19 +262,7 @@ export async function detectarSujeito(tokens: string[]): Promise<InfoSujeito> {
     }
   }
 
-  // 3. Tentar "Casos Familiares" (Eu + mamãe/papai)
-  if (isCompostoEuOutra(tokens)) {
-    return {
-      texto: "Nós",
-      pessoa: 3,
-      rotulo: "composto (Eu + mamãe/papai) → 1ª plural",
-      implicito: false,
-      composto: true,
-      posicaoOriginal: "antes", // Geralmente antes
-    };
-  }
-
-  // 4. Tentar Substantivo/Nome Próprio (Busca Bidirecional)
+  // 3. Tentar Substantivo/Nome Próprio (Busca Bidirecional)
   // Prioridade: Antes do verbo
   if (verbIdx > 0) {
     for (let i = 0; i < verbIdx; i++) {
@@ -240,7 +295,7 @@ export async function detectarSujeito(tokens: string[]): Promise<InfoSujeito> {
     }
   }
 
-  // 5. Fallback Final: Implícito Eu
+  // 4. Fallback Final: Implícito Eu
   return {
     texto: "Eu",
     pessoa: 0,

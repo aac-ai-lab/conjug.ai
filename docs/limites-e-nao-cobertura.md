@@ -23,7 +23,7 @@ Para a arquitetura e o fluxo técnico, ver também `README.md` (raiz) e `vendors
 | Coberto (heurísticas) | Não coberto ou frágil |
 |------------------------|------------------------|
 | Padrão **X e Y** antes do verbo (sujeito composto) | Coordenação com **ou**, **nem**, vírgulas, mais de dois núcleos sem padrão fixo |
-| **Eu + mamãe/papai** (e variantes próximas) | Ordens de palavras muito livres ou com muitos constituintes entre o sujeito e o verbo |
+| **Eu + núcleo familiar** (lista em `sujeito.ts`: mamãe, papai, titio, vovô, tio, avô, irmão…); prefixo antes do verbo, **com ou sem** «e», **qualquer ordem** | Palavras **fora da lista** em uso próprio (outros substantivos); núcleos em **lados opostos** do verbo ou **muitos** tokens entre sujeito e verbo |
 | Pronomes explícitos (eu, tu, ele, ela...) em **qualquer posição** (SVO, VSO) | Resolução de **correferência**, sujeito em oração relativa |
 | Pronome **entre «que» e o verbo** a corrigir (heurística de dependente) | Vários «que» aninhados, sujeito **nominal** só após «que» (sem pronome), relativas |
 | **Nomes próprios** (Maiúsculas) e **títulos** (médico, papai...) como sujeito | Substantivos comuns minúsculos que possam ser interpretados como objeto (ex: "comer pizza") |
@@ -31,7 +31,14 @@ Para a arquitetura e o fluxo técnico, ver também `README.md` (raiz) e `vendors
 
 ---
 
-## 3. Tempo verbal (pipeline CAA)
+## 3. Perífrase progressiva (*estar* + V)
+
+- **Coberto:** telegrafia *estar* + infinitivo do segundo verbo → forma flexionada de **estar** + **gerúndio** (ex.: *estava brincando* com Ontem; *estou / estarei brincando* com Hoje / Amanhã). Opcional *estar a* + infinitivo (omissão de «a» na saída).
+- **Não coberto (por agora):** flexionar orações dependentes temporais (*quando ela chegar* → *chegou*); progressiva com verbo **fora do léxico** sem gerúndio gerado.
+
+---
+
+## 4. Tempo verbal (pipeline CAA)
 
 - O fluxo de `analisarFrase` usa **três macro-tempos** orientados por marcadores: **presente**, **futuro**, **passado** (ver `tempo.ts`).
 - **Prioridade Manual**: Seleções feitas na interface (Ontem, Hoje, Amanhã) têm prioridade absoluta sobre os marcadores de texto. Isso é intencional para apoiar pranchas de CAA com botões de tempo.
@@ -40,7 +47,7 @@ Para a arquitetura e o fluxo técnico, ver também `README.md` (raiz) e `vendors
 
 ---
 
-## 4. Conjugação e léxico
+## 5. Conjugação e léxico
 
 - **Fallbacks Regulares**: O motor suporta conjugação por sufixação regular (-ar/-er/-ir) para **Presente**, **Passado** (Perfeito) e **Futuro**. Isso fornece cobertura imediata para verbos regulares mesmo sem dados no léxico.
 - A cobertura de formas ricas (irregulares) vem sobretudo de **`verbos.json`** (MorphoBr).
@@ -48,7 +55,7 @@ Para a arquitetura e o fluxo técnico, ver também `README.md` (raiz) e `vendors
 
 ---
 
-## 5. Regência de movimento, **à** / **ao** e “crase”
+## 6. Regência de movimento, **à** / **ao** e “crase”
 
 Implementação em `corretor.ts` (`aplicarRegenciaMovimentoLocais`):
 
@@ -61,13 +68,13 @@ Implementação em `corretor.ts` (`aplicarRegenciaMovimentoLocais`):
 
 ---
 
-## 6. Tokenização
+## 7. Tokenização
 
 - `tokenizer.ts` separa por espaços e remove pontuação final simples. **Não** há análise morfossintática profunda nem segmentação de contrações complexas em todos os casos.
 
 ---
 
-## 7. Outras lacunas gramaticais superficiais
+## 8. Outras lacunas gramaticais superficiais
 
 - **Concordância nominal** continua **parcial**: há ajuste local de **gênero** e **número** em recortes simples (*determinante/possessivo + substantivo*) e em **adjetivos biformes de lista controlada** imediatamente após o substantivo. O plural/singular do substantivo usa flexão regular básica (ex.: `escola` → `escolas`). Adjetivos fora da lista, exceções morfológicas e dependências longas continuam fora do objetivo central da correção atual.
 - **Normalização sintática**: coberta apenas para a ordem **SVO** quando o sujeito é detectado após o verbo. Outras reordenações não são tratadas.
@@ -75,14 +82,14 @@ Implementação em `corretor.ts` (`aplicarRegenciaMovimentoLocais`):
 
 ---
 
-## 8. Demo CAA (interface)
+## 9. Demo CAA (interface)
 
 - `assets/js/app.js` apenas **orquestra** o núcleo; exemplos com **badges** são **rótulos pedagógicos** escolhidos manualmente — não substituem documentação formal do motor.
 - A lista de exemplos pode ficar **desalinhada** de versões antigas do bundle se não se correr `npm run build:core` após alterações em TypeScript.
 
 ---
 
-## 9. Peso e desempenho
+## 10. Peso e desempenho
 
 - Com léxico MorphoBr completo, `verbos.json` e o bundle web são **grandes** (ordem de dezenas de MB); dispositivos muito limitados podem sofrer no arranque e na memória.
 
