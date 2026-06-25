@@ -120,7 +120,7 @@ Recursos DELAF em formato nativo exigem um passo prévio (conversão para este C
 - **`conjugarTempo(verbo, pessoa, tempo)`:** camada ampliada para tempos simples + compostos e não-finitos.
 - **`conjugarPessoaTabela(verbo, pessoa, tempo)`:** API para paradigma de **6 pessoas** (`eu, tu, ele/ela, nós, vós, eles/elas/vocês`) usada na demo da raiz.
 - **`gerundio(verbo)`**, **`participio(verbo, 'm'|'f', 'sg'|'pl')`**, **`infinitivoLexico(verbo)`:** leitura de campos não paradigmáticos no JSON.
-- **`detectarTempo` / `analisarFrase`:** usam marcadores adicionais (incluindo subjuntivo/imperfeito/compostos), aceitam **tempo explícito** no texto e **seleção manual via UI** (com prioridade máxima).
+- **`detectarTempo` / `analisarFrase`:** usam marcadores adicionais (incluindo subjuntivo/imperfeito/compostos), aceitam **tempo explícito** no texto e **seleção manual via UI** (com prioridade máxima). Macro **passado** na UI pode refinar para **imperfeito** com marcadores aspectuais; **condicional** com *disse que*, formas **-ria** e polidez (*gostaria*).
 
 ## 5. Decisão arquitetural
 

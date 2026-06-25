@@ -39,6 +39,8 @@ Alterações em desenvolvimento que ainda não foram consolidadas num período d
 
 - **`detectarSujeito`** (`sujeito.ts`): **Eu + núcleo familiar** no prefixo antes do verbo **sem** «e», **qualquer ordem** — lista extensível (`NUCLEO_FAMILIA_EU_COMPOSTO`: mamãe/papai, **titio**, **vovô**, tio/tia, avô, irmão, …); diminutivos *titio…*, *vovo…*.
 
+- **`detectarTempo`** (`tempo.ts`): heurísticas de **indicativo fino** — refinamento de macro **passado** para **imperfeito** com marcadores aspectuais; **condicional** com discurso reportado (*disse que*), polidez (*gostaria*) e *se* + forma **-ria**; **«sempre»** sozinho não força imperfeito.
+
 - **`detectarTempo`** (`tempo.ts`): ordem dos marcadores — **«ontem» + «já»** devolve `preterito_perfeito_composto` antes do ramo só com «ontem».
 - **`conjugar`** (`conjugador.ts`): **futuro** por sufixo só para lemas com forma verbal (-ar/-er/-ir/-pôr); evita anexar terminações a strings que não são infinitivo.
 - **Testes** (`tempo.test.ts`): uso de `await` com `detectarTempo` (API assíncrona).

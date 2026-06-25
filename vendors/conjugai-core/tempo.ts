@@ -11,6 +11,93 @@ const FORMAS_PRESENTE_TER = new Set(
   ["tenho", "tens", "tem", "temos", "têm"].map((s) => normalize(s))
 );
 
+const MACRO_TEMPOS_CAA = new Set<TempoVerbal>(["presente", "passado", "futuro"]);
+
+/** Marcadores de hábito / pano de fundo no passado → pretérito imperfeito (exceto «sempre», tratado à parte). */
+const MARCADORES_IMPERFEITO_ASPECTUAL = new Set(
+  ["antigamente", "costumava", "enquanto"].map((s) => normalize(s))
+);
+
+/** Matriz já flexionada + «que» → futuro do pretérito na dependente (*disse que estudaria*). */
+const VERBOS_DISCURSO_REPORTADO = new Set(
+  ["disse", "diz", "falou", "contou", "afirmou", "prometeu", "respondeu"].map((s) =>
+    normalize(s)
+  )
+);
+
+/** Formas de polidez / hipótese no token (*gostaria*, *poderia*…). */
+const FORMAS_CONDICIONAL_POLIDEZ = new Set(
+  ["gostaria", "queria", "poderia", "deveria", "precisaria", "desejaria"].map((s) =>
+    normalize(s)
+  )
+);
+
+function temMarcadorPassado(lower: string[], temPassadoLexico: boolean): boolean {
+  return lower.includes("ontem") || temPassadoLexico;
+}
+
+function temMarcadorImperfeitoAspectual(
+  lower: string[],
+  tokensInfo: Array<{ cat?: string[] } | null | undefined>,
+  opts?: { sempreComPassado?: boolean }
+): boolean {
+  if (lower.some((t) => MARCADORES_IMPERFEITO_ASPECTUAL.has(t))) return true;
+
+  const passado = temMarcadorPassado(
+    lower,
+    tokensInfo.some((info) => info?.cat?.includes("PASSADO"))
+  );
+
+  if (opts?.sempreComPassado && lower.includes("sempre") && passado) return true;
+
+  for (let i = 0; i < lower.length; i++) {
+    const t = lower[i];
+    if (t === "sempre") continue;
+    if (tokensInfo[i]?.cat?.includes("IMPERFEITO")) return true;
+  }
+  return false;
+}
+
+function temDiscursoReportadoQue(lower: string[]): boolean {
+  for (let i = 0; i < lower.length - 1; i++) {
+    if (lower[i + 1] === "que" && VERBOS_DISCURSO_REPORTADO.has(lower[i]!)) return true;
+  }
+  return false;
+}
+
+function temFormaCondicionalPolidez(lower: string[]): boolean {
+  return lower.some((t) => FORMAS_CONDICIONAL_POLIDEZ.has(t));
+}
+
+/** «se» + forma em -ria (telegráfico ou já flexionado) → condicional, não subjuntivo. */
+function temSeComCondicional(lower: string[]): boolean {
+  if (!lower.includes("se")) return false;
+  return lower.some((t) => /(?:aria|eriam|iriam)$/.test(t) && t.length > 4);
+}
+
+function refinarMacroTempoManual(
+  tempoManual: TempoVerbal,
+  lower: string[],
+  tokensInfo: Array<{ cat?: string[] } | null | undefined>
+): InfoTempo {
+  if (tempoManual === "passado") {
+    if (
+      lower.includes("sempre") ||
+      temMarcadorImperfeitoAspectual(lower, tokensInfo, { sempreComPassado: true })
+    ) {
+      return {
+        tipo: "preterito_imperfeito",
+        rotulo:
+          "Macro passado (UI) + marcador de hábito/aspecto imperfeito → Pretérito imperfeito.",
+      };
+    }
+  }
+  return {
+    tipo: tempoManual,
+    rotulo: `Tempo definido manualmente pelo usuário (${tempoManual}).`,
+  };
+}
+
 const TEMPOS_EXPLICITOS = new Set<TempoVerbal>([
   "presente",
   "futuro",
@@ -56,8 +143,12 @@ function extrairTempoExplicito(tokens: string[]): TempoVerbal | null {
 export async function detectarTempo(tokens: string[], tempoManual?: TempoVerbal): Promise<InfoTempo> {
   const lower = tokens.map(normalize);
 
-  // 1. Prioridade: Tempo manual (ex: selecionado na UI)
+  // 1. Prioridade: Tempo manual (ex: selecionado na UI); macro-tempos podem refinar imperfeito
   if (tempoManual && TEMPOS_EXPLICITOS.has(tempoManual)) {
+    if (MACRO_TEMPOS_CAA.has(tempoManual)) {
+      const tokensInfoEarly = await Promise.all(tokens.map((t) => loader.getWordInfo(t)));
+      return refinarMacroTempoManual(tempoManual, lower, tokensInfoEarly);
+    }
     return {
       tipo: tempoManual,
       rotulo: `Tempo definido manualmente pelo usuário (${tempoManual}).`,
@@ -87,6 +178,12 @@ export async function detectarTempo(tokens: string[], tempoManual?: TempoVerbal)
   }
 
   if (temOntem) {
+    if (lower.includes("sempre")) {
+      return {
+        tipo: "preterito_imperfeito",
+        rotulo: 'Marcadores "ontem" + "sempre" → Pretérito imperfeito (hábito no passado).',
+      };
+    }
     return {
       tipo: "passado",
       rotulo: 'Marcador "ontem" identificado diretamente → Passado.',
@@ -141,7 +238,6 @@ export async function detectarTempo(tokens: string[], tempoManual?: TempoVerbal)
   const temNao = lower.includes("nao");
   const temPassadoLexico = tokensInfo.some(info => info?.cat?.includes("PASSADO"));
   const temAmanhaLexico = tokensInfo.some(info => info?.cat?.includes("FUTURO"));
-  const temImperfeito = tokensInfo.some(info => info?.cat?.includes("IMPERFEITO"));
 
   if (temQuando && temJa) {
     return { tipo: "subjuntivo_futuro_composto", rotulo: 'Marcadores "quando" + "já" → Subjuntivo Futuro composto.' };
@@ -167,8 +263,32 @@ export async function detectarTempo(tokens: string[], tempoManual?: TempoVerbal)
     return { tipo: "preterito_mais_que_perfeito", rotulo: 'Marcador "antes" em contexto de passado → Pretérito Mais-que-perfeito.' };
   }
 
-  if (temImperfeito) {
-    return { tipo: "preterito_imperfeito", rotulo: 'Marcador aspectual (hábito/passado) → Pretérito Imperfeito.' };
+  if (temMarcadorImperfeitoAspectual(lower, tokensInfo, { sempreComPassado: true })) {
+    return {
+      tipo: "preterito_imperfeito",
+      rotulo: "Marcador aspectual (hábito/passado contínuo) → Pretérito imperfeito.",
+    };
+  }
+
+  if (temDiscursoReportadoQue(lower)) {
+    return {
+      tipo: "condicional",
+      rotulo: 'Discurso reportado («disse que», «falou que»…) → Futuro do pretérito (condicional).',
+    };
+  }
+
+  if (temFormaCondicionalPolidez(lower)) {
+    return {
+      tipo: "condicional",
+      rotulo: "Forma de polidez/hipótese (-ria) → Futuro do pretérito (condicional).",
+    };
+  }
+
+  if (temSeComCondicional(lower)) {
+    return {
+      tipo: "condicional",
+      rotulo: '«Se» + forma condicional (-ria) → Futuro do pretérito.',
+    };
   }
 
   if (temQueSubjuntivo || (temTalvez && !temLocucaoTerQue)) {

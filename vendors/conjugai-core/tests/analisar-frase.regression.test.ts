@@ -160,9 +160,9 @@ const CASOS = [
     esperado: {
       sujeito: "Eles",
       infinitivo: "falar",
-      conjugado: "falem",
-      tempo: "subjuntivo_presente" as const,
-      correcao: "Ele disse que eles falem muito",
+      conjugado: "falariam",
+      tempo: "condicional" as const,
+      correcao: "Ele disse que eles falariam muito",
     },
   },
 ];

@@ -42,9 +42,10 @@ Para a arquitetura e o fluxo técnico, ver também `README.md` (raiz) e `vendors
 ## 4. Tempo verbal (pipeline CAA)
 
 - O fluxo de `analisarFrase` usa **três macro-tempos** orientados por marcadores: **presente**, **futuro**, **passado** (ver `tempo.ts`).
-- **Prioridade Manual**: Seleções feitas na interface (Ontem, Hoje, Amanhã) têm prioridade absoluta sobre os marcadores de texto. Isso é intencional para apoiar pranchas de CAA com botões de tempo.
-- **Não** há desambiguação semântica fina entre, por exemplo, pretérito perfeito vs imperfeito em todos os contextos; há **heurísticas** por palavras-chave e regras documentadas no README.
-- Tempos **alargados** existem no tipo `TempoVerbal` e no léxico quando a forma está em `verbos.json`; o utilizador pode forçar tempo com `tempo:<chave>` / `[tempo=<chave>]`.
+- **Prioridade manual**: seleções na interface (Ontem, Hoje, Amanhã) têm prioridade sobre marcadores de texto. Com macro **passado**, marcadores de **hábito/aspecto imperfeito** (`antigamente`, `enquanto`, `sempre`…) refinam para **`preterito_imperfeito`**; sem esses marcadores, passado manual permanece **pretérito perfeito** (`passado`).
+- **Heurísticas indicativo (automáticas)**: `ontem` e marcadores léxicos de passado → **perfeito**; `antigamente` / `enquanto` / `sempre`+passado → **imperfeito**; `amanhã` → **futuro**; `disse que` / `falou que`, formas em **-ria** (`gostaria`, `estudaria` com `se`) → **condicional**. **`sempre` sozinho** não força imperfeito (mantém **presente** habitual).
+- **Não** há desambiguação plena em todos os contextos (ex.: *nós estudamos* presente vs perfeito; pretérito mais-que-perfeito **simples** fora de prioridade CAA). Tag `tempo:<chave>` / `[tempo=<chave>]` força tempo fino.
+- Tempos **alargados** existem no tipo `TempoVerbal` e no léxico quando a forma está em `verbos.json` (MorphoBr).
 
 ---
 
