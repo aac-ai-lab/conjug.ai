@@ -17,9 +17,15 @@ describe("detectarLocucaoVerbalHeadLemma / extrairVerbo", () => {
     expect(extrairVerbo(["Eu", "ter", "de", "sair"])).toBe("ter");
   });
 
-  it("«poder» / «dever» + verbo → núcleo modal", () => {
+  it("«poder» / «dever» / «querer» + verbo → núcleo modal", () => {
     expect(extrairVerbo(["Eu", "poder", "nadar"])).toBe("poder");
     expect(extrairVerbo(["Ela", "dever", "estudar"])).toBe("dever");
+    expect(extrairVerbo(["Eu", "querer", "comer"])).toBe("querer");
+  });
+
+  it("ordem invertida CAA «comer querer» → núcleo querer", () => {
+    expect(extrairVerbo(["Eu", "comer", "querer", "mais"])).toBe("querer");
+    expect(detectarLocucaoVerbalHeadLemma(["Eu", "comer", "querer", "mais"])).toBe("querer");
   });
 
   it("«começar a» + infinitivo → começar", () => {
@@ -54,5 +60,19 @@ describe("analisarFrase — locuções verbais (integração)", () => {
     expect(r.erro).toBeUndefined();
     expect(r.verbo.infinitivo).toBe("poder");
     expect(r.correcao).toMatch(/^Eu posso nadar$/i);
+  });
+
+  it("«eu querer comer mais»", async () => {
+    const r = await analisarFrase("eu querer comer mais");
+    expect(r.erro).toBeUndefined();
+    expect(r.verbo.infinitivo).toBe("querer");
+    expect(r.correcao).toMatch(/^Eu quero comer mais$/i);
+  });
+
+  it("«eu comer querer mais» (ordem invertida na prancha)", async () => {
+    const r = await analisarFrase("eu comer querer mais");
+    expect(r.erro).toBeUndefined();
+    expect(r.verbo.infinitivo).toBe("querer");
+    expect(r.correcao).toMatch(/^Eu quero comer mais$/i);
   });
 });

@@ -23,6 +23,7 @@ Para a arquitetura e o fluxo técnico, ver também `README.md` (raiz) e `vendors
 | Coberto (heurísticas) | Não coberto ou frágil |
 |------------------------|------------------------|
 | Padrão **X e Y** antes do verbo (sujeito composto) | Coordenação com **ou**, **nem**, vírgulas, mais de dois núcleos sem padrão fixo |
+| **Dois+ pronomes** antes do verbo, sem «e» (*eu, ela brincar* → *brincamos*) | Três ou mais pronomes com conectores (*eu ou ela*); vírgula na entrada **não** é reposta na saída (tokenização) |
 | **Eu + núcleo familiar** (lista em `sujeito.ts`: mamãe, papai, titio, vovô, tio, avô, irmão…); prefixo antes do verbo, **com ou sem** «e», **qualquer ordem** | Palavras **fora da lista** em uso próprio (outros substantivos); núcleos em **lados opostos** do verbo ou **muitos** tokens entre sujeito e verbo |
 | Pronomes explícitos (eu, tu, ele, ela...) em **qualquer posição** (SVO, VSO) | Resolução de **correferência**, sujeito em oração relativa |
 | Pronome **entre «que» e o verbo** a corrigir (heurística de dependente) | Vários «que» aninhados, sujeito **nominal** só após «que» (sem pronome), relativas |

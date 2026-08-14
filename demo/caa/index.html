@@ -56,7 +56,7 @@
             aria-activedescendant=""
           ></ul>
           <p class="hint">
-            As frases de exemplo evitam adverbios de tempo; use a barra <strong>Tempo verbal</strong> (Hoje, Ontem, Amanhã) para passado ou futuro. Ou edite a frase no painel de entrada.
+            As frases de exemplo evitam adverbios de tempo; use a barra <strong>Tempo verbal</strong> (Hoje, Ontem, Amanhã) para passado ou futuro. Os interruptores <strong>SVP</strong> e <strong>SVO</strong> (desligados por omissão) mudam como o sujeito é lido. Ou edite a frase no painel de entrada.
           </p>
         </aside>
 
@@ -67,7 +67,7 @@
               <span class="badge">Texto bruto</span>
             </div>
 
-            <span class="time-selector-label">Tempo Verbal (Opcional)</span>
+            <span class="time-selector-label" id="time-selector-label">Tempo Verbal (Opcional)</span>
             <div id="time-selector" class="time-selector" role="radiogroup" aria-labelledby="time-selector-label">
               <button type="button" class="time-btn is-active" data-time="auto" aria-checked="true" role="radio">
                 <i>A</i> Auto
@@ -81,6 +81,33 @@
               <button type="button" class="time-btn" data-time="futuro" aria-checked="false" role="radio">
                 <i>⟳</i> Amanhã
               </button>
+            </div>
+
+            <div class="order-toggles">
+              <div class="order-toggle">
+                <label class="order-toggle__label" for="chk-ordem-forcada">
+                  <input type="checkbox" id="chk-ordem-forcada" />
+                  <span class="order-toggle__switch" aria-hidden="true"></span>
+                  <span class="order-toggle__name" aria-describedby="svp-tooltip">
+                    SVP
+                    <span class="order-toggle__tip" id="svp-tooltip" role="tooltip">
+                      SVP (sujeito–verbo–predicado): tudo antes do verbo conta como sujeito; tudo depois, como predicado.
+                    </span>
+                  </span>
+                </label>
+              </div>
+              <div class="order-toggle">
+                <label class="order-toggle__label" for="chk-svo">
+                  <input type="checkbox" id="chk-svo" />
+                  <span class="order-toggle__switch" aria-hidden="true"></span>
+                  <span class="order-toggle__name" aria-describedby="svo-tooltip">
+                    SVO
+                    <span class="order-toggle__tip" id="svo-tooltip" role="tooltip">
+                      SVO (sujeito–verbo–objeto): aceita sujeito depois do verbo (ex.: comer eu maçã) e reordena para a ordem direta. Desligado por omissão.
+                    </span>
+                  </span>
+                </label>
+              </div>
             </div>
 
             <label class="sr-only" for="raw-input">Frase telegráfica</label>
@@ -376,6 +403,17 @@
           <h3 class="algo-dialog__h3">6. Oração composta (coordenação)</h3>
           <p>
             Se a frase tiver <strong>duas (ou mais) orações</strong> ligadas por coordenação (<strong>«e»</strong>, <strong>«ou»</strong>, <strong>«mas»</strong>, <strong>«porém»</strong>, <strong>«então»</strong>), o motor <strong>segmenta</strong> em blocos com verbo cada um. Os conectores <strong>«e»</strong> e <strong>«ou»</strong> só partem orações quando aparecem <strong>depois do primeiro verbo</strong> — assim <em>João e Maria comer</em> ou <em>Ana ou Pedro viajar</em> continuam como <strong>sujeito composto</strong>. Exemplos na barra lateral: <em>Eu comer e ele dormir</em>, <em>Eu comer ou ele dormir</em> (com tempo futuro na UI), <em>Eu comer pizza e dormir</em>, <em>Ele viajar mas eu ficar</em>.
+          </p>
+
+          <h3 class="algo-dialog__h3">7. SVP e SVO (interruptores na entrada)</h3>
+          <p>
+            Por omissão os dois estão <strong>desligados</strong>: o motor só procura sujeito <em>antes</em> do verbo (heurísticas habituais) e não reordena a frase.
+          </p>
+          <p>
+            <strong>SVP</strong> (sujeito–verbo–predicado): o prefixo inteiro é o sujeito (incluindo <em>as crianças</em> e <em>a gente</em>) e o que vem depois fica no predicado. Desfaz a ambiguidade <em>eu mamãe querer</em> (co-sujeito) vs <em>eu querer mamãe</em> (objeto).
+          </p>
+          <p>
+            <strong>SVO</strong> (sujeito–verbo–objeto): aceita sujeito depois do verbo (VSO/VOS) e reordena para a ordem direta (<em>comer eu maçã</em> → <em>Eu como maçã</em>).
           </p>
 
           <p class="algo-dialog__note">

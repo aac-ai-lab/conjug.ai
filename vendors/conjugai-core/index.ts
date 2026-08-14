@@ -3,11 +3,12 @@ import { corrigir } from "./corretor";
 import { resolverConjugacaoProgressivaEstar } from "./progressivo-estar";
 import { detectarSujeito } from "./sujeito";
 import { detectarTempo } from "./tempo";
-import type { ResultadoAnalise, ResultadoAnaliseClausula, TempoVerbal } from "./types";
+import type { ContextoAnalise, ResultadoAnalise, ResultadoAnaliseClausula, TempoVerbal } from "./types";
 import { juntarCorrecoesOracoes, segmentarOracoesCoordenadas } from "./oracao-composta";
 import { tokenize } from "../nlp-pt-br-lite/src/index";
 
 export type {
+  ContextoAnalise,
   GeneroParticipio,
   NumeroParticipio,
   PessoaIndice,
@@ -19,6 +20,7 @@ export type {
 } from "./types";
 export { tokenize } from "../nlp-pt-br-lite/src/index";
 export { detectarSujeito } from "./sujeito";
+export type { OpcoesSujeito } from "./sujeito";
 export { detectarTempo } from "./tempo";
 export {
   conjugar,
@@ -43,9 +45,12 @@ export { segmentarOracoesCoordenadas } from "./oracao-composta";
 
 async function analisarOracaoUnica(
   tokens: string[],
-  contexto?: { tempo?: TempoVerbal }
+  contexto?: ContextoAnalise
 ): Promise<ResultadoAnalise> {
-  const sujeito = await detectarSujeito(tokens);
+  const sujeito = await detectarSujeito(tokens, {
+    ordemSintaticaForcada: contexto?.ordemSintaticaForcada,
+    normalizarSVO: contexto?.normalizarSVO,
+  });
   const tempo = await detectarTempo(tokens, contexto?.tempo);
   const infinitivo = extrairVerbo(tokens);
 
@@ -112,6 +117,7 @@ async function analisarOracaoUnica(
 
   const correcao = await corrigir(tokens, sujeito, infinitivo, conjugado, tempo.tipo as TempoVerbal, {
     omitirIndicesTokens: progEstar?.omitirIndices,
+    normalizarSVO: contexto?.normalizarSVO,
   });
 
   return {
@@ -141,11 +147,11 @@ async function analisarOracaoUnica(
  * Pipeline principal: tokenização → sujeito → tempo → verbo → conjugação → correção.
  * Orações coordenadas (por «e», «ou», «mas», «porém», «então») são segmentadas e analisadas em sequência.
  * @param frase Texto bruto para processar.
- * @param contexto Opções manuais para guiar a análise (ex: tempo verbal).
+ * @param contexto Opções manuais para guiar a análise (tempo verbal, ordem forçada).
  */
 export async function analisarFrase(
   frase: string,
-  contexto?: { tempo?: TempoVerbal }
+  contexto?: ContextoAnalise
 ): Promise<ResultadoAnalise> {
   const tokens = tokenize(frase);
 

@@ -398,6 +398,67 @@
         { texto: "Conjugação", tipo: "verb" },
       ],
     },
+    {
+      texto: "comer eu maçã",
+      rotulo:
+        "Com SVO: sujeito depois do verbo é reordenado → «Eu como maçã». Desligado, o «eu» pós-verbo não é promovido a sujeito.",
+      badges: [
+        { texto: "SVO", tipo: "other" },
+        { texto: "Ordem inversa", tipo: "subject" },
+        { texto: "Presente", tipo: "time" },
+      ],
+    },
+    {
+      texto: "as crianças correr",
+      rotulo:
+        "Com SVP: o prefixo «as crianças» é o sujeito (3ª pl) → «correm», sem inserir «eu». Desligada, o motor pode falhar neste SN comum.",
+      badges: [
+        { texto: "SVP", tipo: "subject" },
+        { texto: "SN plural", tipo: "subject" },
+        { texto: "Presente", tipo: "time" },
+      ],
+    },
+    {
+      texto: "eu mamãe querer",
+      rotulo:
+        "Com SVP: tudo antes do verbo é sujeito → «queremos». Contraste com «eu querer mamãe».",
+      badges: [
+        { texto: "SVP", tipo: "subject" },
+        { texto: "Co-sujeito", tipo: "subject" },
+        { texto: "Presente", tipo: "time" },
+      ],
+    },
+    {
+      texto: "eu querer mamãe",
+      rotulo:
+        "Com SVP: «mamãe» fica no predicado → «Eu quero mamãe».",
+      badges: [
+        { texto: "SVP", tipo: "subject" },
+        { texto: "Objeto", tipo: "other" },
+        { texto: "Presente", tipo: "time" },
+      ],
+    },
+    {
+      texto: "querer mamãe",
+      rotulo:
+        "Contraste: SVP → «Eu quero mamãe»; SVO → «Mamãe quer»; os dois desligados → «Eu quero mamãe» (sem promover o nome após o verbo).",
+      badges: [
+        { texto: "SVP", tipo: "subject" },
+        { texto: "SVO", tipo: "other" },
+        { texto: "Ambíguo", tipo: "other" },
+        { texto: "Presente", tipo: "time" },
+      ],
+    },
+    {
+      texto: "a gente comer",
+      rotulo:
+        "Com SVP: «a gente» no prefixo → 3ª sg («come»).",
+      badges: [
+        { texto: "SVP", tipo: "subject" },
+        { texto: "a gente", tipo: "subject" },
+        { texto: "Presente", tipo: "time" },
+      ],
+    },
   ];
 
   function exemploTexto(ex) {
@@ -436,7 +497,41 @@
     dialogProject: document.getElementById("dialog-project-context"),
     btnProjectContext: document.getElementById("btn-project-context"),
     timeBtns: document.querySelectorAll(".time-btn"),
+    chkOrdemForcada: document.getElementById("chk-ordem-forcada"),
+    chkSvo: document.getElementById("chk-svo"),
   };
+
+  var STORAGE_ORDEM = "conjugai.ordemSintaticaForcada";
+  var STORAGE_SVO = "conjugai.normalizarSVO";
+
+  function isOrdemForcada() {
+    return !!(el.chkOrdemForcada && el.chkOrdemForcada.checked);
+  }
+
+  function isSvo() {
+    return !!(el.chkSvo && el.chkSvo.checked);
+  }
+
+  function persistToggle(key, on) {
+    try {
+      localStorage.setItem(key, on ? "1" : "0");
+    } catch (_e) {
+      /* ignore */
+    }
+  }
+
+  function restoreToggles() {
+    try {
+      if (el.chkOrdemForcada) {
+        el.chkOrdemForcada.checked = localStorage.getItem(STORAGE_ORDEM) === "1";
+      }
+      if (el.chkSvo) {
+        el.chkSvo.checked = localStorage.getItem(STORAGE_SVO) === "1";
+      }
+    } catch (_e) {
+      /* ignore */
+    }
+  }
 
   function badgeClass(tipo) {
     var m = {
@@ -569,8 +664,10 @@
       };
     }
 
-    // Passamos o contexto manual para o motor
-    var contexto = manualTime ? { tempo: manualTime } : {};
+    var contexto = {};
+    if (manualTime) contexto.tempo = manualTime;
+    if (isOrdemForcada()) contexto.ordemSintaticaForcada = true;
+    if (isSvo()) contexto.normalizarSVO = true;
     var r = await core.analisarFrase(String(raw).trim(), contexto);
     
     if (r.erro) {
@@ -759,6 +856,7 @@
   // --- Inicialização ---
 
   buildExampleList();
+  restoreToggles();
 
   el.btnAnalyze.addEventListener("click", runAnalysis);
   el.btnReset.addEventListener("click", function () {
@@ -773,6 +871,20 @@
       updateTimeSelection(btn.getAttribute("data-time"));
     });
   });
+
+  if (el.chkOrdemForcada) {
+    el.chkOrdemForcada.addEventListener("change", function () {
+      persistToggle(STORAGE_ORDEM, isOrdemForcada());
+      if (el.input && String(el.input.value).trim()) runAnalysis();
+    });
+  }
+
+  if (el.chkSvo) {
+    el.chkSvo.addEventListener("change", function () {
+      persistToggle(STORAGE_SVO, isSvo());
+      if (el.input && String(el.input.value).trim()) runAnalysis();
+    });
+  }
 
   function escapeHtml(s) {
     return String(s)

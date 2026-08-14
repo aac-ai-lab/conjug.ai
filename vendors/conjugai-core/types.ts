@@ -67,6 +67,21 @@ export type ResultadoAnaliseClausula = {
   };
 };
 
+/** Opções manuais do pipeline CAA (`analisarFrase`). */
+export type ContextoAnalise = {
+  tempo?: TempoVerbal;
+  /**
+   * SVP: tudo antes do verbo = sujeito; tudo depois = predicado.
+   * Não procura sujeito após o verbo.
+   */
+  ordemSintaticaForcada?: boolean;
+  /**
+   * SVO: aceita sujeito depois do verbo e reordena para a ordem direta.
+   * Desligado por omissão.
+   */
+  normalizarSVO?: boolean;
+};
+
 export type ResultadoAnalise = {
   tokens: string[];
   sujeito: InfoSujeitoAnalise;

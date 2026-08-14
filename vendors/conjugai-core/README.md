@@ -287,7 +287,8 @@ Frases telegráficas podem ter **vários núcleos** no sujeito (*eu e João*, *J
    - existe **tu** ou **você** (`voce` normalizado) → **Vocês**, pessoa **4** (em PT-BR, mesmas terminações que *eles* no sistema);
    - caso contrário → **Eles**, pessoa **4** (ex.: *João e Maria*, *meu pai e minha mãe* — nomes próprios ou grupos nominais simples).
 4. **Telegrafia CAA (sem «e»):** se o prefixo tiver **pelo menos dois tokens** antes do verbo e, entre eles, existirem **eu** e um **núcleo familiar** — **ordem livre** (*eu mamae*, *titio eu*, *vovo eu comer*) — aplica-se **Nós** / 1.ª plural (`prefixoTemEuEFamilia`). Os léxicos aceites estão em `NUCLEO_FAMILIA_EU_COMPOSTO` em `sujeito.ts` (mãe/mamãe, pai/papai, titio/titia, tio/tia, vovô/vovó→`vovo`, avô/avó, irmão/irmã, neto/a, primos, sogros, etc.; diminutivos *titio…*, *vovo…*). Esta regra corre **antes** de escolher o primeiro pronome isolado (*eu*).
-5. Na correção da frase, **`corrigir`** só substitui a **forma verbal** no sítio certo; os tokens do sujeito (incluindo prefixo *X e Y*) **mantêm-se** na superfície. O pronome em `sujeito.texto` (ex.: Nós, Eles) serve à **UI** e à **pessoa** para `conjugar`, não à reconstrução literal quando `composto` é verdadeiro.
+5. **Lista de pronomes (sem «e»):** se **todos** os tokens do prefixo forem pronomes (≥2), ex.: *eu, ela brincar* → **Nós** + *brincámos*/*brincamos* (`detectarSujeitoCompostoPronomes`). *ela ele* → **Eles** / 3.ª pl.
+6. Na correção da frase, **`corrigir`** só substitui a **forma verbal** no sítio certo; os tokens do sujeito (incluindo prefixo *X e Y*) **mantêm-se** na superfície. O pronome em `sujeito.texto` (ex.: Nós, Eles) serve à **UI** e à **pessoa** para `conjugar`, não à reconstrução literal quando `composto` é verdadeiro.
 
 ### 11.3 Limitações
 

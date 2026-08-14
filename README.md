@@ -57,9 +57,12 @@ Após alterar o TypeScript, regenerar o bundle:
 npm install   # necessário para instalar esbuild em node_modules
 npm run build:lexicon   # opcional: regerar `verbos.json` a partir do MorphoBr (ver `vendors/conjugai-core/README.md`)
 npm run build:core
+npm run sync:emotalk     # opcional: só sync (já corre no fim do build:core)
 npm run build:core:package  # opcional: gera pacote JS/TS em `vendors/conjugai-core/dist`
 npm test      # Vitest: testes unitários e de regressão do conjugai-core
 ```
+
+`npm run build:core` também tenta sincronizar `assets/js/conjugai-core.js` para o Emotalk irmão (`../emotalk`) e incrementa o cache PWA (`sw.js`). Se o Emotalk não estiver nessa pasta, o sync é ignorado; override: `EMOTALK_PATH=/caminho/para/emotalk`.
 
 Sem `build:core`, o ficheiro em `assets/js/` pode ficar **desatualizado** em relação a `vendors/conjugai-core/`. O `build:lexicon` só é necessário quando atualizares os `.dict` MorphoBr ou o script de conversão.
 

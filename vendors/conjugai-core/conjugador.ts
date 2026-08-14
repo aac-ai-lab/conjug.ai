@@ -193,7 +193,16 @@ export function detectarLocucaoVerbalHeadLemma(tokens: string[]): string | null 
       return "ter";
     }
 
-    if ((lem === "poder" || lem === "dever") && i + 1 < n && segDireto) {
+    if ((lem === "poder" || lem === "dever" || lem === "querer" || lem === "precisar") && i + 1 < n && segDireto) {
+      return lem;
+    }
+
+    // Ordem invertida em CAA: «comer querer» → núcleo modal «querer»
+    if (
+      (lem === "poder" || lem === "dever" || lem === "querer" || lem === "precisar") &&
+      i > 0 &&
+      lemmaDoToken(tokens[i - 1])
+    ) {
       return lem;
     }
 
@@ -325,9 +334,24 @@ function conjugarRegularFuturo(infinitivo: string, pessoa: number): string | nul
  * @param pessoa 0–4 (pipeline CAA). Para paradigma completo com `vós`, usar `conjugarPessoaTabela` (0–5).
  * @param tempo ver verbo-data / MorphoBr
  */
+/**
+ * MorphoBr trunca algumas 3.ª sg de irregulares frequentes em CAA
+ * (querer→quere, fazer→fá/fê, trazer→trá). Sobrepõe só essas células.
+ */
+const CORRECOES_MORPHOBR: Partial<
+  Record<string, Partial<Record<TempoVerbal, readonly (string | undefined)[]>>>
+> = {
+  querer: { presente: [undefined, undefined, "quer"] },
+  fazer: { presente: [undefined, undefined, "faz"], passado: [undefined, undefined, "fez"] },
+  trazer: { presente: [undefined, undefined, "traz"] },
+};
+
 export function conjugar(verbo: string, pessoa: number, tempo: TempoVerbal): string | null {
   const v = verbo.toLowerCase().trim();
   if (pessoa < 0 || pessoa > 4) return null;
+
+  const corrigido = CORRECOES_MORPHOBR[v]?.[tempo]?.[pessoa];
+  if (corrigido) return corrigido;
 
   const entry = verbos[v];
   if (entry) {

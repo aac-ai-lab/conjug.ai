@@ -165,6 +165,16 @@ const CASOS = [
       correcao: "Ele disse que eles falariam muito",
     },
   },
+  {
+    frase: "eu, ela brincar ontem",
+    esperado: {
+      sujeito: "Nós",
+      tempo: "passado" as const,
+      infinitivo: "brincar",
+      conjugado: "brincámos",
+      correcao: "Eu ela brincámos ontem",
+    },
+  },
 ];
 
 describe("analisarFrase — regressão (integração)", () => {

@@ -82,4 +82,79 @@ describe("detectarSujeito", () => {
     expect(r.texto).toBe("Tu");
     expect(r.pessoa).toBe(1);
   });
+
+  it("«eu ela brincar» (pronomes sem «e») → Nós, pessoa 3", async () => {
+    const r = await detectarSujeito(["eu", "ela", "brincar"]);
+    expect(r.texto).toBe("Nós");
+    expect(r.pessoa).toBe(3);
+    expect(r.composto).toBe(true);
+  });
+
+  it("«ela ele brincar» → Eles, pessoa 4", async () => {
+    const r = await detectarSujeito(["ela", "ele", "brincar"]);
+    expect(r.texto).toBe("Eles");
+    expect(r.pessoa).toBe(4);
+    expect(r.composto).toBe(true);
+  });
+});
+
+describe("detectarSujeito — ordemSintaticaForcada", () => {
+  const forced = { ordemSintaticaForcada: true };
+
+  it("«as crianças correr» → SN plural, pessoa 4 (não insere Eu)", async () => {
+    const r = await detectarSujeito(["as", "crianças", "correr"], forced);
+    expect(r.implicito).toBe(false);
+    expect(r.pessoa).toBe(4);
+    expect(r.texto.toLowerCase()).toContain("crianças");
+  });
+
+  it("«eu mamãe querer» → Nós (prefixo inteiro = sujeito)", async () => {
+    const r = await detectarSujeito(["eu", "mamãe", "querer"], forced);
+    expect(r.pessoa).toBe(3);
+    expect(r.composto).toBe(true);
+  });
+
+  it("«eu querer mamãe» → Eu (mamãe fica no predicado)", async () => {
+    const r = await detectarSujeito(["eu", "querer", "mamãe"], forced);
+    expect(r.texto).toBe("Eu");
+    expect(r.pessoa).toBe(0);
+    expect(r.implicito).toBe(false);
+  });
+
+  it("«querer mamãe» → implícito Eu (não promove mamãe a sujeito)", async () => {
+    const r = await detectarSujeito(["querer", "mamãe"], forced);
+    expect(r.implicito).toBe(true);
+    expect(r.pessoa).toBe(0);
+  });
+
+  it("por omissão, «querer mamãe» não promove mamãe (SVO desligado)", async () => {
+    const r = await detectarSujeito(["querer", "mamãe"]);
+    expect(r.implicito).toBe(true);
+    expect(r.pessoa).toBe(0);
+  });
+
+  it("com SVO, «querer mamãe» acha mamãe após o verbo", async () => {
+    const r = await detectarSujeito(["querer", "mamãe"], { normalizarSVO: true });
+    expect(r.implicito).not.toBe(true);
+    expect(r.posicaoOriginal).toBe("depois");
+  });
+
+  it("«a gente comer» → 3ª sg", async () => {
+    const r = await detectarSujeito(["a", "gente", "comer"], forced);
+    expect(r.pessoa).toBe(2);
+    expect(r.implicito).toBe(false);
+  });
+
+  it("«o menino correr» → 3ª sg", async () => {
+    const r = await detectarSujeito(["o", "menino", "correr"], forced);
+    expect(r.pessoa).toBe(2);
+    expect(r.implicito).toBe(false);
+  });
+
+  it("«nos querer» (sem acento) → Nós, não implícito Eu", async () => {
+    const r = await detectarSujeito(["nos", "querer", "pizza"], forced);
+    expect(r.implicito).not.toBe(true);
+    expect(r.pessoa).toBe(3);
+    expect(r.texto).toBe("Nós");
+  });
 });

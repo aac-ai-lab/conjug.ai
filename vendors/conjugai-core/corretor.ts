@@ -8,6 +8,9 @@ import { ADJETIVOS_BIFORMES } from "./data/adjetivos-biformes";
 import type { TempoVerbal } from "./types";
 import { normalize, getRegenciaInfo, getPronomeInfo, loader } from "../nlp-pt-br-lite/src/index";
 
+/** Modais que regem infinitivo em telegrafia CAA (*querer comer*, *poder nadar*). */
+const MODAIS_COM_INFINITIVO = new Set(["querer", "poder", "dever", "precisar"]);
+
 /** Tempos macro em que matriz e dependente usam o mesmo tempo (*Ele dizer…* + passado manual → *disse* + *falaram*). */
 const TEMPOS_MACRO_MATRIZ_IGUAL: TempoVerbal[] = ["passado", "presente", "futuro"];
 type GeneroNominal = "f" | "m";
@@ -289,6 +292,8 @@ async function aplicarRegenciaMovimentoLocais(resultado: string[], vi: number, i
 export type OpcoesCorrigir = {
   /** Índices em `tokens` que não entram na frase corrigida (ex.: segundo verbo em infinitivo → gerúndio incorporado ao auxiliar). */
   omitirIndicesTokens?: ReadonlySet<number>;
+  /** SVO: se o sujeito estava depois do verbo, move-o para o início. Desligado por omissão. */
+  normalizarSVO?: boolean;
 };
 
 export async function corrigir(
@@ -309,9 +314,20 @@ export async function corrigir(
   const verbLower = conjugado.charAt(0).toLowerCase() + conjugado.slice(1);
   const vi = indiceDoVerboNaFrase(tokens, infinitivo);
 
+  // CAA: «eu comer querer mais» → «Eu quero comer mais» (modal depois do lexical)
+  const reordenado = reordenarModalAposComplemento(tokens, infinitivo, verbLower, vi, sujeito);
+  if (reordenado) {
+    await flexionarQuandoSubordinadaNoPassado(reordenado, tempoTipo);
+    const outR = reordenado.join(" ").replace(/\s+/g, " ").trim();
+    return outR.charAt(0).toUpperCase() + outR.slice(1);
+  }
+
   // 1. Filtrar tokens para reconstrução
-  // Se o sujeito for explícito e estiver depois do verbo, vamos movê-lo para o início (SVO)
-  const normalizeSVO = sujeito.posicaoOriginal === "depois" && typeof sujeito.tokenIndex === "number";
+  // SVO: só reordena se a opção estiver ligada e o sujeito estava depois do verbo
+  const normalizeSVO =
+    !!opcoes?.normalizarSVO &&
+    sujeito.posicaoOriginal === "depois" &&
+    typeof sujeito.tokenIndex === "number";
   const matriz =
     !normalizeSVO && !sujeito.implicito
       ? await conjugadoMatrizInfinitivoAntesQue(tokens, vi, tempoTipo)
@@ -361,4 +377,57 @@ export async function corrigir(
 
   const out = resultado.join(" ").replace(/\s+/g, " ").trim();
   return out.charAt(0).toUpperCase() + out.slice(1);
+}
+
+/**
+ * Quando o utilizador toca o lexical antes do modal (*comer querer*),
+ * reconstrói: sujeito + modal conjugado + infinitivo(s) + resto.
+ */
+function reordenarModalAposComplemento(
+  tokens: string[],
+  infinitivo: string,
+  verbLower: string,
+  vi: number,
+  sujeito: { texto: string; implicito?: boolean; tokenIndex?: number }
+): string[] | null {
+  if (vi < 0 || !MODAIS_COM_INFINITIVO.has(normalize(infinitivo))) return null;
+
+  const complementos: number[] = [];
+  for (let i = 0; i < tokens.length; i++) {
+    if (i === vi) continue;
+    if (isVerbShape(tokens[i])) complementos.push(i);
+  }
+  if (!complementos.some((i) => i < vi)) return null;
+
+  const verbIdx = new Set<number>([vi, ...complementos]);
+  const prefixo: string[] = [];
+  const resto: string[] = [];
+  let viuVerbo = false;
+  for (let i = 0; i < tokens.length; i++) {
+    if (verbIdx.has(i)) {
+      viuVerbo = true;
+      continue;
+    }
+    if (typeof sujeito.tokenIndex === "number" && i === sujeito.tokenIndex && !sujeito.implicito) {
+      // sujeito explícito: trata abaixo
+    }
+    if (!viuVerbo) prefixo.push(tokens[i]);
+    else resto.push(tokens[i]);
+  }
+
+  const out: string[] = [];
+  if (sujeito.implicito || !prefixo.length) {
+    out.push(sujeito.texto);
+    // evita duplicar pronome se já estava no prefixo
+    for (const t of prefixo) {
+      if (normalize(t) === normalize(sujeito.texto)) continue;
+      out.push(t);
+    }
+  } else {
+    out.push(...prefixo);
+  }
+  out.push(verbLower);
+  for (const i of complementos) out.push(tokens[i].toLowerCase());
+  out.push(...resto);
+  return out;
 }
